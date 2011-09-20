@@ -1,7 +1,7 @@
-package net.tailriver.agoraguide.android;
+package net.tailriver.agoraguide;
 
-import net.tailriver.agoraguide.android.AgoraData;
-import net.tailriver.agoraguide.android.AgoraData.XMLParserAbortException;
+import net.tailriver.agoraguide.R;
+import net.tailriver.agoraguide.AgoraData.XMLParserAbortException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
