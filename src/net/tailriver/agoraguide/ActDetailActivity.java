@@ -2,12 +2,11 @@ package net.tailriver.agoraguide;
 
 import java.net.HttpURLConnection;
 
-import net.tailriver.agoraguide.R;
+import net.tailriver.agoraguide.AgoraData.*;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,40 +22,30 @@ public class ActDetailActivity extends Activity {
 		setContentView(R.layout.actdetail);
 
 		Intent intent = getIntent();
-		String id = intent.getStringExtra("id");
-		AgoraData.Entry entry = AgoraData.getEntry(id);
+		Entry entry = AgoraData.getEntry(intent.getStringExtra("id"));
 
-		TextView titleText = (TextView) this.findViewById(R.id.actdetail_title);
-		titleText.setText(entry.getTitle());
-		titleText.setTextSize(21.0f);
-		titleText.setTextColor(Color.WHITE);
-
-		TextView exhibitorText = (TextView) this.findViewById(R.id.actdetail_exhibitor);
-		exhibitorText.setText(entry.getExhibitor());
-		exhibitorText.setTextColor(Color.GRAY);
-		exhibitorText.setTextSize(14.0f);
-
-		TextView abstractText = (TextView) this.findViewById(R.id.actdetail_abstract);
-		abstractText.setText(entry.getAbstract());
-		abstractText.setTextColor(Color.WHITE);
-		abstractText.setTextSize(14.0f);
-
+		((TextView) this.findViewById(R.id.actdetail_title)).setText(entry.getTitle());
+		((TextView) this.findViewById(R.id.actdetail_exhibitor)).setText(entry.getExhibitor());
+		((TextView) this.findViewById(R.id.actdetail_abstract)).setText(entry.getDataString(EntryKey.Abstract));
+		((TextView) this.findViewById(R.id.actdetail_content)).setText(entry.getDataString(EntryKey.Content).replace("&x0A;", "\n"));
 
 		ImageView thumbnail = (ImageView) this.findViewById(R.id.actdetail_thumbnail);
-		if (entry.getImage() != null) {
+		if (entry.getDataURL(EntryKey.Image) != null) {
 			try {
-				HttpURLConnection huc = ((HttpURLConnection) entry.getImage().openConnection());
+				HttpURLConnection huc = ((HttpURLConnection) entry.getDataURL(EntryKey.Image).openConnection());
 				huc.setDoInput(true);
 				huc.connect();
 				thumbnail.setImageBitmap(BitmapFactory.decodeStream(huc.getInputStream()));
 			}
 			catch (Exception e) {
 				Log.e("ADActivity", e.toString());
+				thumbnail.setVisibility(View.GONE);
 			}
 		}
 		else {
 			thumbnail.setVisibility(View.GONE);
 		}
+
 
 		Button btn = (Button)findViewById(R.id.button1);
 		btn.setOnClickListener(new View.OnClickListener() {

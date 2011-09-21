@@ -1,11 +1,8 @@
 package net.tailriver.agoraguide;
 
-import net.tailriver.agoraguide.R;
-import net.tailriver.agoraguide.AgoraData.XMLParserAbortException;
+import net.tailriver.agoraguide.AgoraData.*;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,26 +18,18 @@ public class AgoraGuideActivity extends Activity {
 		setContentView(R.layout.main);
 
 		AgoraData ad = new AgoraData(this.getApplicationContext());
-		boolean isAvailableLatestVersion = ad.XMLUpdateNotifier();
-		Log.d("AGActivity", "isAvailableLatestVersion: " + isAvailableLatestVersion);
-		if (isAvailableLatestVersion) {
+		if (ad.isXMLUpdated())
 			ad.XMLUpdater();
-		}
+
 		try {
 			ad.XMLParser();
 		}
 		catch (XMLParserAbortException e) {
 			Log.e("AGActivity", e.toString());
-
-			SharedPreferences pref = this.getApplicationContext().getSharedPreferences("pref", Context.MODE_PRIVATE);
-			SharedPreferences.Editor ee = pref.edit();
-			ee.putInt("localVersion", 0);
-			ee.commit();
-			Log.w("AGActivity", "localVersion reseted");
 		}
 		ListView actList = (ListView) this.findViewById(R.id.main_actlist);
 
-		ActArrayAdapter adapter = new ActArrayAdapter(this, R.layout.actlist_item, AgoraData.getEntryIdList());
+		ActArrayAdapter adapter = new ActArrayAdapter(this, R.layout.actlist_item, AgoraData.getAllEntry());
 		actList.setAdapter(adapter);
 
 		actList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -49,7 +38,7 @@ public class AgoraGuideActivity extends Activity {
 					int position, long id) {
 				ListView listView = (ListView) parent;
 				Intent intent = new Intent(AgoraGuideActivity.this, ActDetailActivity.class);
-				intent.putExtra("id", (String) listView.getItemAtPosition(position));
+				intent.putExtra("id", ((AgoraData.Entry) listView.getItemAtPosition(position)).getId());
 				try {
 					startActivity(intent);
 				} catch (Exception e) {
@@ -84,8 +73,6 @@ public class AgoraGuideActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-
 		Log.i("MainActivity", "onResume() called");
-		//		ap.parse();
 	}
 }

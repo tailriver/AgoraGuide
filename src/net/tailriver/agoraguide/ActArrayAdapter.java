@@ -3,6 +3,8 @@ package net.tailriver.agoraguide;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.tailriver.agoraguide.AgoraData.*;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -11,14 +13,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class ActArrayAdapter extends ArrayAdapter<String> {
+class ActArrayAdapter extends ArrayAdapter<Entry> {
 	private LayoutInflater inflater;
-	private ArrayList<String> items;
+	private ArrayList<Entry> items;
 
-	public ActArrayAdapter(Context context, int textViewResourceId, List<String> objects) {
-		super(context, textViewResourceId, objects);
+	public ActArrayAdapter(Context context, int textViewResourceId, ArrayList<Entry> arrayList) {
+		super(context, textViewResourceId, (List<Entry>) null);
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		this.items = (ArrayList<String>) objects;
+		this.items = arrayList;
 	}
 
 	@Override
@@ -27,8 +29,8 @@ public class ActArrayAdapter extends ArrayAdapter<String> {
 	}
 
 	@Override
-	public String getItem(int position) {
-		return (String) items.get(position);
+	public Entry getItem(int position) {
+		return items.get(position);
 	}
 
 	@Override
@@ -37,22 +39,22 @@ public class ActArrayAdapter extends ArrayAdapter<String> {
 		if (view == null) {
 			view = inflater.inflate(R.layout.actlist_item, null);
 		}
-		AgoraData.Entry act = AgoraData.getEntry(this.getItem(position));
-		if (act != null) {
+		AgoraData.Entry entry = this.getItem(position);
+		if (entry != null) {
 			TextView titleText = (TextView)view.findViewById(R.id.actlist_item_title);
-			titleText.setText(act.getTitle());
+			titleText.setText(entry.getTitle());
 			titleText.setSingleLine(true);
 			titleText.setTextSize(17.0f);
 			titleText.setTextColor(Color.WHITE);
 
 			TextView exhibitorText = (TextView)view.findViewById(R.id.actlist_item_exhibitor);
-			exhibitorText.setText(act.getExhibitor());
+			exhibitorText.setText(entry.getExhibitor());
 			exhibitorText.setSingleLine(true);
 			exhibitorText.setTextColor(Color.GRAY);
 			exhibitorText.setTextSize(12.0f);
 
 			TextView scheduleText = (TextView) view.findViewById(R.id.actlist_item_schedule);
-			scheduleText.setText(act.getScheduleString());
+			scheduleText.setText(entry.getDataString(EntryKey.Schedule));
 			scheduleText.setTextColor(Color.GRAY);
 			scheduleText.setTextSize(12.0f);
 		}
