@@ -1,6 +1,5 @@
 package net.tailriver.agoraguide;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.tailriver.agoraguide.AgoraData.*;
@@ -15,9 +14,9 @@ import android.widget.TextView;
 
 class ActArrayAdapter extends ArrayAdapter<Entry> {
 	private LayoutInflater inflater;
-	private ArrayList<Entry> items;
+	private List<Entry> items;
 
-	public ActArrayAdapter(Context context, int textViewResourceId, ArrayList<Entry> arrayList) {
+	public ActArrayAdapter(Context context, int textViewResourceId, List<Entry> arrayList) {
 		super(context, textViewResourceId, (List<Entry>) null);
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.items = arrayList;
@@ -42,19 +41,19 @@ class ActArrayAdapter extends ArrayAdapter<Entry> {
 		AgoraData.Entry entry = this.getItem(position);
 		if (entry != null) {
 			TextView titleText = (TextView)view.findViewById(R.id.actlist_item_title);
-			titleText.setText(entry.getTitle());
+			titleText.setText(entry.getLocaleString(EntryKey.TitleJa));
 			titleText.setSingleLine(true);
 			titleText.setTextSize(17.0f);
 			titleText.setTextColor(Color.WHITE);
 
 			TextView exhibitorText = (TextView)view.findViewById(R.id.actlist_item_exhibitor);
-			exhibitorText.setText(entry.getExhibitor());
+			exhibitorText.setText(entry.getLocaleString(EntryKey.ExhibitorJa));
 			exhibitorText.setSingleLine(true);
 			exhibitorText.setTextColor(Color.GRAY);
 			exhibitorText.setTextSize(12.0f);
 
 			TextView scheduleText = (TextView) view.findViewById(R.id.actlist_item_schedule);
-			scheduleText.setText(entry.getDataString(EntryKey.Schedule));
+			scheduleText.setText(entry.getString(EntryKey.Schedule));
 			scheduleText.setTextColor(Color.GRAY);
 			scheduleText.setTextSize(12.0f);
 		}

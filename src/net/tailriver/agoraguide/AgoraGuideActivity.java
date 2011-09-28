@@ -1,6 +1,7 @@
 package net.tailriver.agoraguide;
 
 import net.tailriver.agoraguide.AgoraData.*;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,8 +19,7 @@ public class AgoraGuideActivity extends Activity {
 		setContentView(R.layout.main);
 
 		AgoraData ad = new AgoraData(this.getApplicationContext());
-		if (ad.isXMLUpdated())
-			ad.XMLUpdater();
+		ad.XMLUpdater();
 
 		try {
 			ad.XMLParser();

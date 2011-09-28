@@ -1,6 +1,7 @@
 package net.tailriver.agoraguide;
 
 import java.net.HttpURLConnection;
+import java.net.URL;
 
 import net.tailriver.agoraguide.AgoraData.*;
 
@@ -24,15 +25,16 @@ public class ActDetailActivity extends Activity {
 		Intent intent = getIntent();
 		Entry entry = AgoraData.getEntry(intent.getStringExtra("id"));
 
-		((TextView) this.findViewById(R.id.actdetail_title)).setText(entry.getTitle());
-		((TextView) this.findViewById(R.id.actdetail_exhibitor)).setText(entry.getExhibitor());
-		((TextView) this.findViewById(R.id.actdetail_abstract)).setText(entry.getDataString(EntryKey.Abstract));
-		((TextView) this.findViewById(R.id.actdetail_content)).setText(entry.getDataString(EntryKey.Content).replace("&x0A;", "\n"));
+		((TextView) this.findViewById(R.id.actdetail_title)).setText(entry.getLocaleString(EntryKey.TitleJa));
+		((TextView) this.findViewById(R.id.actdetail_exhibitor)).setText(entry.getLocaleString(EntryKey.ExhibitorJa));
+		((TextView) this.findViewById(R.id.actdetail_abstract)).setText(entry.getString(EntryKey.Abstract));
+		((TextView) this.findViewById(R.id.actdetail_content)).setText(entry.getString(EntryKey.Content).replace("&x0A;", "\n"));
 
 		ImageView thumbnail = (ImageView) this.findViewById(R.id.actdetail_thumbnail);
-		if (entry.getDataURL(EntryKey.Image) != null) {
+		URL imageURL = (URL) entry.get(EntryKey.Image);
+		if (imageURL != null) {
 			try {
-				HttpURLConnection huc = ((HttpURLConnection) entry.getDataURL(EntryKey.Image).openConnection());
+				HttpURLConnection huc = ((HttpURLConnection) imageURL.openConnection());
 				huc.setDoInput(true);
 				huc.connect();
 				thumbnail.setImageBitmap(BitmapFactory.decodeStream(huc.getInputStream()));
