@@ -19,6 +19,7 @@ public class AgoraGuideActivity extends Activity {
 		setContentView(R.layout.main);
 
 		AgoraData ad = new AgoraData(this.getApplicationContext());
+		ad.removeDataFile();
 		ad.XMLUpdater();
 
 		try {
@@ -29,7 +30,7 @@ public class AgoraGuideActivity extends Activity {
 		}
 		ListView actList = (ListView) this.findViewById(R.id.main_actlist);
 
-		ActArrayAdapter adapter = new ActArrayAdapter(this, R.layout.actlist_item, AgoraData.getAllEntry());
+		EntryArrayAdapter adapter = new EntryArrayAdapter(this, R.layout.actlist_item, AgoraData.getAllEntry());
 		actList.setAdapter(adapter);
 
 		actList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -37,12 +38,13 @@ public class AgoraGuideActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				ListView listView = (ListView) parent;
-				Intent intent = new Intent(AgoraGuideActivity.this, ActDetailActivity.class);
+				Intent intent = new Intent(AgoraGuideActivity.this, EntryDetailActivity.class);
 				intent.putExtra("id", ((AgoraData.Entry) listView.getItemAtPosition(position)).getId());
 				try {
 					startActivity(intent);
-				} catch (Exception e) {
-					Toast.makeText(AgoraGuideActivity.this, "Fail to move to detail view" + e.toString(), Toast.LENGTH_LONG).show();
+				}
+				catch (Exception e) {
+					Toast.makeText(AgoraGuideActivity.this, "Fail to move to detail view: " + e, Toast.LENGTH_LONG).show();
 					Log.w("AGActivity", e.toString());
 				}
 			}

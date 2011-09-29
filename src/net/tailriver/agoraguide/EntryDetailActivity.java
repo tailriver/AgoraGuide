@@ -15,7 +15,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ActDetailActivity extends Activity {
+public class EntryDetailActivity extends Activity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -33,8 +33,9 @@ public class ActDetailActivity extends Activity {
 		ImageView thumbnail = (ImageView) this.findViewById(R.id.actdetail_thumbnail);
 		URL imageURL = (URL) entry.get(EntryKey.Image);
 		if (imageURL != null) {
+			HttpURLConnection huc = null;
 			try {
-				HttpURLConnection huc = ((HttpURLConnection) imageURL.openConnection());
+				huc = (HttpURLConnection) imageURL.openConnection();
 				huc.setDoInput(true);
 				huc.connect();
 				thumbnail.setImageBitmap(BitmapFactory.decodeStream(huc.getInputStream()));
@@ -42,6 +43,10 @@ public class ActDetailActivity extends Activity {
 			catch (Exception e) {
 				Log.e("ADActivity", e.toString());
 				thumbnail.setVisibility(View.GONE);
+			}
+			finally {
+				if (huc != null)
+					huc.disconnect();
 			}
 		}
 		else {

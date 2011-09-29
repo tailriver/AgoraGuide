@@ -2,6 +2,6 @@
 <resources>
 	<string name="app_name">AgoraGuide</string>
 	<string name="versionTextURL">http://www.tailriver.net/scienceagora/2010/version.txt</string>
-	<string name="XMLDataURL">http://www.tailriver.net/scienceagora/2010/data.xml</string>
+	<string name="XMLDataURL">http://www.tailriver.net/scienceagora/2010/data.xml.gz</string>
 	<string name="XMLDataFilename">data.xml</string>
 </resources>

@@ -7,15 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -29,27 +22,21 @@ import android.util.Xml;
 
 
 class AgoraData {
-	private Context context;
-	private boolean isLocaleJapanese;
+	private final Context context;
+	private final SharedPreferences pref;
 
-	private static List<String> entryOrder;
 	private static Map<String, Entry> entryMap;
 	private static Map<String, TimeFrame> timeFrameMap;
 
 	static {
-		entryOrder	 = new ArrayList<String>();
-		entryMap	 = new HashMap<String, Entry>();
+		entryMap	 = new LinkedHashMap<String, Entry>();
 		timeFrameMap = new HashMap<String, TimeFrame>();
-	}
-
-	public AgoraData() {
-		this(null);
 	}
 
 	public AgoraData(Context context) {
 		super();
 		this.context = context;
-		isLocaleJapanese = Locale.getDefault().getLanguage().equals(Locale.JAPANESE.getLanguage());
+		this.pref = context.getSharedPreferences("pref", Context.MODE_PRIVATE);
 	}
 
 	public boolean isConnected() {
@@ -61,14 +48,13 @@ class AgoraData {
 		if (!isConnected())
 			return;
 
-		SharedPreferences pref = context.getSharedPreferences("pref", Context.MODE_PRIVATE);
 		final int localVersion = pref.getInt("localVersion", 0);
 		final int serverVersion;
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(new URL(context.getString(R.string.versionTextURL)).openStream()), 16);
 			serverVersion = Integer.parseInt(br.readLine());
 			br.close();
-			Log.i("AgoraData.XMLUpdater", String.format("server: %i, local: %i", serverVersion, localVersion));
+			Log.i("AgoraData.XMLUpdater", String.format("server: %d, local: %d", serverVersion, localVersion));
 		}
 		catch (IOException e) {
 			Log.w("AgoraData.XMLUpdater", "Fail to check the version of data: " + e);
@@ -80,22 +66,22 @@ class AgoraData {
 
 		try {
 			final int BUFFER_SIZE = 1024;
-			BufferedInputStream bis = new BufferedInputStream(new URL(context.getString(R.string.XMLDataURL)).openStream(), BUFFER_SIZE);
+			GZIPInputStream gis = new GZIPInputStream(new BufferedInputStream(new URL(context.getString(R.string.XMLDataURL)).openStream(), BUFFER_SIZE));
 			BufferedOutputStream bos = new BufferedOutputStream(context.openFileOutput(context.getString(R.string.XMLDataFilename), Context.MODE_PRIVATE), BUFFER_SIZE);
 			byte[] buffer = new byte[BUFFER_SIZE];
 			while (true) {
-				int byteRead = bis.read(buffer, 0, BUFFER_SIZE);
+				int byteRead = gis.read(buffer, 0, BUFFER_SIZE);
 				if (byteRead == -1)
 					break;
 				bos.write(buffer, 0, byteRead);
 			}
-			bis.close();
+			gis.close();
 			bos.flush();
 			bos.close();
 
-			SharedPreferences.Editor spe = pref.edit();
-			spe.putInt("localVersion", serverVersion);
-			spe.commit();
+			SharedPreferences.Editor ee = pref.edit();
+			ee.putInt("localVersion", serverVersion);
+			ee.commit();
 			Log.i("AgoraData.XMLUpdater", "XML update successed");
 		}
 		catch (IOException e) {
@@ -144,7 +130,6 @@ class AgoraData {
 						entry.set(EntryKey.Target,		xpp.getAttributeValue(null, "target"));
 						entry.set(EntryKey.Reservation, xpp.getAttributeValue(null, "reservation"));
 						entryMap.put(id, entry);
-						entryOrder.add(id);
 						break;
 					}
 					if (entry == null)
@@ -202,14 +187,12 @@ class AgoraData {
 	}
 
 	public static void clearCache() {
-		entryOrder.clear();
 		entryMap.clear();
 		timeFrameMap.clear();
 	}
 
 	// TODO
 	public void removeDataFile() {
-		SharedPreferences pref = context.getSharedPreferences("pref", Context.MODE_PRIVATE);
 		SharedPreferences.Editor ee = pref.edit();
 		ee.putInt("localVersion", 0);
 		ee.commit();
@@ -247,6 +230,22 @@ class AgoraData {
 	// TODO not implemented
 	public static List<Entry> getEntryByTimeFrame(String day, int hour, int minute) {
 		return new ArrayList<Entry>();
+	}
+
+	public Locale getAppLocale() {
+		if (pref.contains("appLocale"))
+			return new Locale(pref.getString("appLocale", Locale.getDefault().getLanguage()));
+		else
+			return Locale.getDefault();
+	}
+
+	public void setAppLocale(Locale appLocale) {
+		SharedPreferences.Editor ee = pref.edit();
+		if (appLocale == null)
+			ee.remove("appLocale");
+		else
+			ee.putString("appLocale", appLocale.getLanguage());
+		ee.commit();
 	}
 
 	@Override
@@ -292,11 +291,11 @@ class AgoraData {
 	public enum EntryTarget { Child, Student, Teacher, Professional, Adult, Politics, SCer, NonJapanese }
 
 	class Entry {
-		private final char[] id;
+		private final String id;
 		private EnumMap<EntryKey, Object> data;
 
 		public Entry(String id) {
-			this.id = id.toCharArray();
+			this.id = id;
 			data = new EnumMap<EntryKey, Object>(EntryKey.class);
 			data.put(EntryKey.Genre,		EntryGenre.NULL);
 			data.put(EntryKey.Target,		EnumSet.noneOf(EntryTarget.class));
@@ -304,17 +303,7 @@ class AgoraData {
 		}
 
 		public String getId() {
-			return id.toString();
-		}
-
-		@Deprecated
-		public String getTitle() {
-			return getLocaleString(EntryKey.TitleJa);
-		}
-
-		@Deprecated
-		public String getExhibitor() {
-			return getLocaleString(EntryKey.ExhibitorJa);
+			return id;
 		}
 
 		public Object get(EntryKey key) {
@@ -343,7 +332,7 @@ class AgoraData {
 
 			final String ja = (String) getString(keyJa);
 			final String en = (String) getString(keyEn);
-			return (isLocaleJapanese || en.length() == 0) ? ja : en;
+			return (getAppLocale().equals(Locale.JAPANESE.getLanguage()) || en.length() == 0) ? ja : en;
 		}
 
 		public void set(EntryKey key, String value) {
