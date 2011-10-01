@@ -6,10 +6,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ListView;
-import android.widget.Toast;
 
 public class AgoraGuideActivity extends Activity {
 	/** Called when the activity is first created. */
@@ -19,7 +19,6 @@ public class AgoraGuideActivity extends Activity {
 		setContentView(R.layout.main);
 
 		AgoraData ad = new AgoraData(this.getApplicationContext());
-		ad.removeDataFile();
 		ad.XMLUpdater();
 
 		try {
@@ -30,40 +29,26 @@ public class AgoraGuideActivity extends Activity {
 		}
 		ListView actList = (ListView) this.findViewById(R.id.main_actlist);
 
-		EntryArrayAdapter adapter = new EntryArrayAdapter(this, R.layout.actlist_item, AgoraData.getAllEntry());
+		EntryArrayAdapter adapter = new EntryArrayAdapter(AgoraGuideActivity.this, AgoraData.getAllEntry());
 		actList.setAdapter(adapter);
+		actList.setOnItemClickListener(adapter.goToDetail());
+	}
 
-		actList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				ListView listView = (ListView) parent;
-				Intent intent = new Intent(AgoraGuideActivity.this, EntryDetailActivity.class);
-				intent.putExtra("id", ((AgoraData.Entry) listView.getItemAtPosition(position)).getId());
-				try {
-					startActivity(intent);
-				}
-				catch (Exception e) {
-					Toast.makeText(AgoraGuideActivity.this, "Fail to move to detail view: " + e, Toast.LENGTH_LONG).show();
-					Log.w("AGActivity", e.toString());
-				}
-			}
-		});
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater mi = new MenuInflater(getApplicationContext());
+		mi.inflate(R.menu.main, menu);
+		return true;
+	}
 
-/*
-		actList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				ListView listView = (ListView) parent;
-				AgoraAct act = (AgoraAct) listView.getItemAtPosition(position);
-				Toast.makeText(AgoraGuideActivity.this, act.getId(), Toast.LENGTH_SHORT).show();
-			}
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
-*/
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getTitle().equals(getText(R.string.menu_sbk))) {
+			startActivity(new Intent(AgoraGuideActivity.this, SearchByKeywordActivity.class));
+			return true;
+		}
+		Log.i("AGActivity", item.getTitle().toString());
+		return false;
 	}
 
 	@Override

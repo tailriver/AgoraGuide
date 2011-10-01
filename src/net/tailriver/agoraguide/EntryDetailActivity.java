@@ -25,8 +25,8 @@ public class EntryDetailActivity extends Activity {
 		Intent intent = getIntent();
 		Entry entry = AgoraData.getEntry(intent.getStringExtra("id"));
 
-		((TextView) this.findViewById(R.id.actdetail_title)).setText(entry.getLocaleString(EntryKey.TitleJa));
-		((TextView) this.findViewById(R.id.actdetail_exhibitor)).setText(entry.getLocaleString(EntryKey.ExhibitorJa));
+		((TextView) this.findViewById(R.id.actdetail_title)).setText(entry.getLocaleTitle());
+		((TextView) this.findViewById(R.id.actdetail_exhibitor)).setText(entry.getString(EntryKey.Sponsor));
 		((TextView) this.findViewById(R.id.actdetail_abstract)).setText(entry.getString(EntryKey.Abstract));
 		((TextView) this.findViewById(R.id.actdetail_content)).setText(entry.getString(EntryKey.Content).replace("&x0A;", "\n"));
 

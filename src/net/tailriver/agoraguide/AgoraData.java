@@ -50,11 +50,16 @@ class AgoraData {
 
 		final int localVersion = pref.getInt("localVersion", 0);
 		final int serverVersion;
+		final int fileSize; 
 		try {
+			// format of version.txt
+			//		version ; file size of data.xml ; file size of data.xml.gz
 			BufferedReader br = new BufferedReader(new InputStreamReader(new URL(context.getString(R.string.versionTextURL)).openStream()), 16);
-			serverVersion = Integer.parseInt(br.readLine());
+			String[] versionTexts = br.readLine().split(";");
 			br.close();
-			Log.i("AgoraData.XMLUpdater", String.format("server: %d, local: %d", serverVersion, localVersion));
+			serverVersion = Integer.parseInt(versionTexts[0]);
+			fileSize = Integer.parseInt(versionTexts[2]);
+			Log.i("AgoraData.XMLUpdater", String.format("server: %d, local: %d (%d bytes)", serverVersion, localVersion, fileSize));
 		}
 		catch (IOException e) {
 			Log.w("AgoraData.XMLUpdater", "Fail to check the version of data: " + e);
@@ -106,13 +111,12 @@ class AgoraData {
 		// Loop over XML input stream and process events
 		try {
 			Entry entry = null;
-			boolean inSchedule = false;
 			for (int e = xpp.getEventType(); e != XmlPullParser.END_DOCUMENT; e = xpp.next()) {
 				String tag;
 				switch (e) {
 				case XmlPullParser.START_TAG:
 					tag = xpp.getName();
-					if ("act".equals(tag)) {
+					if ("entry".equals(tag)) {
 						String id = xpp.getAttributeValue(null, "id");
 						if (id == null)
 							throw new XMLParserAbortException();
@@ -120,27 +124,21 @@ class AgoraData {
 						entry = new Entry(id);
 						entry.set(EntryKey.TitleJa,		xpp.getAttributeValue(null, "title.ja"));
 						entry.set(EntryKey.TitleEn,		xpp.getAttributeValue(null, "title.en"));
-						entry.set(EntryKey.ExhibitorJa,	xpp.getAttributeValue(null, "exhibitor.ja"));
-						entry.set(EntryKey.ExhibitorEn,	xpp.getAttributeValue(null, "exhibitor.en"));
+						entry.set(EntryKey.Sponsor,		xpp.getAttributeValue(null, "sponsor"));
+						entry.set(EntryKey.CoSponsor,	xpp.getAttributeValue(null, "cosponsor"));
 						entry.set(EntryKey.Image,		xpp.getAttributeValue(null, "image"));
 						entry.set(EntryKey.Location,	xpp.getAttributeValue(null, "location"));
-						entry.set(EntryKey.FixedNumber,	xpp.getAttributeValue(null, "fixedNumber"));
-						entry.set(EntryKey.Website,		xpp.getAttributeValue(null, "website"));
-						entry.set(EntryKey.Genre,		xpp.getAttributeValue(null, "genre"));
+						entry.set(EntryKey.Website,		xpp.getAttributeValue(null, "url"));
+						entry.set(EntryKey.Category,	xpp.getAttributeValue(null, "category"));
 						entry.set(EntryKey.Target,		xpp.getAttributeValue(null, "target"));
-						entry.set(EntryKey.Reservation, xpp.getAttributeValue(null, "reservation"));
+						entry.set(EntryKey.Schedule,	xpp.getAttributeValue(null, "schedule"));
 						entryMap.put(id, entry);
 						break;
 					}
 					if (entry == null)
 						break;
 
-					else if ("schedule".equals(tag)) {
-						inSchedule = true;
-						entry.set(EntryKey.Schedule,	xpp.getAttributeValue(null, "string"));
-						break;
-					}
-					if (inSchedule && "timeframe".equals(tag)) {
+					if ("timeframe".equals(tag)) {
 						String sid	= xpp.getAttributeValue(null, "id");
 						String id	= entry.getId();
 						String day	= xpp.getAttributeValue(null, "day");
@@ -155,6 +153,8 @@ class AgoraData {
 						entry.set(EntryKey.Abstract,	xpp.nextText());
 					else if ("content".equals(tag))
 						entry.set(EntryKey.Content,		xpp.nextText());
+					else if ("reservation".equals(tag))
+						entry.set(EntryKey.Reservation,	xpp.nextText());
 					else if ("note".equals(tag))
 						entry.set(EntryKey.Note,		xpp.nextText());
 					else
@@ -163,10 +163,7 @@ class AgoraData {
 
 				case XmlPullParser.END_TAG:
 					tag = xpp.getName();
-					if ("schedule".equals(tag)) {
-						inSchedule = false;
-					}
-					else if ("act".equals(tag)) {
+					if ("entry".equals(tag)) {
 						entry = null;
 					}
 					break;
@@ -211,7 +208,7 @@ class AgoraData {
 
 	public static List<Entry> getEntryByKeyword(String query) {
 		final EnumSet<EntryKey> searchKeys = EnumSet.of(
-				EntryKey.TitleJa, EntryKey.TitleEn, EntryKey.ExhibitorJa, EntryKey.ExhibitorEn,
+				EntryKey.TitleJa, EntryKey.TitleEn, EntryKey.Sponsor, EntryKey.CoSponsor,
 				EntryKey.Abstract, EntryKey.Content, EntryKey.Note);
 
 		List<Entry> matched = new ArrayList<Entry>();
@@ -256,18 +253,17 @@ class AgoraData {
 	public enum EntryKey {
 		TitleJa(String.class),
 		TitleEn(String.class),
-		ExhibitorJa(String.class),
-		ExhibitorEn(String.class),
+		Sponsor(String.class),
+		CoSponsor(String.class),
 		Image(URL.class),
-		Genre(EntryGenre.class),
+		Category(EntryCategory.class),
 		Target(HashSet.class),
 		Abstract(String.class),
 		Location(String.class),
 		Schedule(String.class),
 		ScheduleSet(HashMap.class),
-		FixedNumber(Integer.class),
-		Reservation(Boolean.class),
 		Content(String.class),
+		Reservation(String.class),
 		Website(URL.class),
 		Note(String.class),
 		;
@@ -287,7 +283,7 @@ class AgoraData {
 			return super.toString();
 		}
 	};
-	public enum EntryGenre { NULL, SymposiumAndTalkSession, ScienceShow, WorkshopAndCafe, PlayAndManufacture, Booth, Poster, Other }
+	public enum EntryCategory { NULL, SymposiumAndTalkSession, ScienceShow, WorkshopAndCafe, PlayAndManufacture, Booth, Poster, Other }
 	public enum EntryTarget { Child, Student, Teacher, Professional, Adult, Politics, SCer, NonJapanese }
 
 	class Entry {
@@ -297,7 +293,7 @@ class AgoraData {
 		public Entry(String id) {
 			this.id = id;
 			data = new EnumMap<EntryKey, Object>(EntryKey.class);
-			data.put(EntryKey.Genre,		EntryGenre.NULL);
+			data.put(EntryKey.Category,		EntryCategory.NULL);
 			data.put(EntryKey.Target,		EnumSet.noneOf(EntryTarget.class));
 			data.put(EntryKey.ScheduleSet,	new HashSet<String>());
 		}
@@ -317,15 +313,18 @@ class AgoraData {
 			return (s == null) ? "" : s;
 		}
 
+		public String getLocaleTitle() {
+			final String ja = (String) getString(EntryKey.TitleJa);
+			final String en = (String) getString(EntryKey.TitleEn);
+			return (getAppLocale().equals(Locale.JAPANESE.getLanguage()) || en.length() == 0) ? ja : en;
+		}
+
+		@Deprecated
 		public String getLocaleString(EntryKey key) {
 			final EntryKey keyJa, keyEn;
 			if (EnumSet.of(EntryKey.TitleJa, EntryKey.TitleEn).contains(key)) {
 				keyJa = EntryKey.TitleJa;
 				keyEn = EntryKey.TitleEn;
-			}
-			else if (EnumSet.of(EntryKey.ExhibitorJa, EntryKey.ExhibitorEn).contains(key)) {
-				keyJa = EntryKey.ExhibitorJa;
-				keyEn = EntryKey.ExhibitorEn;
 			}
 			else
 				throw new IllegalArgumentException();
@@ -336,60 +335,48 @@ class AgoraData {
 		}
 
 		public void set(EntryKey key, String value) {
-					switch (key) {
-					case Genre:
-		//				this.genre = (genre == null) ? EntryGenre.NULL : EntryGenre.valueOf(genre);
-						EntryGenre eg = (EntryGenre) data.get(key);
-						eg = EntryGenre.NULL;
-						data.put(key, eg);
-						break;
-		
-					case Target:
-						if (key == null)
-							break;
-						@SuppressWarnings("unchecked")
-						EnumSet<EntryTarget> et = (EnumSet<EntryTarget>) data.get(key);
-		//				String[] targets = target.split(",");
-		//				for (int i = 0; i < targets.length; i++) {
-		//					this.target.add(EntryTarget.values()[Integer.parseInt(targets[i])]);
-		//				}				EnumSet<EntryTarget> et = (EnumSet<EntryTarget>) data.get(key);
-						et.add(EntryTarget.SCer);
-						data.put(key, et);
-						break;
-		
-					case ScheduleSet:
-						@SuppressWarnings("unchecked")
-						Set<String> ss = (Set<String>) data.get(key);
-						ss.add(value);
-						data.put(key, ss);
-						break;
-		
-					case Image:
-					case Website:
-						try {
-							data.put(key, new URL(value));
-						} catch (MalformedURLException e) {
-							data.put(key, null);
-						}
-						break;
-		
-					case FixedNumber:
-						try {
-							data.put(key, Integer.parseInt(value));
-						} catch (NumberFormatException e) {
-							data.put(key, -1);
-						}
-						break;
-		
-					case Reservation:
-						data.put(key, (value == null) ? false : value.equals("required"));
-						break;
-		
-					default:
-						data.put(key, value);
-						break;
-					}
+			switch (key) {
+			case Category:
+				//				this.genre = (genre == null) ? EntryGenre.NULL : EntryGenre.valueOf(genre);
+				EntryCategory ec = (EntryCategory) data.get(key);
+				ec = EntryCategory.NULL;
+				data.put(key, ec);
+				break;
+
+			case Target:
+				if (key == null)
+					break;
+				@SuppressWarnings("unchecked")
+				EnumSet<EntryTarget> et = (EnumSet<EntryTarget>) data.get(key);
+				//				String[] targets = target.split(",");
+				//				for (int i = 0; i < targets.length; i++) {
+				//					this.target.add(EntryTarget.values()[Integer.parseInt(targets[i])]);
+				//				}				EnumSet<EntryTarget> et = (EnumSet<EntryTarget>) data.get(key);
+				et.add(EntryTarget.SCer);
+				data.put(key, et);
+				break;
+
+			case ScheduleSet:
+				@SuppressWarnings("unchecked")
+				Set<String> ss = (Set<String>) data.get(key);
+				ss.add(value);
+				data.put(key, ss);
+				break;
+
+			case Image:
+			case Website:
+				try {
+					data.put(key, new URL(value));
+				} catch (MalformedURLException e) {
+					data.put(key, null);
 				}
+				break;
+
+			default:
+				data.put(key, value);
+				break;
+			}
+		}
 
 		public void addScheduleId(String scheduleId) {
 			set(EntryKey.ScheduleSet, scheduleId);

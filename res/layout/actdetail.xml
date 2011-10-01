@@ -3,13 +3,12 @@
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:orientation="vertical" android:weightSum="1" android:padding="5dp"
 	android:background="@android:color/background_dark">
-	<LinearLayout android:id="@+id/linearLayout1"
-		android:layout_width="fill_parent" android:orientation="horizontal"
-		android:layout_height="wrap_content" android:minHeight="90dp"
-		android:layout_weight="0.0">
-		<LinearLayout android:id="@+id/linearLayout2"
-			android:layout_height="fill_parent" android:orientation="vertical"
-			android:layout_width="wrap_content" android:layout_weight="1.0">
+	<LinearLayout android:layout_width="fill_parent"
+		android:orientation="horizontal" android:layout_height="wrap_content"
+		android:minHeight="90dp" android:layout_weight="0.0">
+		<LinearLayout android:layout_height="fill_parent"
+			android:orientation="vertical" android:layout_width="wrap_content"
+			android:layout_weight="1.0">
 			<TextView android:id="@+id/actdetail_title" android:text="TextView"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
 				android:layout_weight="0.5" android:textSize="21sp"

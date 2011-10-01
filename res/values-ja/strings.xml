@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="menu_sbk">キーワードで探す</string>
+    <string name="menu_sbtf">時間で探す</string>
+    <string name="menu_sbm">地図で探す</string>
     
 </resources>
