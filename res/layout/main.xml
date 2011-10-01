@@ -4,6 +4,6 @@
 	android:layout_height="fill_parent">
 	<ListView android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/main_actlist">
-		<!-- Preview: listitem=@android:layout/simple_list_item_2 -->
+		<!-- Preview: listitem=@layout/entrylist_item -->
 	</ListView>
 </LinearLayout>

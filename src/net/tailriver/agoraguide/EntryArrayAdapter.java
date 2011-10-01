@@ -20,7 +20,7 @@ class EntryArrayAdapter extends ArrayAdapter<Entry> {
 	private final OnItemClickListener onItemClickListener;
 
 	public EntryArrayAdapter(final Context context,	List<Entry> objects) {
-		super(context, R.layout.actlist_item, objects);
+		super(context, R.layout.entrylist_item, objects);
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		onItemClickListener = new OnItemClickListener() {
@@ -35,8 +35,7 @@ class EntryArrayAdapter extends ArrayAdapter<Entry> {
 		};
 	}
 
-	public void resetEntry(List<Entry> objects) {
-		super.clear();
+	public void add(List<Entry> objects) {
 		for (Entry e : objects)
 			super.add(e);
 	}
@@ -45,14 +44,20 @@ class EntryArrayAdapter extends ArrayAdapter<Entry> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
 		if (view == null) {
-			view = inflater.inflate(R.layout.actlist_item, null);
+			view = inflater.inflate(R.layout.entrylist_item, null);
 		}
 
 		AgoraData.Entry entry = this.getItem(position);
 		if (entry != null) {
-			((TextView) view.findViewById(R.id.actlist_item_title)).setText(entry.getLocaleTitle());
-			((TextView) view.findViewById(R.id.actlist_item_exhibitor)).setText(entry.getString(EntryKey.Sponsor));
-			((TextView) view.findViewById(R.id.actlist_item_schedule)).setText(entry.getString(EntryKey.Schedule));
+			((TextView) view.findViewById(R.id.entrylist_item_title)).setText(entry.getLocaleTitle());
+			((TextView) view.findViewById(R.id.entrylist_item_sponsor)).setText(entry.getString(EntryKey.Sponsor));
+			((TextView) view.findViewById(R.id.entrylist_item_schedule)).setText(entry.getString(EntryKey.Schedule));
+			((TextView) view.findViewById(R.id.entrylist_item_category)).setText(entry.getCategory().toString());
+
+			// FIXME not worked
+			TextView reservaionView = (TextView) view.findViewById(R.id.entrylist_item_reservation);
+			if (entry.getString(EntryKey.Reservation).length() == 0)
+				reservaionView.setVisibility(View.INVISIBLE);
 		}
 		return view;
 	}

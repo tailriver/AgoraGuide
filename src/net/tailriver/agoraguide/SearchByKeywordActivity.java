@@ -16,13 +16,13 @@ public class SearchByKeywordActivity extends Activity {
 		setContentView(R.layout.searchbykeyword);
 
 		ListView entryList = (ListView) this.findViewById(R.id.sbk_result);
-		EditText keywordText = (EditText) this.findViewById(R.id.sbk_text);
+		EditText editText = (EditText) this.findViewById(R.id.sbk_text);
 
 		EntryArrayAdapter adapter = new EntryArrayAdapter(SearchByKeywordActivity.this, new ArrayList<AgoraData.Entry>());
 		entryList.setAdapter(adapter);
 		entryList.setOnItemClickListener(adapter.goToDetail());
 
-		keywordText.addTextChangedListener(new TextWatcher() {
+		editText.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 			}
@@ -35,10 +35,9 @@ public class SearchByKeywordActivity extends Activity {
 			@Override
 			public void afterTextChanged(Editable s) {
 				EntryArrayAdapter adapter = (EntryArrayAdapter) ((ListView) findViewById(R.id.sbk_result)).getAdapter();
-				if (s.length() == 0)
-					adapter.clear();
-				else
-					adapter.resetEntry(AgoraData.getEntryByKeyword(s.toString()));
+				adapter.clear();
+				if (s.length() != 0)
+					adapter.add(AgoraData.getEntryByKeyword(s.toString()));
 			}
 		});
 	}

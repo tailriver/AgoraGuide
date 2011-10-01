@@ -11,7 +11,6 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -28,15 +27,12 @@ class AgoraData {
 	private static Map<String, Entry> entryMap;
 	private static Map<String, TimeFrame> timeFrameMap;
 
-	static {
-		entryMap	 = new LinkedHashMap<String, Entry>();
-		timeFrameMap = new HashMap<String, TimeFrame>();
-	}
-
 	public AgoraData(Context context) {
 		super();
 		this.context = context;
-		this.pref = context.getSharedPreferences("pref", Context.MODE_PRIVATE);
+		this.pref	 = context.getSharedPreferences("pref", Context.MODE_PRIVATE);
+		entryMap	 = new LinkedHashMap<String, Entry>(pref.getInt("initialCapacityOfEntry",	  50));
+		timeFrameMap = new HashMap<String, TimeFrame>(  pref.getInt("initialCapacityOfTimeFrame", 50));
 	}
 
 	public boolean isConnected() {
@@ -96,7 +92,7 @@ class AgoraData {
 	}
 
 	public synchronized void XMLParser() throws XMLParserAbortException {
-		XmlPullParser xpp = Xml.newPullParser();
+		final XmlPullParser xpp = Xml.newPullParser();
 
 		try {
 			xpp.setInput(context.openFileInput(context.getString(R.string.XMLDataFilename)), null);
@@ -112,75 +108,72 @@ class AgoraData {
 		try {
 			Entry entry = null;
 			for (int e = xpp.getEventType(); e != XmlPullParser.END_DOCUMENT; e = xpp.next()) {
-				String tag;
 				switch (e) {
 				case XmlPullParser.START_TAG:
-					tag = xpp.getName();
-					if ("entry".equals(tag)) {
-						String id = xpp.getAttributeValue(null, "id");
-						if (id == null)
+					final String startTag = xpp.getName();
+					if ("entry".equals(startTag)) {
+						final String id			= xpp.getAttributeValue(null, "id");
+						final String category	= xpp.getAttributeValue(null, "category");
+						if (id == null || category == null)
 							throw new XMLParserAbortException();
 
-						entry = new Entry(id);
+						entry = new Entry(id, category);
 						entry.set(EntryKey.TitleJa,		xpp.getAttributeValue(null, "title.ja"));
 						entry.set(EntryKey.TitleEn,		xpp.getAttributeValue(null, "title.en"));
 						entry.set(EntryKey.Sponsor,		xpp.getAttributeValue(null, "sponsor"));
 						entry.set(EntryKey.CoSponsor,	xpp.getAttributeValue(null, "cosponsor"));
 						entry.set(EntryKey.Image,		xpp.getAttributeValue(null, "image"));
-						entry.set(EntryKey.Location,	xpp.getAttributeValue(null, "location"));
-						entry.set(EntryKey.Website,		xpp.getAttributeValue(null, "url"));
-						entry.set(EntryKey.Category,	xpp.getAttributeValue(null, "category"));
 						entry.set(EntryKey.Target,		xpp.getAttributeValue(null, "target"));
+						entry.set(EntryKey.Location,	xpp.getAttributeValue(null, "location"));
 						entry.set(EntryKey.Schedule,	xpp.getAttributeValue(null, "schedule"));
+						entry.set(EntryKey.Guest,		xpp.getAttributeValue(null, "guest"));
+						entry.set(EntryKey.Website,		xpp.getAttributeValue(null, "url"));
 						entryMap.put(id, entry);
 						break;
 					}
 					if (entry == null)
 						break;
 
-					if ("timeframe".equals(tag)) {
-						String sid	= xpp.getAttributeValue(null, "id");
-						String id	= entry.getId();
-						String day	= xpp.getAttributeValue(null, "day");
-						int start	= Integer.parseInt(xpp.getAttributeValue(null, "start"));
-						int end		= Integer.parseInt(xpp.getAttributeValue(null, "end"));
-						timeFrameMap.put(sid, new TimeFrame(sid, id, day, start, end));
-						entry.addScheduleId(sid);
+					if ("timeframe".equals(startTag)) {
+						final String eid	= entry.getId();
+						final String tfid	= xpp.getAttributeValue(null, "id");
+						final String day	= xpp.getAttributeValue(null, "day");
+						final int start		= Integer.parseInt(xpp.getAttributeValue(null, "start"));
+						final int end		= Integer.parseInt(xpp.getAttributeValue(null, "end"));
+						timeFrameMap.put(tfid, new TimeFrame(tfid, eid, day, start, end));
 						break;
 					}
 
-					if ("abstract".equals(tag))
+					if ("abstract".equals(startTag))
 						entry.set(EntryKey.Abstract,	xpp.nextText());
-					else if ("content".equals(tag))
+					else if ("content".equals(startTag))
 						entry.set(EntryKey.Content,		xpp.nextText());
-					else if ("reservation".equals(tag))
+					else if ("reservation".equals(startTag))
 						entry.set(EntryKey.Reservation,	xpp.nextText());
-					else if ("note".equals(tag))
+					else if ("note".equals(startTag))
 						entry.set(EntryKey.Note,		xpp.nextText());
 					else
-						Log.i("AgoraData.XMLParser", entry + ": " + tag + " is not implemented");
+						Log.i("AgoraData.XMLParser", entry + ": " + startTag + " is not implemented");
 					break;
 
 				case XmlPullParser.END_TAG:
-					tag = xpp.getName();
-					if ("entry".equals(tag)) {
+					final String closeTag = xpp.getName();
+					if ("entry".equals(closeTag))
 						entry = null;
-					}
 					break;
 				}
 			}
 		}
-		catch (XmlPullParserException e) {
+		catch (Exception e) {
 			clearCache();
 			Log.w("AgoraData.XMLParser", "parse aborted: " + e);
 			throw new XMLParserAbortException();
 		}
-		catch (IOException e) {
-			clearCache();
-			removeDataFile();
-			Log.w("AgoraData.XMLParser", "parse aborted: " + e);
-			throw new XMLParserAbortException();
-		}
+
+		SharedPreferences.Editor ee = pref.edit();
+		ee.putInt("initialCapacityOfEntryMap", (int) (entryMap.size() * 1.5));
+		ee.putInt("initialCapacityOfTimeFrameMap", (int) (timeFrameMap.size() * 1.5));
+		ee.commit();
 	}
 
 	public static void clearCache() {
@@ -255,17 +248,16 @@ class AgoraData {
 		TitleEn(String.class),
 		Sponsor(String.class),
 		CoSponsor(String.class),
-		Image(URL.class),
-		Category(EntryCategory.class),
-		Target(HashSet.class),
 		Abstract(String.class),
 		Location(String.class),
 		Schedule(String.class),
-		ScheduleSet(HashMap.class),
 		Content(String.class),
-		Reservation(String.class),
-		Website(URL.class),
+		Guest(String.class),
 		Note(String.class),
+		Reservation(String.class),
+		Image(URL.class),
+		Website(URL.class),
+		Target(HashSet.class),
 		;
 
 		private final Class<?> dataClass;
@@ -277,40 +269,48 @@ class AgoraData {
 		public Class<?> getDataClass() {
 			return dataClass;
 		}
-
-		@Override
-		public String toString() {
-			return super.toString();
-		}
 	};
-	public enum EntryCategory { NULL, SymposiumAndTalkSession, ScienceShow, WorkshopAndCafe, PlayAndManufacture, Booth, Poster, Other }
+	public enum EntryCategory { SymposiumAndTalkSession, WorkshopAndScienceCafe, ScienceShowAndDisplay, Other }
 	public enum EntryTarget { Child, Student, Teacher, Professional, Adult, Politics, SCer, NonJapanese }
 
 	class Entry {
 		private final String id;
-		private EnumMap<EntryKey, Object> data;
+		private final EntryCategory category;
+		private final Map<EntryKey, CharSequence> stringData;
+		private final Map<EntryKey, URL> urlData;
+		private final Set<EntryTarget> target;
 
-		public Entry(String id) {
-			this.id = id;
-			data = new EnumMap<EntryKey, Object>(EntryKey.class);
-			data.put(EntryKey.Category,		EntryCategory.NULL);
-			data.put(EntryKey.Target,		EnumSet.noneOf(EntryTarget.class));
-			data.put(EntryKey.ScheduleSet,	new HashSet<String>());
+		public Entry(String id, String category) {
+			this.id			= id;
+			this.category	= EntryCategory.valueOf(category);
+			stringData		= new EnumMap<EntryKey, CharSequence>(EntryKey.class);
+			urlData			= new EnumMap<EntryKey, URL>(EntryKey.class);
+			target			= EnumSet.noneOf(EntryTarget.class);
 		}
 
 		public String getId() {
 			return id;
 		}
 
-		public Object get(EntryKey key) {
-			return data.get(key);
+		public EntryCategory getCategory() {
+			return category;
+		}
+
+		public Set<EntryTarget> getTarget() {
+			return target;
+		}
+
+		public URL getURL(EntryKey key) {
+			if (!key.getDataClass().equals(URL.class))
+				throw new IllegalArgumentException();
+			return urlData.get(key);
 		}
 
 		public String getString(EntryKey key) {
 			if (!key.getDataClass().equals(String.class))
 				throw new IllegalArgumentException();
-			final String s = (String) data.get(key);
-			return (s == null) ? "" : s;
+			final CharSequence cs = stringData.get(key);
+			return (cs == null) ? "" : cs.toString();
 		}
 
 		public String getLocaleTitle() {
@@ -319,67 +319,32 @@ class AgoraData {
 			return (getAppLocale().equals(Locale.JAPANESE.getLanguage()) || en.length() == 0) ? ja : en;
 		}
 
-		@Deprecated
-		public String getLocaleString(EntryKey key) {
-			final EntryKey keyJa, keyEn;
-			if (EnumSet.of(EntryKey.TitleJa, EntryKey.TitleEn).contains(key)) {
-				keyJa = EntryKey.TitleJa;
-				keyEn = EntryKey.TitleEn;
-			}
-			else
-				throw new IllegalArgumentException();
-
-			final String ja = (String) getString(keyJa);
-			final String en = (String) getString(keyEn);
-			return (getAppLocale().equals(Locale.JAPANESE.getLanguage()) || en.length() == 0) ? ja : en;
-		}
-
 		public void set(EntryKey key, String value) {
 			switch (key) {
-			case Category:
-				//				this.genre = (genre == null) ? EntryGenre.NULL : EntryGenre.valueOf(genre);
-				EntryCategory ec = (EntryCategory) data.get(key);
-				ec = EntryCategory.NULL;
-				data.put(key, ec);
-				break;
-
 			case Target:
-				if (key == null)
+				if (value == null)
 					break;
-				@SuppressWarnings("unchecked")
-				EnumSet<EntryTarget> et = (EnumSet<EntryTarget>) data.get(key);
 				//				String[] targets = target.split(",");
 				//				for (int i = 0; i < targets.length; i++) {
 				//					this.target.add(EntryTarget.values()[Integer.parseInt(targets[i])]);
 				//				}				EnumSet<EntryTarget> et = (EnumSet<EntryTarget>) data.get(key);
-				et.add(EntryTarget.SCer);
-				data.put(key, et);
-				break;
-
-			case ScheduleSet:
-				@SuppressWarnings("unchecked")
-				Set<String> ss = (Set<String>) data.get(key);
-				ss.add(value);
-				data.put(key, ss);
+				target.add(EntryTarget.valueOf(value));
 				break;
 
 			case Image:
 			case Website:
 				try {
-					data.put(key, new URL(value));
+					URL url = new URL(value);
+					urlData.put(key, url);
 				} catch (MalformedURLException e) {
-					data.put(key, null);
+					urlData.put(key, null);
 				}
 				break;
 
 			default:
-				data.put(key, value);
+				stringData.put(key, value);
 				break;
 			}
-		}
-
-		public void addScheduleId(String scheduleId) {
-			set(EntryKey.ScheduleSet, scheduleId);
 		}
 
 		@Override
@@ -389,18 +354,26 @@ class AgoraData {
 	}
 
 	class TimeFrame {
-		final char[] sid;	// schedule id
-		final char[] id;	// entry id
-		final char[] day;
-		final int start;
-		final int end;
+//		private final String tfid;	// schedule id
+		private final String eid;	// entry id
+		private final String day;
+		private final int start;
+		private final int end;
 
-		public TimeFrame(String sid, String id, String day, int start, int end) {
-			this.sid = sid.toCharArray();
-			this.id = id.toCharArray();
-			this.day = day.toCharArray();
-			this.start = start;
-			this.end = end;
+		public TimeFrame(String tfid, String eid, String day, int start, int end) {
+//			this.tfid	= tfid;
+			this.eid	= eid;
+			this.day	= day;
+			this.start	= start;
+			this.end	= end;
+		}
+
+		public Entry getEntry() {
+			return AgoraData.getEntry(eid.toString());
+		}
+
+		public boolean isInSession(String day, int time) {
+			return this.day.equals(day) && start <= time && time < end;
 		}
 	}
 
