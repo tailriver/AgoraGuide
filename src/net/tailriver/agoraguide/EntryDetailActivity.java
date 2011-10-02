@@ -1,58 +1,60 @@
 package net.tailriver.agoraguide;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import net.tailriver.agoraguide.AgoraData.*;
-
 import android.app.Activity;
-import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Gallery;
 
 public class EntryDetailActivity extends Activity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.entrydetail);
+		setContentView(R.layout.entrygallery);
 
-		Intent intent = getIntent();
-		Entry entry = AgoraData.getEntry(intent.getStringExtra("id"));
+		final String[] entryIdList = getIntent().getStringArrayExtra("entryIdList");
+		final int position = getIntent().getIntExtra("position", 0);
 
-		((TextView) this.findViewById(R.id.entrydetail_title)).setText(entry.getLocaleTitle());
-		((TextView) this.findViewById(R.id.entrydetail_sponsor)).setText(entry.getString(EntryKey.Sponsor));
-		((TextView) this.findViewById(R.id.entrydetail_cosponsor)).setText(entry.getString(EntryKey.CoSponsor));
-		((TextView) this.findViewById(R.id.entrydetail_abstract)).setText(entry.getString(EntryKey.Abstract));
-		((TextView) this.findViewById(R.id.entrydetail_content)).setText(entry.getString(EntryKey.Content).replace("&#xA;", "\n"));
-		((TextView) this.findViewById(R.id.entrydetail_reservation)).setText(entry.getString(EntryKey.Reservation));
-		((TextView) this.findViewById(R.id.entrydetail_note)).setText(entry.getString(EntryKey.Note));
+		final Gallery gallery = (Gallery) findViewById(R.id.entrygallery);
+		gallery.setAdapter(new EntryGalleryAdapter(EntryDetailActivity.this));
 
-		ImageView thumbnail = (ImageView) this.findViewById(R.id.entrydetail_thumbnail);
-		URL imageURL = (URL) entry.getURL(EntryKey.Image);
-		if (imageURL != null && new AgoraData(getApplicationContext()).isConnected()) {
-			HttpURLConnection huc = null;
-			try {
-				huc = (HttpURLConnection) imageURL.openConnection();
-				huc.setDoInput(true);
-				huc.connect();
-				thumbnail.setImageBitmap(BitmapFactory.decodeStream(huc.getInputStream()));
-			}
-			catch (Exception e) {
-				Log.e("ADActivity", e.toString());
-				thumbnail.setVisibility(View.GONE);
-			}
-			finally {
-				if (huc != null)
-					huc.disconnect();
-			}
+		theAdapter().add(entryIdList);		
+		gallery.setSelection(position, true);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		final MenuInflater mi = new MenuInflater(EntryDetailActivity.this);
+		mi.inflate(R.menu.entrydetail, menu);
+
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		final MenuItem favoriteItem = menu.findItem(R.id.menu_entrydetail_favorite);
+		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
+		if (!AgoraData.isFavorite(selectedId))
+			favoriteItem.setTitle(R.string.addFavorite);
+		else
+			favoriteItem.setTitle(R.string.removeFavorite);
+
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
+		if (item.getItemId() == R.id.menu_entrydetail_favorite) {
+			new AgoraData(this).setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
+			return false;
 		}
-		else {
-			thumbnail.setVisibility(View.GONE);
-		}
+		return false;
+	}
+
+	private EntryGalleryAdapter theAdapter() {
+		return (EntryGalleryAdapter) ((Gallery) findViewById(R.id.entrygallery)).getAdapter();
 	}
 }

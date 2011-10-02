@@ -1,5 +1,6 @@
 package net.tailriver.agoraguide;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.tailriver.agoraguide.AgoraData.*;
@@ -10,59 +11,60 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
-class EntryArrayAdapter extends ArrayAdapter<Entry> {
-	private final LayoutInflater inflater;
-	private final OnItemClickListener onItemClickListener;
+class EntryArrayAdapter extends ArrayAdapter<String> implements OnItemClickListener {
+	private final Context context;
+	private final List<String> idList;
 
-	public EntryArrayAdapter(final Context context,	List<Entry> objects) {
-		super(context, R.layout.entrylist_item, objects);
-		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		onItemClickListener = new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				ListView listView = (ListView) parent;
-				Intent intent = new Intent(context, EntryDetailActivity.class);
-				intent.putExtra("id", ((AgoraData.Entry) listView.getItemAtPosition(position)).getId());
-				context.startActivity(intent);
-			}
-		};
+	public EntryArrayAdapter(Context context) {
+		super(context, R.layout.entrylist_item, (List<String>) new ArrayList<String>());
+		this.context = context;
+		this.idList = new ArrayList<String>();
 	}
 
-	public void add(List<Entry> objects) {
-		for (Entry e : objects)
+	public void add(List<String> objects) {
+		for (String e : objects) {
+			idList.add(e);
 			super.add(e);
+		}
+	}
+
+	@Override
+	public void clear() {
+		idList.clear();
+		super.clear();
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		View view = convertView;
-		if (view == null) {
-			view = inflater.inflate(R.layout.entrylist_item, null);
+		if (convertView == null) {
+			final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			convertView = inflater.inflate(R.layout.entrylist_item, null);
 		}
 
-		AgoraData.Entry entry = this.getItem(position);
+		final Entry entry = AgoraData.getEntry(this.getItem(position));
 		if (entry != null) {
-			((TextView) view.findViewById(R.id.entrylist_item_title)).setText(entry.getLocaleTitle());
-			((TextView) view.findViewById(R.id.entrylist_item_sponsor)).setText(entry.getString(EntryKey.Sponsor));
-			((TextView) view.findViewById(R.id.entrylist_item_schedule)).setText(entry.getString(EntryKey.Schedule));
-			((TextView) view.findViewById(R.id.entrylist_item_category)).setText(entry.getCategory().toString());
+			((TextView) convertView.findViewById(R.id.entrylist_item_title)).setText(entry.getLocaleTitle());
+			((TextView) convertView.findViewById(R.id.entrylist_item_sponsor)).setText(entry.getString(EntryKey.Sponsor));
+			((TextView) convertView.findViewById(R.id.entrylist_item_schedule)).setText(entry.getString(EntryKey.Schedule));
+			((TextView) convertView.findViewById(R.id.entrylist_item_category)).setText(entry.getCategory().toString());
 
 			// FIXME not worked
-			TextView reservaionView = (TextView) view.findViewById(R.id.entrylist_item_reservation);
-			if (entry.getString(EntryKey.Reservation).length() == 0)
+			TextView reservaionView = (TextView) convertView.findViewById(R.id.entrylist_item_reservation);
+			if (entry.getString(EntryKey.Reservation) == null)
 				reservaionView.setVisibility(View.INVISIBLE);
 		}
-		return view;
+		return convertView;
 	}
 
-	public OnItemClickListener goToDetail() {
-		return onItemClickListener;
+	public void onItemClick(AdapterView<?> parent, View view,
+			int position, long id) {
+		Intent intent = new Intent(context, EntryDetailActivity.class);
+		intent.putExtra("entryIdList", idList.toArray(new String[idList.size()]));
+		intent.putExtra("position", position);
+		context.startActivity(intent);	// TODO return value?
 	}
 }

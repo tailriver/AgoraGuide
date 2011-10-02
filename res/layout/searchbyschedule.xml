@@ -4,10 +4,8 @@
 	android:layout_height="fill_parent">
 	<LinearLayout android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:orientation="horizontal">
-		<EditText android:id="@+id/sbk_text" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:singleLine="true"
-			android:hint="@string/search">
-		</EditText>
+		<EditText android:layout_width="wrap_content" android:id="@+id/editText1" android:inputType="time" android:layout_height="wrap_content" android:layout_weight="1"></EditText>
+		<Spinner android:id="@+id/spinner1" android:layout_height="wrap_content" android:layout_width="65dp"></Spinner>
 	</LinearLayout>
 	<ListView android:layout_width="fill_parent" android:id="@+id/sbk_result"
 		android:layout_height="fill_parent">

@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="menu_sbk">キーワードで探す</string>
-    <string name="menu_sbtf">時間で探す</string>
-    <string name="menu_sbm">地図で探す</string>
+    <string name="searchByKeyword">キーワードで探す</string>
+    <string name="searchBySchedule">時間で探す</string>
+    <string name="searchByMap">地図で探す</string>
+    <string name="addFavorite">お気に入りに追加</string>
+    <string name="removeFavorite">お気に入りから削除</string>
+    <string name="entryDetail">企画詳細</string>
+    <string name="favorite">お気に入り</string>
+    <string name="search">検索キーワード</string>
+    <string name="clearFavorite">すべてのお気に入りを削除する</string>
     
 </resources>

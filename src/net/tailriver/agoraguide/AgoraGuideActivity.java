@@ -18,7 +18,7 @@ public class AgoraGuideActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		AgoraData ad = new AgoraData(this.getApplicationContext());
+		final AgoraData ad = new AgoraData(this);
 		ad.XMLUpdater();
 
 		try {
@@ -27,39 +27,46 @@ public class AgoraGuideActivity extends Activity {
 		catch (XMLParserAbortException e) {
 			Log.e("AGActivity", e.toString());
 		}
-		ListView actList = (ListView) this.findViewById(R.id.main_actlist);
 
-		EntryArrayAdapter adapter = new EntryArrayAdapter(AgoraGuideActivity.this, AgoraData.getAllEntry());
-		actList.setAdapter(adapter);
-		actList.setOnItemClickListener(adapter.goToDetail());
+		final ListView entryListView = (ListView) findViewById(R.id.main_entrylist);
+		entryListView.setAdapter(new EntryArrayAdapter(AgoraGuideActivity.this));
+		entryListView.setOnItemClickListener(theAdapter());
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		theAdapter().add(AgoraData.getAllEntryId());
+	}
+
+	@Override
+	public void onStop() {
+		theAdapter().clear();
+		super.onStop();
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater mi = new MenuInflater(getApplicationContext());
+		final MenuInflater mi = new MenuInflater(AgoraGuideActivity.this);
 		mi.inflate(R.menu.main, menu);
+
+		menu.findItem(R.id.menu_sbk).setIntent(new Intent(AgoraGuideActivity.this, SearchByKeywordActivity.class));
+		menu.findItem(R.id.menu_sbs).setEnabled(false);
+		menu.findItem(R.id.menu_sbm).setEnabled(false);
+		menu.findItem(R.id.menu_favorite).setIntent(new Intent(AgoraGuideActivity.this, FavoritesActivity.class));
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getTitle().equals(getText(R.string.menu_sbk))) {
-			startActivity(new Intent(AgoraGuideActivity.this, SearchByKeywordActivity.class));
+		if (item.getIntent() != null) {
+			startActivity(item.getIntent());
 			return true;
 		}
-		Log.i("AGActivity", item.getTitle().toString());
 		return false;
 	}
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		Log.i("MainActivity", "onPause() called");
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		Log.i("MainActivity", "onResume() called");
+	private EntryArrayAdapter theAdapter() {
+		return (EntryArrayAdapter) ((ListView) findViewById(R.id.main_entrylist)).getAdapter();
 	}
 }

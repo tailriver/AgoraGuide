@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/menu_sbk" android:title="@string/menu_sbk"
-		android:icon="@drawable/icon" />
-	<item android:id="@+id/menu_sbtf" android:title="@string/menu_sbtf"
-		android:icon="@drawable/icon" />
-	<item android:id="@+id/menu_sbm" android:title="@string/menu_sbm"
-		android:icon="@drawable/icon" />
+	<group android:id="@+id/group1">
+		<item android:id="@+id/menu_sbk" android:title="@string/searchByKeyword"
+			android:icon="@drawable/icon" />
+		<item android:id="@+id/menu_sbs" android:title="@string/searchBySchedule"
+			android:icon="@drawable/icon" />
+		<item android:id="@+id/menu_sbm" android:title="@string/searchByMap"
+			android:icon="@drawable/icon" />
+	</group>
+	<item android:id="@+id/menu_favorite" android:title="@string/favorite" android:icon="@drawable/icon"></item>
 </menu>
