@@ -1,30 +1,37 @@
 package net.tailriver.agoraguide;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+
 import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Xml;
 
 class AgoraData {
+	private static final String versionURL  = "http://www.tailriver.net/scienceagora/2011/version.txt";
+	private static final String dataXMLURL  = "http://www.tailriver.net/scienceagora/2011/data.xml";
+	private static final String dataGZIPURL = "http://www.tailriver.net/scienceagora/2011/data.xml.gz";
+	private static final String dataLocal   = "data.xml";
+
 	private final Context context;
 	private final SharedPreferences pref;
 
 	private static Map<String, Entry> entryMap;
 	private static Map<String, TimeFrame> timeFrameMap;
 	private static List<String> favoriteList;
+	private static boolean isParseFinished = false;
 
+	/** @param context	It should be {@code getApplicationContext()} */
 	public AgoraData(Context context) {
 		this.context = context.getApplicationContext();
 		this.pref	 = this.context.getSharedPreferences("pref", Context.MODE_PRIVATE);
@@ -36,48 +43,75 @@ class AgoraData {
 		}
 	}
 
+	public boolean isParseFinished() {
+		return isParseFinished;
+	}
+
 	public boolean isConnected() {
+		return AgoraData.isConnected(context);
+	}
+
+	public static boolean isConnected(Context context) {
 		final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return cm.getActiveNetworkInfo().getState() == NetworkInfo.State.CONNECTED;
 	}
 
-	public synchronized void XMLUpdater() {
+	/** @throws UpdateDataAbortException */
+	public void updateData(boolean useGZIP, Handler handler) throws UpdateDataAbortException {
 		if (!isConnected())
 			return;
 
-		final int localVersion = pref.getInt("localVersion", 0);
-		final int serverVersion;
-		final int fileSize; 
+		final String[] versionText;
 		try {
-			// format of version.txt
-			//		version ; file size of data.xml ; file size of data.xml.gz
-			final BufferedReader br = new BufferedReader(new InputStreamReader(new URL(context.getString(R.string.versionTextURL)).openStream()), 16);
-			final String[] versionTexts = br.readLine().split(";");
+			final BufferedReader br = new BufferedReader(new InputStreamReader(new URL(versionURL).openStream()), 64);
+			versionText = br.readLine().split(";");
 			br.close();
-			serverVersion = Integer.parseInt(versionTexts[0]);
-			fileSize = Integer.parseInt(versionTexts[2]);
-			Log.i("AgoraData.XMLUpdater", String.format("server: %d, local: %d (%d bytes)", serverVersion, localVersion, fileSize));
 		}
 		catch (IOException e) {
-			Log.w("AgoraData.XMLUpdater", "Fail to check the version of data: " + e);
-			return;
+			// fail to download versionTextURL; we cannot continue
+			throw new UpdateDataAbortException("Fail to check update information");
+		}
+
+		// format of version.txt
+		//		version ; file size of data.xml ; file size of data.xml.gz
+		final int localVersion	= pref.getInt("localVersion", 0);
+		final int serverVersion	= Integer.parseInt(versionText[0]);
+		final int size			= Integer.parseInt(versionText[useGZIP ? 2 : 1]);
+
+		if (handler != null) {
+			Message message = new Message();
+			Bundle bundle = new Bundle();
+			bundle.putInt("max", size);
+			message.setData(bundle);
+			handler.sendMessage(message);
 		}
 
 		if (serverVersion == localVersion || !isConnected())
 			return;
 
 		try {
-			final int BUFFER_SIZE = 1024;
-			// TODO want to use GZIPINPUTSTREAM
-//			final BufferedInputStream  bis = new BufferedInputStream(new GZIPInputStream(new URL(context.getString(R.string.XMLDataURL)).openStream()), BUFFER_SIZE);
-			final BufferedInputStream  bis = new BufferedInputStream(new URL(context.getString(R.string.XMLDataURL)).openStream(), BUFFER_SIZE);
-			final BufferedOutputStream bos = new BufferedOutputStream(context.openFileOutput(context.getString(R.string.XMLDataFilename), Context.MODE_PRIVATE), BUFFER_SIZE);
+			final InputStream			is = new URL(useGZIP ? dataGZIPURL : dataXMLURL).openStream();
+			final FileOutputStream	   fos = context.openFileOutput(dataLocal, Context.MODE_PRIVATE);
+
+			final int BUFFER_SIZE = 4096;
+			final BufferedInputStream  bis = new BufferedInputStream(useGZIP ? new GZIPInputStream(is) : is, BUFFER_SIZE);
+			final BufferedOutputStream bos = new BufferedOutputStream(fos, BUFFER_SIZE);
 			byte[] buffer = new byte[BUFFER_SIZE];
+			int totalRead = 0;
 			while (true) {
 				final int byteRead = bis.read(buffer, 0, BUFFER_SIZE);
 				if (byteRead == -1)
 					break;
 				bos.write(buffer, 0, byteRead);
+
+				if (handler != null) {
+					totalRead += byteRead;
+					Message message = new Message();
+					Bundle bundle = new Bundle();
+					bundle.putInt("progress", totalRead);
+					message.setData(bundle);
+					handler.sendMessage(message);
+				}
 			}
 			bis.close();
 			bos.flush();
@@ -86,29 +120,21 @@ class AgoraData {
 			SharedPreferences.Editor ee = pref.edit();
 			ee.putInt("localVersion", serverVersion);
 			ee.commit();
-			Log.i("AgoraData.XMLUpdater", "XML update successed");
 		}
 		catch (IOException e) {
-			// TODO rerun?
-			Log.w("AgoraData.XMLUpdater", "XML update failed: " + e);
+			// fail to download XMLDataURL; we cannot continue
+			throw new UpdateDataAbortException("Fail to update data file");
 		}
 	}
 
-	public synchronized void XMLParser() throws XMLParserAbortException {
-		final XmlPullParser xpp = Xml.newPullParser();
+	/** @throws ParseDataAbortException */
+	public void parseData(Handler handler) throws ParseDataAbortException {
+		clear();
 
 		try {
-			xpp.setInput(context.openFileInput(context.getString(R.string.XMLDataFilename)), null);
-		}
-		catch (Exception e) {
-			Log.e("AgoraData.XMLParser", "Cannot read XMLFile: " + e);
-			throw new XMLParserAbortException();
-		}
+			final XmlPullParser xpp = Xml.newPullParser();
+			xpp.setInput(context.openFileInput(dataLocal), null);
 
-		clearCache();
-
-		// Loop over XML input stream and process events
-		try {
 			Entry entry = null;
 			for (int e = xpp.getEventType(); e != XmlPullParser.END_DOCUMENT; e = xpp.next()) {
 				switch (e) {
@@ -120,7 +146,7 @@ class AgoraData {
 						final String target		= xpp.getAttributeValue(null, "target");
 
 						if (id == null || category == null)
-							throw new XMLParserAbortException();
+							throw new ParseDataAbortException("Parse error: it does not have required content");
 
 						entry = new Entry(id, category, target);
 						entry.set(EntryKey.TitleJa,		xpp.getAttributeValue(null, "title.ja"));
@@ -158,7 +184,7 @@ class AgoraData {
 						entry.set(EntryKey.Reservation,	xpp.nextText());
 					}
 					else
-						Log.i("AgoraData.XMLParser", entry + ": " + startTag + " is not implemented");
+						throw new ParseDataAbortException("Parse error: unknown tag found");
 					break;
 
 				case XmlPullParser.END_TAG:
@@ -168,12 +194,26 @@ class AgoraData {
 					break;
 				}
 			}
+			isParseFinished = true;
+		}
+		catch (ParseDataAbortException e) {
+			clear();
+			throw e;
 		}
 		catch (Exception e) {
-			clearCache();
-			Log.w("AgoraData.XMLParser", "parse aborted: " + e);
-			throw new XMLParserAbortException();
+			clear();
+			throw new ParseDataAbortException("Parse error: " + e);
 		}
+		finally {
+			if (handler != null) {
+				Message message = new Message();
+				Bundle bundle = new Bundle();
+				bundle.putBoolean("parse", isParseFinished);
+				message.setData(bundle);
+				handler.sendMessage(message);
+			}
+		}
+
 
 		final SharedPreferences.Editor ee = pref.edit();
 		ee.putInt("initialCapacityOfEntryMap", (int) (entryMap.size() * 1.5));
@@ -181,63 +221,103 @@ class AgoraData {
 		ee.commit();
 	}
 
-	public static void clearCache() {
+	public void removeData() {
+		context.deleteFile(dataLocal);
+		final SharedPreferences.Editor ee = pref.edit();
+		ee.remove("localVersion");
+		ee.commit();
+	}
+
+	public static void clear() {
+		isParseFinished = false;
 		entryMap.clear();
 		timeFrameMap.clear();
 	}
 
-	// TODO
-	public void removeDataFile() {
-		final SharedPreferences.Editor ee = pref.edit();
-		ee.remove("localVersion");
-		ee.commit();
-		Log.w("AgoraData.removeXML", "XMLFile removed");
-	}
-
+	/**
+	 *  @param id entry id
+	 *  @throws IllegalArgumentException when {@code id} is invalid
+	 *  @throws IllegalStateException called before finishing parse
+	 */
 	public static Entry getEntry(String id) {
+		if (!isParseFinished)
+			throw new IllegalStateException();
 		if (entryMap.containsKey(id))
 			return entryMap.get(id);
 		throw new IllegalArgumentException("Requiest id does not exist");
 	}
 
+	/**
+	 * @return list of entry {@code id}(s)
+	 * @throws IllegalStateException called before finishing parse
+	 */
 	public static List<String> getAllEntryId() {
+		if (!isParseFinished)
+			throw new IllegalStateException();
 		return new ArrayList<String>(entryMap.keySet());
 	}
 
+	/**
+	 * @return list of favorite entry {@code id}(s)
+	 * @throws IllegalStateException called before finishing parse
+	 */
 	public static List<String> getFavoriteEntryId() {
-		// normalize entry
+		// normalize
 		favoriteList.remove("");
 		Collections.sort(favoriteList);
 
 		return favoriteList;
 	}
 
+	/**
+	 * @param query
+	 * @return search result, list of {@code id}(s)
+	 * @throws IllegalStateException called before finishing parse
+	 */
 	public static List<String> getEntryByKeyword(String query) {
+		if (!isParseFinished)
+			throw new IllegalStateException();
+
 		final EnumSet<EntryKey> searchKeys = EnumSet.of(
 				EntryKey.TitleJa, EntryKey.TitleEn, EntryKey.Sponsor, EntryKey.CoSponsor,
 				EntryKey.Abstract, EntryKey.Content, EntryKey.Guest, EntryKey.Note);
 
-		final List<String> matched = new ArrayList<String>();
+		final List<String> match = new ArrayList<String>();
 		for (Entry entry : entryMap.values()) {
 			if (entry.getId().equals(query)) {
-				matched.add(entry.getId());
+				match.add(entry.getId());
 				continue;
 			}
 			for (EntryKey key : searchKeys) {
 				final String s = entry.getString(key);
-				// TODO use regular expressions for query!
 				if (s != null && s.contains(query)) {
-					matched.add(entry.getId());
+					match.add(entry.getId());
 					break;
 				}
 			}
 		}
-		return matched;
+		return match;
 	}
 
-	// TODO not implemented
-	public static List<String> getEntryByTimeFrame(String day, int hour, int minute) {
-		return new ArrayList<String>();
+	/**
+	 * @param day
+	 * @param startBegin
+	 * @param startEnd
+	 * @return search result, list of {@code id}(s)
+	 * @throws IllegalStateException called before finishing parse
+	 */
+	public static List<String> getEntryByTimeFrame(String day, int startBegin, int startEnd) {
+		if (!isParseFinished)
+			throw new IllegalStateException();
+
+		final List<String> match = new ArrayList<String>();
+		for (TimeFrame timeFrame : timeFrameMap.values()) {
+			final int start = timeFrame.getStart();
+			if (timeFrame.getDay() == day && startBegin <= start && start <= startEnd)
+				match.add(timeFrame.getId());
+		}
+		// TODO sort
+		return match;
 	}
 
 	public static boolean isFavorite(String id) {
@@ -268,7 +348,6 @@ class AgoraData {
 		for (String favoriteId : favoriteList) {
 			sb.append(favoriteId).append(';');
 		}
-		Log.i("AgoraData", "Favorites: " + sb.toString());
 
 		final SharedPreferences.Editor ee = pref.edit();
 		ee.putString("favorites", sb.toString());
@@ -277,7 +356,7 @@ class AgoraData {
 
 	@Override
 	public String toString() {
-		return getClass().getName() + "@Context: " + ((context == null) ? "static" : context.getClass().getName());
+		return String.format("%s has %d (Entry) and %d (TimeFrame) data", getClass().getName(), entryMap.size(), timeFrameMap.size());
 	}
 
 	public enum EntryKey {
@@ -336,10 +415,12 @@ class AgoraData {
 			return category;
 		}
 
+		/** @return {@code target} or {@code null} */
 		public Set<EntryTarget> getTarget() {
 			return target;
 		}
 
+		/** @return value of {@code key} or {@code null} */
 		public URL getURL(EntryKey key) {
 			if (!key.equalsClass(URL.class))
 				throw new IllegalArgumentException();
@@ -349,12 +430,14 @@ class AgoraData {
 				try {
 					return new URL(s);
 				}
-				catch (MalformedURLException e) { /* ignore */ }
+				catch (MalformedURLException e) {
+					return null;
+				}
 			}
-
 			return null;
 		}
 
+		/** @return value of {@code key} or {@code null} */
 		public String getString(EntryKey key) {
 			if (!key.equalsClass(String.class))
 				throw new IllegalArgumentException();
@@ -391,20 +474,34 @@ class AgoraData {
 			this.end	= end;
 		}
 
-		public Entry getEntry() {
-			return AgoraData.getEntry(eid.toString());
+		public String getId() {
+			return eid;
 		}
 
-		public boolean isInSession(String day, int time) {
-			return this.day.equals(day) && start <= time && time < end;
+		public String getDay() {
+			return day;
+		}
+
+		public int getStart() {
+			return start;
+		}
+
+		public int getEnd() {
+			return end;
 		}
 	}
 
 	@SuppressWarnings("serial")
-	class XMLParserAbortException extends Exception {
-		@Override
-		public String toString() {
-			return this.getClass().getSimpleName();
+	class UpdateDataAbortException extends Exception {
+		public UpdateDataAbortException(String s) {
+			super(s);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	class ParseDataAbortException extends Exception {
+		public ParseDataAbortException(String s) {
+			super(s);
 		}
 	}
 }

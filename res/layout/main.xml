@@ -2,8 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	<ListView android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:id="@+id/main_entrylist">
-		<!-- Preview: listitem=@layout/entrylist_item -->
-	</ListView>
+	<LinearLayout android:orientation="vertical"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:layout_weight="1.0">
+		<TextView android:text="ScienceAgora2011" android:layout_width="fill_parent"
+			android:id="@+id/main_text" android:layout_height="fill_parent" android:textSize="30dp" android:gravity="center"></TextView>
+	</LinearLayout>
+	<ProgressBar android:id="@+id/main_progress"
+		android:layout_height="wrap_content" style="?android:attr/progressBarStyleHorizontal"
+		android:layout_width="fill_parent"></ProgressBar>
 </LinearLayout>

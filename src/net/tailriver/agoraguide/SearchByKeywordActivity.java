@@ -6,7 +6,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class SearchByKeywordActivity extends Activity implements TextWatcher {
 	/** Called when the activity is first created. */
@@ -19,6 +18,7 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 		final ListView entryList = (ListView) findViewById(R.id.sbk_result);
 		entryList.setAdapter(new EntryArrayAdapter(SearchByKeywordActivity.this));
 		entryList.setOnItemClickListener(theAdapter());
+		entryList.setEmptyView(findViewById(R.id.sbk_empty));
 
 		final EditText editText = (EditText) findViewById(R.id.sbk_text);
 		editText.addTextChangedListener(this);
@@ -28,15 +28,6 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 	@Override
 	public void onStart() {
 		super.onStart();
-		final String keyword = ((EditText) findViewById(R.id.sbk_text)).getText().toString();
-		if (keyword.length() != 0)
-			theAdapter().add(AgoraData.getEntryByKeyword(keyword));
-
-		if (theAdapter().isEmpty()) {
-			TextView emptyView = new TextView(this);
-			emptyView.setText("None");
-			((ListView) findViewById(R.id.sbk_result)).setEmptyView(emptyView);
-		}
 	}
 
 	@Override

@@ -1,17 +1,13 @@
 package net.tailriver.agoraguide;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class FavoritesActivity extends Activity {
 	/** Called when the activity is first created. */
@@ -24,17 +20,14 @@ public class FavoritesActivity extends Activity {
 		final ListView entryListView = (ListView) findViewById(R.id.favorites_entrylist);
 		entryListView.setAdapter(new EntryArrayAdapter(FavoritesActivity.this));
 		entryListView.setOnItemClickListener(theAdapter());
-		entryListView.setEmptyView((TextView) findViewById(R.id.favorites_empty));
+		entryListView.setEmptyView(findViewById(R.id.favorites_empty));
 	}
 
 	@Override
 	public void onResume() {
 		super.onStart();
-		final List<String> favs = AgoraData.getFavoriteEntryId();
 		theAdapter().clear();
-		theAdapter().add(favs);
-
-		Log.i("TEST", Boolean.toString(theAdapter().isEmpty()));
+		theAdapter().add(AgoraData.getFavoriteEntryId());
 	}
 
 	@Override

@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">AgoraGuide</string>
-	<string name="versionTextURL">http://www.tailriver.net/scienceagora/2011/version.txt</string>
-	<string name="XMLDataURL">http://www.tailriver.net/scienceagora/2011/data.xml</string>
-	<string name="XMLDataFilename">data.xml</string>
 	<string name="addFavorite">Add</string>
 	<string name="removeFavorite">Remove</string>
 	<string name="favorite">Favorites</string>
@@ -13,4 +10,5 @@
 	<string name="searchByMap">Search by map</string>
 	<string name="search">Search</string>
 	<string name="clearFavorite">Clear Favorites</string>
+	<string name="configuration">Config</string>
 </resources>

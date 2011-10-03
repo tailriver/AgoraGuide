@@ -77,7 +77,7 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 
 		final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.entrydetail_thumbnail);
 		final URL imageURL = entry.getURL(EntryKey.Image);
-		if (imageURL != null && new AgoraData(context).isConnected()) {
+		if (imageURL != null && AgoraData.isConnected(context)) {
 			HttpURLConnection huc = null;
 			try {
 				huc = (HttpURLConnection) imageURL.openConnection();

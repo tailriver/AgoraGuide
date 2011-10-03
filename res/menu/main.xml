@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<group android:id="@+id/group1">
+	<group>
 		<item android:id="@+id/menu_sbk" android:title="@string/searchByKeyword"
 			android:icon="@drawable/icon" />
 		<item android:id="@+id/menu_sbs" android:title="@string/searchBySchedule"
@@ -9,4 +9,5 @@
 			android:icon="@drawable/icon" />
 	</group>
 	<item android:id="@+id/menu_favorite" android:title="@string/favorite" android:icon="@drawable/icon"></item>
+	<item android:id="@+id/menu_configuration" android:title="@string/configuration"></item>
 </menu>

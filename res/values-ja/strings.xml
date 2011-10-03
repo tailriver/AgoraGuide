@@ -9,5 +9,6 @@
     <string name="favorite">お気に入り</string>
     <string name="search">検索キーワード</string>
     <string name="clearFavorite">すべてのお気に入りを削除する</string>
+    <string name="configuration">設定</string>
     
 </resources>
