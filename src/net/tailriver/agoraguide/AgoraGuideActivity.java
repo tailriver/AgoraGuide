@@ -31,7 +31,7 @@ public class AgoraGuideActivity extends Activity {
 		public void run() {
 			try {
 				final AgoraData ad = new AgoraData(getApplicationContext());
-				ad.updateData(false, handler);
+				ad.updateData(true, handler);
 				ad.parseData(handler);
 			}
 			catch (UpdateDataAbortException e) {
@@ -61,8 +61,11 @@ public class AgoraGuideActivity extends Activity {
 			else if (b.containsKey("max"))
 				pb.setMax(b.getInt("max"));
 
-			else if (b.containsKey("parse"))
-				Toast.makeText(AgoraGuideActivity.this, b.getBoolean("parse") ? "Parse finished" : "Parse failed", Toast.LENGTH_LONG).show();
+			else if (b.containsKey("parse") && b.getBoolean("parse"))
+				Toast.makeText(AgoraGuideActivity.this, "Data loaded", Toast.LENGTH_SHORT).show();
+
+			else if (b.containsKey("parse") && !b.getBoolean("parse"))
+				Toast.makeText(AgoraGuideActivity.this, "Fail to load data", Toast.LENGTH_LONG).show();
 
 			else if (b.containsKey("quit")) {
 				pb.setVisibility(View.GONE);
@@ -91,7 +94,7 @@ public class AgoraGuideActivity extends Activity {
 		menu.findItem(R.id.menu_sbm).setEnabled(false);
 		menu.findItem(R.id.menu_favorite).setIntent(new Intent(AgoraGuideActivity.this, FavoritesActivity.class));
 		//menu.findItem(R.id.menu_agora).setEnabled(false);
-		menu.findItem(R.id.menu_configuration).setEnabled(false);
+		menu.findItem(R.id.menu_preference).setEnabled(true);
 		return true;
 	}
 
@@ -100,6 +103,10 @@ public class AgoraGuideActivity extends Activity {
 		if (item.getIntent() != null) {
 			startActivity(item.getIntent());
 			return true;
+		}
+		if (item.getItemId() == R.id.menu_preference) {
+			new AgoraData(getApplicationContext()).removeData();
+			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_LONG).show();
 		}
 		return false;
 	}

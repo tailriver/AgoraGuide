@@ -1,6 +1,7 @@
 package net.tailriver.agoraguide;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +23,14 @@ public class EntryDetailActivity extends Activity {
 
 		theAdapter().add(entryIdList);		
 		gallery.setSelection(position, true);
+	}
+
+	@Override
+	public void onBackPressed() {
+		Intent intent = getIntent();
+		intent.putExtra("position", ((Gallery) findViewById(R.id.entrygallery)).getSelectedItemPosition());
+		setResult(RESULT_OK, intent);
+		super.onBackPressed();
 	}
 
 	@Override

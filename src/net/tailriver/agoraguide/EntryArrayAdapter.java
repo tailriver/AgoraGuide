@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.tailriver.agoraguide.AgoraData.*;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -45,18 +46,24 @@ class EntryArrayAdapter extends ArrayAdapter<String> implements OnItemClickListe
 			convertView = inflater.inflate(R.layout.entrylist_item, null);
 		}
 
-		final Entry entry = AgoraData.getEntry(this.getItem(position));
-		if (entry != null) {
-			((TextView) convertView.findViewById(R.id.entrylist_item_title)).setText(entry.getLocaleTitle());
-			((TextView) convertView.findViewById(R.id.entrylist_item_sponsor)).setText(entry.getString(EntryKey.Sponsor));
-			((TextView) convertView.findViewById(R.id.entrylist_item_schedule)).setText(entry.getString(EntryKey.Schedule));
-			((TextView) convertView.findViewById(R.id.entrylist_item_category)).setText(entry.getCategory().toString());
+		final Entry entry = AgoraData.getEntry(getItem(position));
 
-			// FIXME not worked
-			TextView reservaionView = (TextView) convertView.findViewById(R.id.entrylist_item_reservation);
-			if (entry.getString(EntryKey.Reservation) == null)
-				reservaionView.setVisibility(View.INVISIBLE);
-		}
+		final TextView titleView = (TextView) convertView.findViewById(R.id.entrylist_item_title);
+		titleView.setText(entry.getLocaleTitle());
+
+		final TextView sponsorView = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
+		sponsorView.setText(entry.getString(EntryKey.Sponsor));
+
+		final TextView scheduleView = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
+		scheduleView.setText(entry.getString(EntryKey.Schedule));
+
+		final TextView categoryView = (TextView) convertView.findViewById(R.id.entrylist_item_category);
+		categoryView.setText(entry.getCategory().toString());
+
+		final TextView reservaionView = (TextView) convertView.findViewById(R.id.entrylist_item_reservation);
+		if (entry.getString(EntryKey.Reservation) == null)
+			reservaionView.setVisibility(View.INVISIBLE);
+
 		return convertView;
 	}
 
@@ -65,6 +72,18 @@ class EntryArrayAdapter extends ArrayAdapter<String> implements OnItemClickListe
 		Intent intent = new Intent(context, EntryDetailActivity.class);
 		intent.putExtra("entryIdList", idList.toArray(new String[idList.size()]));
 		intent.putExtra("position", position);
-		context.startActivity(intent);	// TODO return value?
+		intent.putExtra("adapterView", parent.getId());
+		((Activity) context).startActivityForResult(intent, R.layout.entrylist_item);
+	}
+
+	// TODO
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode != R.layout.entrylist_item || resultCode != Activity.RESULT_OK)
+			return;
+
+		int position = data.getIntExtra("position", 0);
+		int adapterViewId = data.getIntExtra("adapterView", -1);
+		if (adapterViewId != -1 && position != AdapterView.INVALID_POSITION)
+			((AdapterView<?>) ((Activity) context).findViewById(adapterViewId)).setSelection(position);
 	}
 }

@@ -1,6 +1,7 @@
 package net.tailriver.agoraguide;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,12 +23,17 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 
 		final EditText editText = (EditText) findViewById(R.id.sbk_text);
 		editText.addTextChangedListener(this);
-
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		afterTextChanged(((EditText) findViewById(R.id.sbk_text)).getText());
 	}
 
 	@Override
@@ -37,10 +43,18 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 	}
 
 	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		theAdapter().onActivityResult(requestCode, resultCode, data);
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
 	public void afterTextChanged(Editable s) {
 		theAdapter().clear();
 		if (s.length() != 0)
 			theAdapter().add(AgoraData.getEntryByKeyword(s.toString()));
+		else
+			theAdapter().add(AgoraData.getAllEntryId());
 	}
 
 	@Override

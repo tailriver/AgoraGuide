@@ -20,7 +20,7 @@ import android.util.Xml;
 class AgoraData {
 	private static final String versionURL  = "http://www.tailriver.net/scienceagora/2011/version.txt";
 	private static final String dataXMLURL  = "http://www.tailriver.net/scienceagora/2011/data.xml";
-	private static final String dataGZIPURL = "http://www.tailriver.net/scienceagora/2011/data.xml.gz";
+	private static final String dataGZIPURL = "http://www.tailriver.net/scienceagora/2011/compress.data.xml.gz";
 	private static final String dataLocal   = "data.xml";
 
 	private final Context context;
