@@ -58,8 +58,11 @@ public class AgoraGuideActivity extends Activity {
 			if (b.containsKey("progress"))
 				pb.setProgress(b.getInt("progress", 0));
 
-			else if (b.containsKey("max"))
+			else if (b.containsKey("max")) {
 				pb.setMax(b.getInt("max"));
+				pb.setProgress(0);
+				pb.setVisibility(View.VISIBLE);
+			}
 
 			else if (b.containsKey("parse") && b.getBoolean("parse"))
 				Toast.makeText(AgoraGuideActivity.this, "Data loaded", Toast.LENGTH_SHORT).show();
@@ -107,6 +110,7 @@ public class AgoraGuideActivity extends Activity {
 		if (item.getItemId() == R.id.menu_preference) {
 			new AgoraData(getApplicationContext()).removeData();
 			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_LONG).show();
+			(new Thread(runnable)).start();
 		}
 		return false;
 	}
