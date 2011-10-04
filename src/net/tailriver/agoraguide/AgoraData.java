@@ -10,11 +10,16 @@ import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.util.Xml;
 
 class AgoraData {
@@ -53,7 +58,13 @@ class AgoraData {
 
 	public static boolean isConnected(Context context) {
 		final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		return cm.getActiveNetworkInfo().getState() == NetworkInfo.State.CONNECTED;
+
+		// TODO I don't have any confidence for this is right
+		for (NetworkInfo ni : cm.getAllNetworkInfo()) {
+			if (ni.isAvailable() && ni.getState() == NetworkInfo.State.CONNECTED)
+				return true;
+		}
+		return false;
 	}
 
 	/** @throws UpdateDataAbortException */
@@ -149,8 +160,8 @@ class AgoraData {
 							throw new ParseDataAbortException("Parse error: it does not have required content");
 
 						entry = new Entry(id, category, target);
-						entry.set(EntryKey.TitleJa,		xpp.getAttributeValue(null, "title.ja"));
-						entry.set(EntryKey.TitleEn,		xpp.getAttributeValue(null, "title.en"));
+						entry.set(EntryKey.TitleJa,		xpp.getAttributeValue(null, "title_ja"));
+						entry.set(EntryKey.TitleEn,		xpp.getAttributeValue(null, "title_en"));
 						entry.set(EntryKey.Sponsor,		xpp.getAttributeValue(null, "sponsor"));
 						entry.set(EntryKey.CoSponsor,	xpp.getAttributeValue(null, "cosponsor"));
 						entry.set(EntryKey.Image,		xpp.getAttributeValue(null, "image"));
@@ -418,6 +429,20 @@ class AgoraData {
 		/** @return {@code target} or {@code null} */
 		public Set<EntryTarget> getTarget() {
 			return target;
+		}
+
+		public CharSequence getColoredSchedule() {
+			final SpannableStringBuilder schedule = new SpannableStringBuilder(data.get(EntryKey.Schedule));
+			for (String day : new String[]{"Fri", "Sat", "Sun"}) {
+				final String seek = String.format("[%s]", day);
+				final int color = day.equals("Sat") ? Color.CYAN : day.equals("Sun") ? Color.MAGENTA : Color.LTGRAY;
+				for (int pos = schedule.toString().indexOf(seek); pos > -1; pos = schedule.toString().indexOf(seek, pos + 1)) {
+					final SpannableString ss = new SpannableString(day);
+					ss.setSpan(new BackgroundColorSpan(color), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+					schedule.replace(pos, pos + seek.length(), ss);
+				}
+			}
+			return schedule;
 		}
 
 		/** @return value of {@code key} or {@code null} */

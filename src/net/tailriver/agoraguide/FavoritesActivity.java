@@ -13,27 +13,32 @@ import android.widget.ListView;
 public class FavoritesActivity extends Activity {
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.favorites);
 		setTitle(R.string.favorite);
 
 		final ListView entryListView = (ListView) findViewById(R.id.favorites_entrylist);
-		entryListView.setAdapter(new EntryArrayAdapter(FavoritesActivity.this));
+		entryListView.setAdapter(new EntryArrayAdapter(FavoritesActivity.this, entryListView.getId()));
 		entryListView.setOnItemClickListener(theAdapter());
 		entryListView.setEmptyView(findViewById(R.id.favorites_empty));
 	}
 
 	@Override
-	public void onResume() {
+	public void onStart() {
 		super.onStart();
 		theAdapter().clear();
 		theAdapter().add(AgoraData.getFavoriteEntryId());
 	}
 
 	@Override
-	public void onPause() {
-		super.onPause();
+	public void onResume() {
+		super.onResume();
+		if (theAdapter().getCount() != AgoraData.getFavoriteEntryId().size()) {
+			theAdapter().clear();
+			theAdapter().add(AgoraData.getFavoriteEntryId());
+			findViewById(R.id.favorites_entrylist).invalidate();
+		}
 	}
 
 	// TODO
@@ -64,7 +69,7 @@ public class FavoritesActivity extends Activity {
 			return true;
 		}
 		if (item.getItemId() == R.id.menu_favorites_clear) {
-			new AlertDialog.Builder(this)
+			new AlertDialog.Builder(FavoritesActivity.this)
 			.setTitle(R.string.clearFavorite)
 			.setMessage("Really?")
 			.setIcon(R.drawable.icon)
@@ -76,14 +81,10 @@ public class FavoritesActivity extends Activity {
 					findViewById(R.id.favorites_entrylist).invalidate();
 				}
 			})
-			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					// nothing to do
-				}
-			})
+			.setNegativeButton("Cancel", null)
 			.create()
 			.show();
+			return true;
 		}
 		return false;
 	}

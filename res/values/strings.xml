@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">AgoraGuide</string>
-	<string name="addFavorite">Add</string>
-	<string name="removeFavorite">Remove</string>
+	<string name="addFavorite">Add Favorite</string>
+	<string name="removeFavorite">Remove Favorite</string>
 	<string name="favorite">Favorites</string>
 	<string name="entryDetail">Program</string>
 	<string name="searchByKeyword">Search by keyword</string>
@@ -11,4 +11,5 @@
 	<string name="search">Search</string>
 	<string name="clearFavorite">Clear Favorites</string>
 	<string name="preference">Preferences</string>
+	<string name="website">Go to web site</string>
 </resources>

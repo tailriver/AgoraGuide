@@ -2,39 +2,55 @@ package net.tailriver.agoraguide;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-
 import net.tailriver.agoraguide.AgoraData.*;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 public class EntryGalleryAdapter extends ArrayAdapter<String> {
+	private final static int textViewResourceId = R.layout.entrygallery_item;
 	private final Context context;
+	private final int adapterViewResourceId;
 
-	public EntryGalleryAdapter(Context context) {
-		super(context, R.layout.entrydetail, new ArrayList<String>());
+	public EntryGalleryAdapter(Context context, int adapterViewResourceId, String[] objects) {
+		super(context, textViewResourceId, objects);
 		this.context = context;
+		this.adapterViewResourceId = adapterViewResourceId;
 	}
 
-	public void add(String[] objects) {
-		for (String e : objects)
-			super.add(e);
+	/** like AdapterView */
+	public int getSelectedItemPosition() {
+		return ((AdapterView<?>) ((Activity) context).findViewById(adapterViewResourceId)).getSelectedItemPosition();
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
 			final LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater.inflate(R.layout.entrydetail, null);
+			convertView = inflater.inflate(textViewResourceId, null);
 		}
 
+		// Note: for current (centered, visible) item
+		// FIXME When the number of item == 2, getView() is never called it means it does NOT works properly.
+		if (getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
+			final Entry currentEntry = AgoraData.getEntry(getItem(getSelectedItemPosition()));
+			((Activity) context).setTitle(currentEntry.getLocaleTitle());
+		}
+
+		// Note: it's not for CENTER item; it is LEFT or RIGHT item for caching
 		final String id = getItem(position);
 		final Entry entry = AgoraData.getEntry(id);
 
@@ -51,29 +67,35 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		if (coSponsor != null)
 			sponsorView.append("\n" + coSponsor);
 
-		final TextView abstractView = (TextView) convertView.findViewById(R.id.entrydetail_abstract);
-		abstractView.setText(entry.getString(EntryKey.Abstract));
+		final TextView scheduleView = (TextView) convertView.findViewById(R.id.entrygallery_schedule);
+		scheduleView.setText(entry.getColoredSchedule());
 
-		final TextView contentView = (TextView) convertView.findViewById(R.id.entrydetail_content);
+		final SpannableString abstractTag	 = getBackgroundColorSpannableString("Abstract", Color.LTGRAY);
+		final SpannableString contentTag	 = getBackgroundColorSpannableString("Content", Color.LTGRAY);
+		final SpannableString guestTag		 = getBackgroundColorSpannableString("Guest", Color.LTGRAY);
+		final SpannableString reservationTag = getBackgroundColorSpannableString("Reservation", Color.LTGRAY);
+		final SpannableString noteTag		 = getBackgroundColorSpannableString("Note", Color.LTGRAY);
+
+		final SpannableStringBuilder text = new SpannableStringBuilder(abstractTag).append('\n').append(entry.getString(EntryKey.Abstract).replace("&#xA;", "\n"));
 		final String content = entry.getString(EntryKey.Content);
-		if (content != null)
-			contentView.setText(content.replace("&#xA;", "\n"));
-		else
-			contentView.setVisibility(View.GONE);
-
-		final TextView reservationView = (TextView) convertView.findViewById(R.id.entrydetail_reservation);
+		final String guest = entry.getString(EntryKey.Guest);
 		final String reservation = entry.getString(EntryKey.Reservation);
-		if (reservation != null)
-			reservationView.setText(reservation);
-		else
-			reservationView.setVisibility(View.GONE);
-
-		final TextView noteView = (TextView) convertView.findViewById(R.id.entrydetail_note);
 		final String note = entry.getString(EntryKey.Note);
+
+		if (content != null)
+			text.append("\n\n").append(contentTag).append("\n").append(content.replace("&#xA;", "\n"));
+
+		if (guest != null)
+			text.append("\n\n").append(guestTag).append("\n").append(guest.replace("&#xA;", "\n"));
+
+		if (reservation != null)
+			text.append("\n\n").append(reservationTag).append("\n").append(reservation.replace("&#xA;", "\n"));
+
 		if (note != null)
-			noteView.setText(note);
-		else
-			noteView.setVisibility(View.GONE);
+			text.append("\n\n").append(noteTag).append("\n").append(note.replace("&#xA;", "\n"));
+
+		final TextView scrollView = (TextView) convertView.findViewById(R.id.entrygallery_content);
+		scrollView.setText(text);
 
 		final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.entrydetail_thumbnail);
 		final URL imageURL = entry.getURL(EntryKey.Image);
@@ -98,5 +120,11 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		}
 
 		return convertView;
+	}
+
+	public SpannableString getBackgroundColorSpannableString(CharSequence source, int color) {
+		SpannableString ss = new SpannableString(source);
+		ss.setSpan(new BackgroundColorSpan(color), 0, source.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+		return ss;
 	}
 }

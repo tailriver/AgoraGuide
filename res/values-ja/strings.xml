@@ -3,12 +3,12 @@
     <string name="searchByKeyword">キーワードで探す</string>
     <string name="searchBySchedule">時間で探す</string>
     <string name="searchByMap">地図で探す</string>
-    <string name="addFavorite">お気に入りに追加</string>
-    <string name="removeFavorite">お気に入りから削除</string>
     <string name="entryDetail">企画詳細</string>
     <string name="favorite">お気に入り</string>
     <string name="search">検索キーワード</string>
+    <string name="addFavorite">お気に入りに追加</string>
+    <string name="removeFavorite">お気に入りから削除</string>
     <string name="clearFavorite">すべてのお気に入りを削除する</string>
     <string name="preference">設定</string>
-    
+	<string name="website">ウェブサイトに移動</string>
 </resources>

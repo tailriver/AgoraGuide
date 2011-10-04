@@ -1,17 +1,21 @@
 package net.tailriver.agoraguide;
 
+import java.net.URL;
+
+import net.tailriver.agoraguide.AgoraData.EntryKey;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Gallery;
 
-public class EntryDetailActivity extends Activity {
+public class EntryGalleryActivity extends Activity {
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.entrygallery);
 
@@ -19,36 +23,44 @@ public class EntryDetailActivity extends Activity {
 		final int position = getIntent().getIntExtra("position", 0);
 
 		final Gallery gallery = (Gallery) findViewById(R.id.entrygallery);
-		gallery.setAdapter(new EntryGalleryAdapter(EntryDetailActivity.this));
-
-		theAdapter().add(entryIdList);		
+		gallery.setAdapter(new EntryGalleryAdapter(EntryGalleryActivity.this, gallery.getId(), entryIdList));
 		gallery.setSelection(position, true);
 	}
 
 	@Override
 	public void onBackPressed() {
 		Intent intent = getIntent();
-		intent.putExtra("position", ((Gallery) findViewById(R.id.entrygallery)).getSelectedItemPosition());
+		intent.putExtra("position", theAdapter().getSelectedItemPosition());
 		setResult(RESULT_OK, intent);
 		super.onBackPressed();
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		final MenuInflater mi = new MenuInflater(EntryDetailActivity.this);
-		mi.inflate(R.menu.entrydetail, menu);
+		final MenuInflater mi = new MenuInflater(EntryGalleryActivity.this);
+		mi.inflate(R.menu.entrygallery, menu);
 
 		return true;
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		final MenuItem favoriteItem = menu.findItem(R.id.menu_entrydetail_favorite);
 		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
+
+		final MenuItem favoriteItem = menu.findItem(R.id.menu_entrygallery_favorite);
 		if (!AgoraData.isFavorite(selectedId))
 			favoriteItem.setTitle(R.string.addFavorite);
 		else
 			favoriteItem.setTitle(R.string.removeFavorite);
+
+		final MenuItem websiteItem = menu.findItem(R.id.menu_entrygallery_website);
+		final URL website = AgoraData.getEntry(selectedId).getURL(EntryKey.Website);
+		if (website != null) {
+			websiteItem.setEnabled(true);
+			websiteItem.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(website.toExternalForm())));
+		}
+		else
+			websiteItem.setEnabled(false);
 
 		return true;
 	}
@@ -56,7 +68,7 @@ public class EntryDetailActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
-		if (item.getItemId() == R.id.menu_entrydetail_favorite) {
+		if (item.getItemId() == R.id.menu_entrygallery_favorite) {
 			new AgoraData(this).setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
 			return false;
 		}

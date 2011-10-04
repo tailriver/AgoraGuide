@@ -17,7 +17,7 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 		setTitle(R.string.searchByKeyword);
 
 		final ListView entryList = (ListView) findViewById(R.id.sbk_result);
-		entryList.setAdapter(new EntryArrayAdapter(SearchByKeywordActivity.this));
+		entryList.setAdapter(new EntryArrayAdapter(SearchByKeywordActivity.this, entryList.getId()));
 		entryList.setOnItemClickListener(theAdapter());
 		entryList.setEmptyView(findViewById(R.id.sbk_empty));
 
@@ -51,7 +51,7 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		theAdapter().clear();
-		if (s.length() != 0)
+		if (s.length() > 0)
 			theAdapter().add(AgoraData.getEntryByKeyword(s.toString()));
 		else
 			theAdapter().add(AgoraData.getAllEntryId());
