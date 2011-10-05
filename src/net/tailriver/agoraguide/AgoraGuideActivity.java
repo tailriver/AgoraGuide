@@ -22,70 +22,82 @@ public class AgoraGuideActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		(new Thread(runnable)).start();
+		findViewById(R.id.main_progress).setVisibility(View.GONE);
 	}
 
-	/** You must not try to change UI here, go to {@link Handler}.  */
-	private Runnable runnable = new Runnable() {
-		@Override
-		public void run() {
-			try {
-				final AgoraData ad = new AgoraData(getApplicationContext());
-				ad.updateData(true, handler);
-				ad.parseData(handler);
-			}
-			catch (UpdateDataAbortException e) {
-				Log.e("AGActivity", e.toString());
-			}
-			catch (ParseDataAbortException e) {
-				Log.e("AGActivity", e.toString());
-			}
-
-			Message message = new Message();
-			Bundle bundle = new Bundle();
-			bundle.putBoolean("quit", true);
-			message.setData(bundle);
-			handler.sendMessage(message);
-		}
-	};
-
-	private final Handler handler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			final Bundle b = msg.getData();
-			final ProgressBar pb = (ProgressBar) findViewById(R.id.main_progress);
-
-			if (b.containsKey("progress"))
-				pb.setProgress(b.getInt("progress", 0));
-
-			else if (b.containsKey("max")) {
-				pb.setMax(b.getInt("max"));
-				pb.setProgress(0);
-				pb.setVisibility(View.VISIBLE);
-			}
-
-			else if (b.containsKey("parse") && b.getBoolean("parse"))
-				Toast.makeText(AgoraGuideActivity.this, "Data loaded", Toast.LENGTH_SHORT).show();
-
-			else if (b.containsKey("parse") && !b.getBoolean("parse"))
-				Toast.makeText(AgoraGuideActivity.this, "Fail to load data", Toast.LENGTH_LONG).show();
-
-			else if (b.containsKey("quit")) {
-				pb.setVisibility(View.GONE);
-				findViewById(R.id.main_text).invalidate();
-			}
-		}
-	};
-
 	@Override
-	public void onStart() {
+	protected void onStart() {
 		super.onStart();
+		(new Thread(runnable)).start();
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 	}
+
+	/** You must not try to change UI here, go to {@link Handler}.  */
+	private Runnable runnable = new Runnable() {
+		@Override
+		public void run() {
+			final Message message = new Message();
+			message.what = R.layout.main;
+			try {
+				final AgoraData ad = new AgoraData(getApplicationContext());
+				try {
+					ad.updateData(true, handler);
+				}
+				catch (UpdateDataAbortException e) {
+					ad.updateData(false, handler);
+				}
+				ad.parseData();
+
+				/*
+				if (AgoraData.isParseFinished()) {
+					bundle.putString("toast_message", "Data loaded successfully");
+					bundle.putInt("toast_duration", Toast.LENGTH_SHORT);
+				}
+				 */
+			}
+			catch (UpdateDataAbortException e) {
+				message.arg1 = R.string.error_fail_update;
+				message.arg2 = Toast.LENGTH_LONG;
+				handler.sendMessage(message);
+				Log.e("AgoraGuide", e.toString());
+			}
+			catch (ParseDataAbortException e) {
+				message.arg1 = R.string.error_fail_parse;
+				message.arg2 = Toast.LENGTH_LONG;
+				handler.sendMessage(message);
+				Log.e("AgoraGuide", e.toString());
+			}
+		}
+	};
+
+	private final Handler handler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case R.id.main_progress:
+				final ProgressBar pb = (ProgressBar) findViewById(msg.what);
+				pb.setProgress(msg.arg1);
+
+				if (msg.arg1 == 0) {
+					pb.setMax(msg.arg2);
+					pb.setVisibility(msg.arg2 > 0 ? View.VISIBLE : View.GONE);
+					findViewById(R.id.main_text).invalidate();
+				}
+				break;
+
+			case R.layout.main:
+				Toast.makeText(AgoraGuideActivity.this, msg.arg1, msg.arg2).show();
+				break;
+
+			default:
+				Log.w("AgoraGuide", "unknown message received: " + msg.toString());
+			}
+		}
+	};
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -109,7 +121,7 @@ public class AgoraGuideActivity extends Activity {
 		}
 		if (item.getItemId() == R.id.menu_preference) {
 			new AgoraData(getApplicationContext()).removeData();
-			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_LONG).show();
+			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_SHORT).show();
 			(new Thread(runnable)).start();
 		}
 		return false;

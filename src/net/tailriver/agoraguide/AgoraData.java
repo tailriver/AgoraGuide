@@ -13,7 +13,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.SpannableString;
@@ -48,7 +47,7 @@ class AgoraData {
 		}
 	}
 
-	public boolean isParseFinished() {
+	public static boolean isParseFinished() {
 		return isParseFinished;
 	}
 
@@ -80,7 +79,7 @@ class AgoraData {
 		}
 		catch (IOException e) {
 			// fail to download versionTextURL; we cannot continue
-			throw new UpdateDataAbortException("Fail to check update information");
+			throw new UpdateDataAbortException("Fail to check update information: " + e);
 		}
 
 		// format of version.txt
@@ -89,16 +88,12 @@ class AgoraData {
 		final int serverVersion	= Integer.parseInt(versionText[0]);
 		final int size			= Integer.parseInt(versionText[useGZIP ? 2 : 1]);
 
-		if (handler != null) {
-			Message message = new Message();
-			Bundle bundle = new Bundle();
-			bundle.putInt("max", size);
-			message.setData(bundle);
-			handler.sendMessage(message);
-		}
-
-		if (serverVersion == localVersion || !isConnected())
+		if (serverVersion == localVersion)
 			return;
+
+		// show progress bar with start state
+		if (handler != null)
+			sendProgressMessage(handler, 0, size);
 
 		try {
 			final InputStream			is = new URL(useGZIP ? dataGZIPURL : dataXMLURL).openStream();
@@ -107,6 +102,7 @@ class AgoraData {
 			final int BUFFER_SIZE = 4096;
 			final BufferedInputStream  bis = new BufferedInputStream(useGZIP ? new GZIPInputStream(is) : is, BUFFER_SIZE);
 			final BufferedOutputStream bos = new BufferedOutputStream(fos, BUFFER_SIZE);
+
 			byte[] buffer = new byte[BUFFER_SIZE];
 			int totalRead = 0;
 			while (true) {
@@ -115,13 +111,10 @@ class AgoraData {
 					break;
 				bos.write(buffer, 0, byteRead);
 
+				// update progress bar
 				if (handler != null) {
 					totalRead += byteRead;
-					Message message = new Message();
-					Bundle bundle = new Bundle();
-					bundle.putInt("progress", totalRead);
-					message.setData(bundle);
-					handler.sendMessage(message);
+					sendProgressMessage(handler, totalRead, size);
 				}
 			}
 			bis.close();
@@ -131,15 +124,18 @@ class AgoraData {
 			SharedPreferences.Editor ee = pref.edit();
 			ee.putInt("localVersion", serverVersion);
 			ee.commit();
+
+			// hide progress bar
+			sendProgressMessage(handler, 0, 0);
 		}
 		catch (IOException e) {
 			// fail to download XMLDataURL; we cannot continue
-			throw new UpdateDataAbortException("Fail to update data file");
+			throw new UpdateDataAbortException("Fail to update data file: " + e);
 		}
 	}
 
 	/** @throws ParseDataAbortException */
-	public void parseData(Handler handler) throws ParseDataAbortException {
+	public void parseData() throws ParseDataAbortException {
 		clear();
 
 		try {
@@ -215,16 +211,6 @@ class AgoraData {
 			clear();
 			throw new ParseDataAbortException("Parse error: " + e);
 		}
-		finally {
-			if (handler != null) {
-				Message message = new Message();
-				Bundle bundle = new Bundle();
-				bundle.putBoolean("parse", isParseFinished);
-				message.setData(bundle);
-				handler.sendMessage(message);
-			}
-		}
-
 
 		final SharedPreferences.Editor ee = pref.edit();
 		ee.putInt("initialCapacityOfEntryMap", (int) (entryMap.size() * 1.5));
@@ -243,6 +229,20 @@ class AgoraData {
 		isParseFinished = false;
 		entryMap.clear();
 		timeFrameMap.clear();
+	}
+
+	/**
+	 * 
+	 * @param handler Handler.
+	 * @param progress int. argument of setProgress()
+	 * @param max int. argument of setMax()
+	 */
+	private void sendProgressMessage(Handler handler, int progress, int max) {
+		final Message message = new Message();
+		message.what = R.id.main_progress;
+		message.arg1 = progress;
+		message.arg2 = max;
+		handler.sendMessage(message);
 	}
 
 	/**
@@ -431,12 +431,13 @@ class AgoraData {
 			return target;
 		}
 
+		// TODO
 		public CharSequence getColoredSchedule() {
 			final SpannableStringBuilder schedule = new SpannableStringBuilder(data.get(EntryKey.Schedule));
 			for (String day : new String[]{"Fri", "Sat", "Sun"}) {
 				final String seek = String.format("[%s]", day);
 				final int color = day.equals("Sat") ? Color.CYAN : day.equals("Sun") ? Color.MAGENTA : Color.LTGRAY;
-				for (int pos = schedule.toString().indexOf(seek); pos > -1; pos = schedule.toString().indexOf(seek, pos + 1)) {
+				for (int pos = schedule.toString().indexOf(seek); pos > -1; pos = schedule.toString().indexOf(seek, pos + seek.length())) {
 					final SpannableString ss = new SpannableString(day);
 					ss.setSpan(new BackgroundColorSpan(color), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 					schedule.replace(pos, pos + seek.length(), ss);

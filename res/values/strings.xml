@@ -12,4 +12,6 @@
 	<string name="clearFavorite">Clear Favorites</string>
 	<string name="preference">Preferences</string>
 	<string name="website">Go to web site</string>
+	<string name="error_fail_update">Fail to update the data...</string>
+	<string name="error_fail_parse">Fail to parse the data...\n(please wait some hours)</string>
 </resources>

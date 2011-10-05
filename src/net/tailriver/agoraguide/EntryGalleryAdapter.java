@@ -44,7 +44,7 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		}
 
 		// Note: for current (centered, visible) item
-		// FIXME When the number of item == 2, getView() is never called it means it does NOT works properly.
+		// FIXME When the first and last item selected, getView() is never called it means it does NOT works properly.
 		if (getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
 			final Entry currentEntry = AgoraData.getEntry(getItem(getSelectedItemPosition()));
 			((Activity) context).setTitle(currentEntry.getLocaleTitle());
