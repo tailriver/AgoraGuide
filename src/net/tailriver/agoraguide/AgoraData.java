@@ -1,10 +1,11 @@
 package net.tailriver.agoraguide;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
+
+import net.tailriver.agoraguide.Entry.*;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -14,21 +15,25 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
 import android.util.Xml;
 
-class AgoraData {
-	private final Context context;
-	private final SharedPreferences pref;
+public class AgoraData {
+	private static final EnumSet<Tag> searchByKeywordTags;
 
 	private static Map<String, Entry> entryMap;
 	private static Map<String, TimeFrame> timeFrameMap;
 	private static List<String> favoriteList;
 	private static boolean isParseFinished = false;
+
+	static {
+		searchByKeywordTags = EnumSet.of(
+				Tag.TitleJa, Tag.TitleEn, Tag.Sponsor, Tag.CoSponsor,
+				Tag.Abstract, Tag.Content, Tag.Guest, Tag.Note
+				);
+	}
+
+	private final Context context;
+	private final SharedPreferences pref;
 
 	/** @param context	It should be {@code getApplicationContext()} */
 	public AgoraData(Context context) {
@@ -156,15 +161,15 @@ class AgoraData {
 							throw new ParseDataAbortException("Parse error: it does not have required content");
 
 						entry = new Entry(id, category, target);
-						entry.set(EntryKey.TitleJa,		xpp.getAttributeValue(null, "title_ja"));
-						entry.set(EntryKey.TitleEn,		xpp.getAttributeValue(null, "title_en"));
-						entry.set(EntryKey.Sponsor,		xpp.getAttributeValue(null, "sponsor"));
-						entry.set(EntryKey.CoSponsor,	xpp.getAttributeValue(null, "cosponsor"));
-						entry.set(EntryKey.Image,		xpp.getAttributeValue(null, "image"));
-						entry.set(EntryKey.Location,	xpp.getAttributeValue(null, "location"));
-						entry.set(EntryKey.Schedule,	xpp.getAttributeValue(null, "schedule"));
-						entry.set(EntryKey.Guest,		xpp.getAttributeValue(null, "guest"));
-						entry.set(EntryKey.Website,		xpp.getAttributeValue(null, "website"));
+						entry.set(Tag.TitleJa,		xpp.getAttributeValue(null, "title_ja"));
+						entry.set(Tag.TitleEn,		xpp.getAttributeValue(null, "title_en"));
+						entry.set(Tag.Sponsor,		xpp.getAttributeValue(null, "sponsor"));
+						entry.set(Tag.CoSponsor,	xpp.getAttributeValue(null, "cosponsor"));
+						entry.set(Tag.Image,		xpp.getAttributeValue(null, "image"));
+						entry.set(Tag.Location,		xpp.getAttributeValue(null, "location"));
+						entry.set(Tag.Schedule,		xpp.getAttributeValue(null, "schedule"));
+						entry.set(Tag.Guest,		xpp.getAttributeValue(null, "guest"));
+						entry.set(Tag.Website,		xpp.getAttributeValue(null, "website"));
 						entryMap.put(id, entry);
 						break;
 					}
@@ -181,14 +186,14 @@ class AgoraData {
 					}
 
 					if ("abstract".equals(startTag))
-						entry.set(EntryKey.Abstract,	xpp.nextText());
+						entry.set(Tag.Abstract,		xpp.nextText());
 					else if ("content".equals(startTag))
-						entry.set(EntryKey.Content,		xpp.nextText());
+						entry.set(Tag.Content,		xpp.nextText());
 					else if ("note".equals(startTag))
-						entry.set(EntryKey.Note,		xpp.nextText());
+						entry.set(Tag.Note,			xpp.nextText());
 					else if ("reservation".equals(startTag)) {
-						entry.set(EntryKey.ProgramURL, xpp.getAttributeValue(null, "url"));
-						entry.set(EntryKey.Reservation,	xpp.nextText());
+						entry.set(Tag.ProgramURL,	xpp.getAttributeValue(null, "url"));
+						entry.set(Tag.Reservation,	xpp.nextText());
 					}
 					else
 						throw new ParseDataAbortException("Parse error: unknown tag found");
@@ -208,7 +213,9 @@ class AgoraData {
 
 			// the new data file is valid (correctly, well-formed) XML, it's time to replace
 			if (useNewData) {
-				context.getFileStreamPath(context.getString(R.string.path_local_data_new)).renameTo(context.getFileStreamPath(context.getString(R.string.path_local_data)));
+				final String newFile = context.getString(R.string.path_local_data_new);
+				final String oldFile = context.getString(R.string.path_local_data);
+				context.getFileStreamPath(newFile).renameTo(context.getFileStreamPath(oldFile));
 				ee.putInt("localVersion", pref.getInt("localVersionNew", 0));
 			}
 		}
@@ -253,7 +260,7 @@ class AgoraData {
 	 * @param progress int. argument of setProgress()
 	 * @param max int. argument of setMax()
 	 */
-	private void sendProgressMessage(Handler handler, int progress, int max) {
+	private static void sendProgressMessage(Handler handler, int progress, int max) {
 		final Message message = new Message();
 		message.what = R.id.main_progress;
 		message.arg1 = progress;
@@ -302,12 +309,7 @@ class AgoraData {
 	 * @throws IllegalStateException called before finishing parse
 	 */
 	public static List<String> getEntryByKeyword(String query) {
-		if (!isParseFinished)
-			throw new IllegalStateException();
-
-		final EnumSet<EntryKey> searchKeys = EnumSet.of(
-				EntryKey.TitleJa, EntryKey.TitleEn, EntryKey.Sponsor, EntryKey.CoSponsor,
-				EntryKey.Abstract, EntryKey.Content, EntryKey.Guest, EntryKey.Note);
+		assert !isParseFinished;
 
 		final List<String> match = new ArrayList<String>();
 		for (Entry entry : entryMap.values()) {
@@ -315,7 +317,7 @@ class AgoraData {
 				match.add(entry.getId());
 				continue;
 			}
-			for (EntryKey key : searchKeys) {
+			for (Tag key : searchByKeywordTags) {
 				final String s = entry.getString(key);
 				if (s != null && s.contains(query)) {
 					match.add(entry.getId());
@@ -334,8 +336,7 @@ class AgoraData {
 	 * @throws IllegalStateException called before finishing parse
 	 */
 	public static List<String> getEntryByTimeFrame(String day, int startBegin, int startEnd) {
-		if (!isParseFinished)
-			throw new IllegalStateException();
+		assert !isParseFinished;
 
 		final List<String> match = new ArrayList<String>();
 		for (TimeFrame timeFrame : timeFrameMap.values()) {
@@ -383,159 +384,9 @@ class AgoraData {
 
 	@Override
 	public String toString() {
-		return String.format("%s has %d (Entry) and %d (TimeFrame) data", getClass().getName(), entryMap.size(), timeFrameMap.size());
+		return String.format("AgoraData has %d (Entry) and %d (TimeFrame) data", entryMap.size(), timeFrameMap.size());
 	}
 
-	public enum EntryKey {
-		TitleJa(String.class),
-		TitleEn(String.class),
-		Sponsor(String.class),
-		CoSponsor(String.class),
-		Abstract(String.class),
-		Location(String.class),
-		Schedule(String.class),
-		Content(String.class),
-		Guest(String.class),
-		Note(String.class),
-		Reservation(String.class),
-		Image(URL.class),
-		Website(URL.class),
-		ProgramURL(URL.class),
-		;
-
-		private final Class<?> c;
-
-		EntryKey(Class<?> theClass) {
-			this.c = theClass;
-		}
-
-		public boolean equalsClass(Class<?> theClass) {
-			return c.equals(theClass);
-		}
-	};
-	public enum EntryCategory { SymposiumAndTalkSession, WorkshopAndScienceCafe, ScienceShowAndDisplay, Other }
-	public enum EntryTarget { Child, Student, Teacher, Professional, Adult, Politics, SCer, NonJapanese }
-
-	class Entry {
-		private final String id;
-		private final EntryCategory category;
-		private final Set<EntryTarget> target;
-		private final Map<EntryKey, String> data;
-
-		public Entry(String id, String category, String target) {
-			this.id			= id;
-			this.category	= EntryCategory.valueOf(category);
-			this.target		= EnumSet.noneOf(EntryTarget.class);
-			this.data		= new EnumMap<EntryKey, String>(EntryKey.class);
-
-			if (target != null) {
-				for (String t : target.split(","))
-					this.target.add(EntryTarget.valueOf(t));
-			}
-		}
-
-		public String getId() {
-			return id;
-		}
-
-		public EntryCategory getCategory() {
-			return category;
-		}
-
-		/** @return {@code target} or {@code null} */
-		public Set<EntryTarget> getTarget() {
-			return target;
-		}
-
-		// TODO
-		public CharSequence getColoredSchedule() {
-			final String[] days	 = context.getResources().getStringArray(R.array.scheduleDays);
-			final int[] fgColors = context.getResources().getIntArray(R.array.scheduleTextColor);
-			final int[] bgColors = context.getResources().getIntArray(R.array.scheduleBackgroundColor);
-
-			final SpannableStringBuilder schedule = new SpannableStringBuilder(data.get(EntryKey.Schedule));
-			for (int i = 0; i < days.length; i++) {
-				final String seek = String.format("[%s]", days[i]);
-				for (int p = schedule.toString().indexOf(seek); p > -1; p = schedule.toString().indexOf(seek, p + seek.length())) {
-					final SpannableString ss = new SpannableString(days[i]);
-					ss.setSpan(new ForegroundColorSpan(fgColors[i]), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-					ss.setSpan(new BackgroundColorSpan(bgColors[i]), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-					schedule.replace(p, p + seek.length(), ss);
-				}
-			}
-			return schedule;
-		}
-
-		/** @return value of {@code key} or {@code null} */
-		public URL getURL(EntryKey key) {
-			if (!key.equalsClass(URL.class))
-				throw new IllegalArgumentException();
-
-			final String s = data.get(key);
-			if (s != null) {
-				try {
-					return new URL(s);
-				}
-				catch (MalformedURLException e) {
-					return null;
-				}
-			}
-			return null;
-		}
-
-		/** @return value of {@code key} or {@code null} */
-		public String getString(EntryKey key) {
-			if (!key.equalsClass(String.class))
-				throw new IllegalArgumentException();
-			return data.get(key);
-		}
-
-		public String getLocaleTitle() {
-			final String ja = getString(EntryKey.TitleJa);
-			final String en = getString(EntryKey.TitleEn);
-			return (Locale.getDefault().getLanguage().equals(Locale.JAPANESE.getLanguage()) || en == null) ? ja : en;
-		}
-
-		public void set(EntryKey key, String value) {
-			if (value != null && value.length() > 0)
-				data.put(key, value);
-		}
-
-		@Override
-		public String toString() {
-			return getClass().getName() + "@" + getId();
-		}
-	}
-
-	class TimeFrame {
-		private final String eid;	// entry id
-		private final String day;
-		private final int start;
-		private final int end;
-
-		public TimeFrame(String eid, String day, int start, int end) {
-			this.eid	= eid;
-			this.day	= day;
-			this.start	= start;
-			this.end	= end;
-		}
-
-		public String getId() {
-			return eid;
-		}
-
-		public String getDay() {
-			return day;
-		}
-
-		public int getStart() {
-			return start;
-		}
-
-		public int getEnd() {
-			return end;
-		}
-	}
 
 	@SuppressWarnings("serial")
 	class UpdateDataAbortException extends Exception {

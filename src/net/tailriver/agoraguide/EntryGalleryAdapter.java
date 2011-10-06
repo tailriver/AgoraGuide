@@ -2,7 +2,8 @@ package net.tailriver.agoraguide;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import net.tailriver.agoraguide.AgoraData.*;
+
+import net.tailriver.agoraguide.Entry.*;
 
 import android.app.Activity;
 import android.content.Context;
@@ -62,8 +63,8 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		titleView.setText(entry.getLocaleTitle());
 
 		final TextView sponsorView = (TextView) convertView.findViewById(R.id.entrydetail_sponsor);
-		sponsorView.setText(entry.getString(EntryKey.Sponsor));
-		final String coSponsor = entry.getString(EntryKey.CoSponsor);
+		sponsorView.setText(entry.getString(Tag.Sponsor));
+		final String coSponsor = entry.getString(Tag.CoSponsor);
 		if (coSponsor != null)
 			sponsorView.append("\n" + coSponsor);
 
@@ -76,11 +77,11 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		final SpannableString reservationTag = getBackgroundColorSpannableString("Reservation", Color.LTGRAY);
 		final SpannableString noteTag		 = getBackgroundColorSpannableString("Note", Color.LTGRAY);
 
-		final SpannableStringBuilder text = new SpannableStringBuilder(abstractTag).append('\n').append(entry.getString(EntryKey.Abstract).replace("&#xA;", "\n"));
-		final String content = entry.getString(EntryKey.Content);
-		final String guest = entry.getString(EntryKey.Guest);
-		final String reservation = entry.getString(EntryKey.Reservation);
-		final String note = entry.getString(EntryKey.Note);
+		final SpannableStringBuilder text = new SpannableStringBuilder(abstractTag).append('\n').append(entry.getString(Tag.Abstract).replace("&#xA;", "\n"));
+		final String content = entry.getString(Tag.Content);
+		final String guest = entry.getString(Tag.Guest);
+		final String reservation = entry.getString(Tag.Reservation);
+		final String note = entry.getString(Tag.Note);
 
 		if (content != null)
 			text.append("\n\n").append(contentTag).append("\n").append(content.replace("&#xA;", "\n"));
@@ -98,7 +99,7 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		scrollView.setText(text);
 
 		final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.entrydetail_thumbnail);
-		final URL imageURL = entry.getURL(EntryKey.Image);
+		final URL imageURL = entry.getURL(Tag.Image);
 		if (imageURL != null && AgoraData.isConnected(context)) {
 			HttpURLConnection huc = null;
 			try {

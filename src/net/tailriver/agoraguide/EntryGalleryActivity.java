@@ -2,7 +2,8 @@ package net.tailriver.agoraguide;
 
 import java.net.URL;
 
-import net.tailriver.agoraguide.AgoraData.EntryKey;
+import net.tailriver.agoraguide.Entry.*;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -54,7 +55,7 @@ public class EntryGalleryActivity extends Activity {
 			favoriteItem.setTitle(R.string.removeFavorite);
 
 		final MenuItem websiteItem = menu.findItem(R.id.menu_entrygallery_website);
-		final URL website = AgoraData.getEntry(selectedId).getURL(EntryKey.Website);
+		final URL website = AgoraData.getEntry(selectedId).getURL(Tag.Website);
 		if (website != null) {
 			websiteItem.setEnabled(true);
 			websiteItem.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(website.toExternalForm())));

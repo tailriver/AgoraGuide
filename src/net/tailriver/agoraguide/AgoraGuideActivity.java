@@ -23,12 +23,20 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 		setContentView(R.layout.main);
 
 		findViewById(R.id.main_progress).setVisibility(View.GONE);
+
+		final AgoraData ad = new AgoraData(getApplicationContext());
+		try {
+			ad.parseData();
+		}
+		catch (ParseDataAbortException e) {
+			// ignore
+		}
+		new Thread(AgoraGuideActivity.this).start();
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		new Thread(AgoraGuideActivity.this).start();
 	}
 
 	/** You must not try to change UI here, go to {@link Handler}.  */
@@ -38,8 +46,6 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 		message.what = R.layout.main;
 		try {
 			final AgoraData ad = new AgoraData(getApplicationContext());
-			ad.parseData();
-	
 			boolean isUpdated = false;
 			try {
 				isUpdated = ad.updateData(true, handler);

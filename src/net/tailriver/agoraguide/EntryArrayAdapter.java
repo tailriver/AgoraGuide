@@ -3,7 +3,7 @@ package net.tailriver.agoraguide;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.tailriver.agoraguide.AgoraData.*;
+import net.tailriver.agoraguide.Entry.*;
 
 import android.app.Activity;
 import android.content.Context;
@@ -52,7 +52,7 @@ class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapter, OnI
 		titleView.setText(entry.getLocaleTitle());
 
 		final TextView sponsorView = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
-		sponsorView.setText(entry.getString(EntryKey.Sponsor));
+		sponsorView.setText(entry.getString(Tag.Sponsor));
 
 		final TextView scheduleView = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
 		scheduleView.setText(entry.getColoredSchedule());
@@ -61,7 +61,7 @@ class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapter, OnI
 		categoryView.setText(entry.getCategory().toString());
 
 		final TextView reservaionView = (TextView) convertView.findViewById(R.id.entrylist_item_reservation);
-		if (entry.getString(EntryKey.Reservation) == null)
+		if (entry.getString(Tag.Reservation) == null)
 			reservaionView.setVisibility(View.INVISIBLE);
 
 		return convertView;
