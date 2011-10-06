@@ -10,7 +10,6 @@ import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
@@ -19,14 +18,10 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.Xml;
 
 class AgoraData {
-	private static final String versionURL  = "http://www.tailriver.net/scienceagora/2011/version.txt";
-	private static final String dataXMLURL  = "http://www.tailriver.net/scienceagora/2011/data.xml";
-	private static final String dataGZIPURL = "http://www.tailriver.net/scienceagora/2011/compress.data.xml.gz";
-	private static final String dataLocal   = "data.xml";
-
 	private final Context context;
 	private final SharedPreferences pref;
 
@@ -67,13 +62,13 @@ class AgoraData {
 	}
 
 	/** @throws UpdateDataAbortException */
-	public void updateData(boolean useGZIP, Handler handler) throws UpdateDataAbortException {
+	public boolean updateData(boolean useGZIP, Handler handler) throws UpdateDataAbortException {
 		if (!isConnected())
-			return;
+			return false;
 
 		final String[] versionText;
 		try {
-			final BufferedReader br = new BufferedReader(new InputStreamReader(new URL(versionURL).openStream()), 64);
+			final BufferedReader br = new BufferedReader(new InputStreamReader(new URL(context.getString(R.string.path_version_check)).openStream()), 64);
 			versionText = br.readLine().split(";");
 			br.close();
 		}
@@ -89,15 +84,15 @@ class AgoraData {
 		final int size			= Integer.parseInt(versionText[useGZIP ? 2 : 1]);
 
 		if (serverVersion == localVersion)
-			return;
+			return false;
 
 		// show progress bar with start state
 		if (handler != null)
 			sendProgressMessage(handler, 0, size);
 
 		try {
-			final InputStream			is = new URL(useGZIP ? dataGZIPURL : dataXMLURL).openStream();
-			final FileOutputStream	   fos = context.openFileOutput(dataLocal, Context.MODE_PRIVATE);
+			final InputStream			is = new URL(context.getString(useGZIP ? R.string.path_data_xml_gz : R.string.path_data_xml)).openStream();
+			final FileOutputStream	   fos = context.openFileOutput(context.getString(R.string.path_local_data_new), Context.MODE_PRIVATE);
 
 			final int BUFFER_SIZE = 4096;
 			final BufferedInputStream  bis = new BufferedInputStream(useGZIP ? new GZIPInputStream(is) : is, BUFFER_SIZE);
@@ -122,11 +117,13 @@ class AgoraData {
 			bos.close();
 
 			SharedPreferences.Editor ee = pref.edit();
-			ee.putInt("localVersion", serverVersion);
+			ee.putInt("localVersionNew", serverVersion);
 			ee.commit();
 
 			// hide progress bar
 			sendProgressMessage(handler, 0, 0);
+
+			return true;
 		}
 		catch (IOException e) {
 			// fail to download XMLDataURL; we cannot continue
@@ -138,9 +135,12 @@ class AgoraData {
 	public void parseData() throws ParseDataAbortException {
 		clear();
 
+		boolean useNewData = pref.contains("localVersionNew");
+		final SharedPreferences.Editor ee = pref.edit();
+
 		try {
 			final XmlPullParser xpp = Xml.newPullParser();
-			xpp.setInput(context.openFileInput(dataLocal), null);
+			xpp.setInput(context.openFileInput(context.getString(useNewData ? R.string.path_local_data_new : R.string.path_local_data)), null);
 
 			Entry entry = null;
 			for (int e = xpp.getEventType(); e != XmlPullParser.END_DOCUMENT; e = xpp.next()) {
@@ -202,6 +202,15 @@ class AgoraData {
 				}
 			}
 			isParseFinished = true;
+
+			ee.putInt("initialCapacityOfEntryMap", (int) (entryMap.size() * 1.5));
+			ee.putInt("initialCapacityOfTimeFrameMap", (int) (timeFrameMap.size() * 1.5));
+
+			// the new data file is valid (correctly, well-formed) XML, it's time to replace
+			if (useNewData) {
+				context.getFileStreamPath(context.getString(R.string.path_local_data_new)).renameTo(context.getFileStreamPath(context.getString(R.string.path_local_data)));
+				ee.putInt("localVersion", pref.getInt("localVersionNew", 0));
+			}
 		}
 		catch (ParseDataAbortException e) {
 			clear();
@@ -211,16 +220,23 @@ class AgoraData {
 			clear();
 			throw new ParseDataAbortException("Parse error: " + e);
 		}
+		finally {
+			ee.remove("localVersionNew");
+			ee.commit();
 
-		final SharedPreferences.Editor ee = pref.edit();
-		ee.putInt("initialCapacityOfEntryMap", (int) (entryMap.size() * 1.5));
-		ee.putInt("initialCapacityOfTimeFrameMap", (int) (timeFrameMap.size() * 1.5));
-		ee.commit();
+			// delete invalid new XML file
+			// retry. parseData() run under using old data
+			if (useNewData && !isParseFinished) {
+				context.deleteFile(context.getString(R.string.path_local_data_new));
+				parseData();
+			}
+		}
 	}
 
 	public void removeData() {
-		context.deleteFile(dataLocal);
+		context.deleteFile(context.getString(R.string.path_local_data));
 		final SharedPreferences.Editor ee = pref.edit();
+		ee.remove("lovalVersionNew");
 		ee.remove("localVersion");
 		ee.commit();
 	}
@@ -433,14 +449,18 @@ class AgoraData {
 
 		// TODO
 		public CharSequence getColoredSchedule() {
+			final String[] days	 = context.getResources().getStringArray(R.array.scheduleDays);
+			final int[] fgColors = context.getResources().getIntArray(R.array.scheduleTextColor);
+			final int[] bgColors = context.getResources().getIntArray(R.array.scheduleBackgroundColor);
+
 			final SpannableStringBuilder schedule = new SpannableStringBuilder(data.get(EntryKey.Schedule));
-			for (String day : new String[]{"Fri", "Sat", "Sun"}) {
-				final String seek = String.format("[%s]", day);
-				final int color = day.equals("Sat") ? Color.CYAN : day.equals("Sun") ? Color.MAGENTA : Color.LTGRAY;
-				for (int pos = schedule.toString().indexOf(seek); pos > -1; pos = schedule.toString().indexOf(seek, pos + seek.length())) {
-					final SpannableString ss = new SpannableString(day);
-					ss.setSpan(new BackgroundColorSpan(color), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-					schedule.replace(pos, pos + seek.length(), ss);
+			for (int i = 0; i < days.length; i++) {
+				final String seek = String.format("[%s]", days[i]);
+				for (int p = schedule.toString().indexOf(seek); p > -1; p = schedule.toString().indexOf(seek, p + seek.length())) {
+					final SpannableString ss = new SpannableString(days[i]);
+					ss.setSpan(new ForegroundColorSpan(fgColors[i]), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+					ss.setSpan(new BackgroundColorSpan(bgColors[i]), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+					schedule.replace(p, p + seek.length(), ss);
 				}
 			}
 			return schedule;

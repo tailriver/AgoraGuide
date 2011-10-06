@@ -13,5 +13,20 @@
 	<string name="preference">Preferences</string>
 	<string name="website">Go to web site</string>
 	<string name="error_fail_update">Fail to update the data...</string>
-	<string name="error_fail_parse">Fail to parse the data...\n(please wait some hours)</string>
+	<string name="error_fail_parse">Fail to parse the data...\n(please wait a few hours)</string>
+	<string-array name="scheduleDays">
+		<item>Fri</item>
+		<item>Sat</item>
+		<item>Sun</item>
+	</string-array>
+	<integer-array name="scheduleBackgroundColor">
+		<item>0xFF666666</item>
+		<item>0xFF00FFFF</item>
+		<item>0xFFFF00FF</item>
+	</integer-array>
+	<integer-array name="scheduleTextColor">
+		<item>0xFF000000</item>
+		<item>0xFFFFFFFF</item>
+		<item>0xFFFFFFFF</item>
+	</integer-array>
 </resources>

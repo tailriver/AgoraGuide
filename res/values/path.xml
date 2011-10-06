@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="path_version_check">http://www.tailriver.net/scienceagora/2011/version.txt</string>
+    <string name="path_data_xml">http://www.tailriver.net/scienceagora/2011/data.xml</string>
+    <string name="path_data_xml_gz">http://www.tailriver.net/scienceagora/2011/data.xml.gz</string>
+    <string name="path_local_data">data.xml</string>
+    <string name="path_local_data_new">data.new.xml</string>
+    <string name="path_pref">pref</string>
+    
+</resources>

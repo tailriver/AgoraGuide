@@ -15,7 +15,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-public class AgoraGuideActivity extends Activity {
+public class AgoraGuideActivity extends Activity implements Runnable {
 	/** Called when the activity is first created. */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,51 +28,41 @@ public class AgoraGuideActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		(new Thread(runnable)).start();
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
+		new Thread(AgoraGuideActivity.this).start();
 	}
 
 	/** You must not try to change UI here, go to {@link Handler}.  */
-	private Runnable runnable = new Runnable() {
-		@Override
-		public void run() {
-			final Message message = new Message();
-			message.what = R.layout.main;
+	@Override
+	public synchronized void run() {
+		final Message message = new Message();
+		message.what = R.layout.main;
+		try {
+			final AgoraData ad = new AgoraData(getApplicationContext());
+			ad.parseData();
+	
+			boolean isUpdated = false;
 			try {
-				final AgoraData ad = new AgoraData(getApplicationContext());
-				try {
-					ad.updateData(true, handler);
-				}
-				catch (UpdateDataAbortException e) {
-					ad.updateData(false, handler);
-				}
-				ad.parseData();
-
-				/*
-				if (AgoraData.isParseFinished()) {
-					bundle.putString("toast_message", "Data loaded successfully");
-					bundle.putInt("toast_duration", Toast.LENGTH_SHORT);
-				}
-				 */
+				isUpdated = ad.updateData(true, handler);
 			}
 			catch (UpdateDataAbortException e) {
-				message.arg1 = R.string.error_fail_update;
-				message.arg2 = Toast.LENGTH_LONG;
-				handler.sendMessage(message);
-				Log.e("AgoraGuide", e.toString());
+				isUpdated = ad.updateData(false, handler);
 			}
-			catch (ParseDataAbortException e) {
-				message.arg1 = R.string.error_fail_parse;
-				message.arg2 = Toast.LENGTH_LONG;
-				handler.sendMessage(message);
-				Log.e("AgoraGuide", e.toString());
-			}
+			if (isUpdated)
+				ad.parseData();
 		}
-	};
+		catch (UpdateDataAbortException e) {
+			message.arg1 = R.string.error_fail_update;
+			message.arg2 = Toast.LENGTH_LONG;
+			handler.sendMessage(message);
+			Log.e("AgoraGuide", e.toString());
+		}
+		catch (ParseDataAbortException e) {
+			message.arg1 = R.string.error_fail_parse;
+			message.arg2 = Toast.LENGTH_LONG;
+			handler.sendMessage(message);
+			Log.e("AgoraGuide", e.toString());
+		}
+	}
 
 	private final Handler handler = new Handler() {
 		@Override
@@ -122,7 +112,7 @@ public class AgoraGuideActivity extends Activity {
 		if (item.getItemId() == R.id.menu_preference) {
 			new AgoraData(getApplicationContext()).removeData();
 			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_SHORT).show();
-			(new Thread(runnable)).start();
+			new Thread(AgoraGuideActivity.this).start();
 		}
 		return false;
 	}
