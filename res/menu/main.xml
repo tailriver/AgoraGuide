@@ -8,6 +8,6 @@
 		<item android:id="@+id/menu_sbm" android:title="@string/searchByMap"
 			android:icon="@drawable/icon" />
 	</group>
-	<item android:id="@+id/menu_favorite" android:title="@string/favorite" android:icon="@drawable/icon"></item>
+	<item android:id="@+id/menu_favorites" android:title="@string/favorites" android:icon="@drawable/icon"></item>
 	<item android:id="@+id/menu_preference" android:title="@string/preference"></item>
 </menu>

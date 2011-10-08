@@ -8,10 +8,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import net.tailriver.agoraguide.TimeFrame.Days;
+
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 
 
@@ -31,6 +32,7 @@ public class Entry {
 		Image(URL.class),
 		Website(URL.class),
 		ProgramURL(URL.class),
+		ColoredSchedule(CharSequence.class),
 		;
 
 		private final Class<?> c;
@@ -64,13 +66,13 @@ public class Entry {
 
 	// static variables
 	
-	private static final String[] days;
-	private static final int[] fgColors, bgColors;
+	private static final Map<Days, Integer> bgColor;
 
 	static {
-		days  = new String[]{ "Fri",		"Sat",		"Sun"		};
-		fgColors = new int[]{ 0xFF666666,	0xFF00FFFF,	0xFFFF00FF	};
-		bgColors = new int[]{ 0xFF000000,	0xFFFFFFFF,	0xFFFFFFFF	};
+		bgColor = new EnumMap<Days, Integer>(Days.class);
+		bgColor.put(Days.Fri, 0xFF666666);
+		bgColor.put(Days.Sat, 0xFF0000CC);
+		bgColor.put(Days.Sun, 0xFFCC0000);
 	}
 
 	// member variables
@@ -78,7 +80,7 @@ public class Entry {
 	private final String id;
 	private final Category category;
 	private final Set<Target> target;
-	private final Map<Tag, String> data;
+	private final Map<Tag, CharSequence> data;
 
 	// constructor and methods
 
@@ -86,7 +88,7 @@ public class Entry {
 		this.id			= id;
 		this.category	= Category.valueOf(category);
 		this.target		= EnumSet.noneOf(Target.class);
-		this.data		= new EnumMap<Tag, String>(Tag.class);
+		this.data		= new EnumMap<Tag, CharSequence>(Tag.class);
 
 		if (target != null) {
 			for (String t : target.split(","))
@@ -107,18 +109,24 @@ public class Entry {
 		return target;
 	}
 
-	// TODO
 	public CharSequence getColoredSchedule() {
+		if (data.get(Tag.ColoredSchedule) != null)
+			return data.get(Tag.ColoredSchedule);
+
 		final SpannableStringBuilder schedule = new SpannableStringBuilder(data.get(Tag.Schedule));
-		for (int i = 0; i < days.length; i++) {
-			final String seek = String.format("[%s]", days[i]);
+		for (Map.Entry<Days, Integer> e : bgColor.entrySet()) {
+			final String day = e.getKey().toString();
+			final int color = e.getValue();
+
+			final String seek = String.format("[%s]", day);
 			for (int p = schedule.toString().indexOf(seek); p > -1; p = schedule.toString().indexOf(seek, p + seek.length())) {
-				final SpannableString ss = new SpannableString(days[i]);
-				ss.setSpan(new ForegroundColorSpan(fgColors[i]), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-				ss.setSpan(new BackgroundColorSpan(bgColors[i]), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				final SpannableString ss = new SpannableString(day);
+				ss.setSpan(android.graphics.Typeface.BOLD, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				ss.setSpan(new ForegroundColorSpan(color), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				schedule.replace(p, p + seek.length(), ss);
 			}
 		}
+		data.put(Tag.ColoredSchedule, schedule);
 		return schedule;
 	}
 
@@ -126,10 +134,10 @@ public class Entry {
 	public URL getURL(Tag tag) {
 		assert !tag.equalsClass(URL.class);
 
-		final String s = data.get(tag);
+		final CharSequence s = data.get(tag);
 		if (s != null) {
 			try {
-				return new URL(s);
+				return new URL(s.toString());
 			}
 			catch (MalformedURLException e) {
 				return null;
@@ -141,7 +149,8 @@ public class Entry {
 	/** @return value of {@code key} or {@code null} */
 	public String getString(Tag tag) {
 		assert !tag.equalsClass(String.class);
-		return data.get(tag);
+		final CharSequence s = data.get(tag);
+		return s != null ? s.toString() : null;
 	}
 
 	public String getLocaleTitle() {

@@ -3,7 +3,7 @@
 	<string name="app_name">AgoraGuide</string>
 	<string name="addFavorite">Add Favorite</string>
 	<string name="removeFavorite">Remove Favorite</string>
-	<string name="favorite">Favorites</string>
+	<string name="favorites">Favorites</string>
 	<string name="entryDetail">Program</string>
 	<string name="searchByKeyword">Search by keyword</string>
 	<string name="searchBySchedule">Search by schedule</string>

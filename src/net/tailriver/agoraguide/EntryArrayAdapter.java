@@ -8,6 +8,7 @@ import net.tailriver.agoraguide.Entry.*;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapter, OnItemClickListener {
+public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapter, OnItemClickListener {
 	private final static int textViewResourceId = R.layout.entrylist_item;
 	private final Context context;
 	private final int adapterViewResourceId;
@@ -80,6 +81,7 @@ class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapter, OnI
 		if (requestCode != textViewResourceId || resultCode != Activity.RESULT_OK)
 			return;
 
+		Log.i("Test", data.getExtras().toString());
 		int position = data.getIntExtra("position", 0);
 		if (position != AdapterView.INVALID_POSITION)
 			((AdapterView<?>) ((Activity) context).findViewById(adapterViewResourceId)).setSelection(position);

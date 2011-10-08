@@ -16,7 +16,7 @@ public class FavoritesActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.favorites);
-		setTitle(R.string.favorite);
+		setTitle(R.string.favorites);
 
 		final ListView entryListView = (ListView) findViewById(R.id.favorites_entrylist);
 		entryListView.setAdapter(new EntryArrayAdapter(FavoritesActivity.this, entryListView.getId()));

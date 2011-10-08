@@ -11,9 +11,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Gallery;
 
-public class EntryGalleryActivity extends Activity {
+public class EntryGalleryActivity extends Activity implements OnItemSelectedListener {
 	/** Called when the activity is first created. */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +28,8 @@ public class EntryGalleryActivity extends Activity {
 
 		final Gallery gallery = (Gallery) findViewById(R.id.entrygallery);
 		gallery.setAdapter(new EntryGalleryAdapter(EntryGalleryActivity.this, gallery.getId(), entryIdList));
-		gallery.setSelection(position, true);
+		gallery.setOnItemSelectedListener(this);
+		gallery.setSelection(position, false);
 	}
 
 	@Override
@@ -78,5 +82,17 @@ public class EntryGalleryActivity extends Activity {
 
 	private EntryGalleryAdapter theAdapter() {
 		return (EntryGalleryAdapter) ((Gallery) findViewById(R.id.entrygallery)).getAdapter();
+	}
+
+	@Override
+	public void onItemSelected(AdapterView<?> parent, View view,
+			int position, long id) {
+		final String entryId = getIntent().getStringArrayExtra("entryIdList")[position];
+
+		setTitle(AgoraData.getEntry(entryId).getLocaleTitle());
+	}
+
+	@Override
+	public void onNothingSelected(AdapterView<?> arg0) {
 	}
 }

@@ -44,14 +44,6 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 			convertView = inflater.inflate(textViewResourceId, null);
 		}
 
-		// Note: for current (centered, visible) item
-		// FIXME When the first and last item selected, getView() is never called it means it does NOT works properly.
-		if (getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-			final Entry currentEntry = AgoraData.getEntry(getItem(getSelectedItemPosition()));
-			((Activity) context).setTitle(currentEntry.getLocaleTitle());
-		}
-
-		// Note: it's not for CENTER item; it is LEFT or RIGHT item for caching
 		final String id = getItem(position);
 		final Entry entry = AgoraData.getEntry(id);
 

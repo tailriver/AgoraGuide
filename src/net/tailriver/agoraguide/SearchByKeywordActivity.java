@@ -26,22 +26,12 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 	}
 
 	@Override
-	public void onStart() {
-		super.onStart();
-	}
-
-	@Override
 	public void onResume() {
 		super.onResume();
 		afterTextChanged(((EditText) findViewById(R.id.sbk_text)).getText());
 	}
 
-	@Override
-	public void onStop() {
-		theAdapter().clear();
-		super.onStop();
-	}
-
+	// TODO
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		theAdapter().onActivityResult(requestCode, resultCode, data);

@@ -21,8 +21,8 @@ public class AgoraData {
 	private static final EnumSet<Tag> searchByKeywordTags;
 
 	private static Map<String, Entry> entryMap;
-	private static Map<String, TimeFrame> timeFrameMap;
-	private static List<String> favoriteList;
+	private static List<TimeFrame> timeFrame;
+	private static List<String> favorites;
 	private static boolean isParseFinished = false;
 
 	static {
@@ -41,9 +41,9 @@ public class AgoraData {
 		this.pref	 = this.context.getSharedPreferences("pref", Context.MODE_PRIVATE);
 
 		if (entryMap == null) {
-			entryMap	 = new LinkedHashMap<String, Entry>(pref.getInt("initialCapacityOfEntry",	  50));
-			timeFrameMap = new HashMap<String, TimeFrame>(  pref.getInt("initialCapacityOfTimeFrame", 50));
-			favoriteList = new ArrayList<String>(Arrays.asList(pref.getString("favorites", "").split(";")));
+			entryMap	= new LinkedHashMap<String, Entry>(pref.getInt("initialCapacityOfEntry",	50));
+			timeFrame	= new ArrayList<TimeFrame>(  pref.getInt("initialCapacityOfTimeFrame",		50));
+			favorites	= new ArrayList<String>(Arrays.asList(pref.getString("favorites", "").split(";")));
 		}
 	}
 
@@ -177,11 +177,11 @@ public class AgoraData {
 						break;
 
 					if ("timeframe".equals(startTag)) {
-						final String tfid	= xpp.getAttributeValue(null, "id");
+						//final String tfid	= xpp.getAttributeValue(null, "id");
 						final String day	= xpp.getAttributeValue(null, "day");
 						final int start		= Integer.parseInt(xpp.getAttributeValue(null, "start"));
 						final int end		= Integer.parseInt(xpp.getAttributeValue(null, "end"));
-						timeFrameMap.put(tfid, new TimeFrame(entry.getId(), day, start, end));
+						timeFrame.add(new TimeFrame(entry.getId(), day, start, end));
 						break;
 					}
 
@@ -208,8 +208,10 @@ public class AgoraData {
 			}
 			isParseFinished = true;
 
+			Collections.sort(timeFrame);
+
 			ee.putInt("initialCapacityOfEntryMap", (int) (entryMap.size() * 1.5));
-			ee.putInt("initialCapacityOfTimeFrameMap", (int) (timeFrameMap.size() * 1.5));
+			ee.putInt("initialCapacityOfTimeFrameMap", (int) (timeFrame.size() * 1.5));
 
 			// the new data file is valid (correctly, well-formed) XML, it's time to replace
 			if (useNewData) {
@@ -251,7 +253,7 @@ public class AgoraData {
 	public static void clear() {
 		isParseFinished = false;
 		entryMap.clear();
-		timeFrameMap.clear();
+		timeFrame.clear();
 	}
 
 	/**
@@ -297,10 +299,10 @@ public class AgoraData {
 	 */
 	public static List<String> getFavoriteEntryId() {
 		// normalize
-		favoriteList.remove("");
-		Collections.sort(favoriteList);
+		favorites.remove("");
+		Collections.sort(favorites);
 
-		return favoriteList;
+		return favorites;
 	}
 
 	/**
@@ -312,11 +314,10 @@ public class AgoraData {
 		assert !isParseFinished;
 
 		final List<String> match = new ArrayList<String>();
+		if (entryMap.containsKey(query))
+			match.add(query);
+
 		for (Entry entry : entryMap.values()) {
-			if (entry.getId().equals(query)) {
-				match.add(entry.getId());
-				continue;
-			}
 			for (Tag key : searchByKeywordTags) {
 				final String s = entry.getString(key);
 				if (s != null && s.contains(query)) {
@@ -335,45 +336,40 @@ public class AgoraData {
 	 * @return search result, list of {@code id}(s)
 	 * @throws IllegalStateException called before finishing parse
 	 */
-	public static List<String> getEntryByTimeFrame(String day, int startBegin, int startEnd) {
+	public static List<String> getEntryBySchedule(String day, int startBegin, int startEnd) {
 		assert !isParseFinished;
 
 		final List<String> match = new ArrayList<String>();
-		for (TimeFrame timeFrame : timeFrameMap.values()) {
-			final int start = timeFrame.getStart();
-			if (timeFrame.getDay() == day && startBegin <= start && start <= startEnd)
-				match.add(timeFrame.getId());
+		for (TimeFrame t : timeFrame) {
+			final int start = t.getStart();
+			if (t.equalsDay(day) && startBegin <= start && start <= startEnd)
+				match.add(t.getId());
 		}
-		// TODO sort
 		return match;
 	}
 
 	public static boolean isFavorite(String id) {
-		for (String favoriteId : favoriteList) {
-			if (id.equals(favoriteId))
-				return true;
-		}
-		return false;
+		return favorites.contains(id);
 	}
 
 	public void setFavorite(String id, boolean state) {
-		if (state && !favoriteList.contains(id)) {
-			favoriteList.add(id);
+		if (state && !favorites.contains(id)) {
+			favorites.add(id);
 			updateFavoriteList();
 		}
-		else if (!state && favoriteList.remove(id)) {
+		else if (!state && favorites.remove(id)) {
 			updateFavoriteList();
 		}
 	}
 
 	public void clearFavorite() {
-		favoriteList.clear();
+		favorites.clear();
 		updateFavoriteList();
 	}
 
 	private void updateFavoriteList() {
 		final StringBuilder sb = new StringBuilder();
-		for (String favoriteId : favoriteList) {
+		for (String favoriteId : favorites) {
 			sb.append(favoriteId).append(';');
 		}
 
@@ -384,7 +380,7 @@ public class AgoraData {
 
 	@Override
 	public String toString() {
-		return String.format("AgoraData has %d (Entry) and %d (TimeFrame) data", entryMap.size(), timeFrameMap.size());
+		return String.format("AgoraData has %d (Entry) and %d (TimeFrame) data", entryMap.size(), timeFrame.size());
 	}
 
 

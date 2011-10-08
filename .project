@@ -3,7 +3,6 @@
 	<name>AgoraGuide</name>
 	<comment></comment>
 	<projects>
-		<project>wheel</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

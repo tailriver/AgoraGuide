@@ -101,9 +101,9 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 		mi.inflate(R.menu.main, menu);
 
 		menu.findItem(R.id.menu_sbk).setIntent(new Intent(AgoraGuideActivity.this, SearchByKeywordActivity.class));
-		menu.findItem(R.id.menu_sbs).setEnabled(false);
+		menu.findItem(R.id.menu_sbs).setIntent(new Intent(AgoraGuideActivity.this, SearchByScheduleActivity.class));
 		menu.findItem(R.id.menu_sbm).setEnabled(false);
-		menu.findItem(R.id.menu_favorite).setIntent(new Intent(AgoraGuideActivity.this, FavoritesActivity.class));
+		menu.findItem(R.id.menu_favorites).setIntent(new Intent(AgoraGuideActivity.this, FavoritesActivity.class));
 		//menu.findItem(R.id.menu_agora).setEnabled(false);
 		menu.findItem(R.id.menu_preference).setEnabled(true);
 		return true;
