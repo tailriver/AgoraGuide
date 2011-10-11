@@ -47,6 +47,9 @@ public class Entry {
 	}
 
 	public enum Category {
+		Booth,
+		Poster,
+		DisplayAndCraft,
 		SymposiumAndTalkSession,
 		WorkshopAndScienceCafe,
 		ScienceShowAndDisplay,
