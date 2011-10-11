@@ -8,7 +8,6 @@ import net.tailriver.agoraguide.Entry.*;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,14 +75,16 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 		((Activity) context).startActivityForResult(intent, textViewResourceId);
 	}
 
-	// TODO
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode != textViewResourceId || resultCode != Activity.RESULT_OK)
 			return;
 
-		Log.i("Test", data.getExtras().toString());
-		int position = data.getIntExtra("position", 0);
-		if (position != AdapterView.INVALID_POSITION)
-			((AdapterView<?>) ((Activity) context).findViewById(adapterViewResourceId)).setSelection(position);
+		final int position = data.getIntExtra("position", 0);
+		if (position == AdapterView.INVALID_POSITION)
+			return;
+
+		final AdapterView<?> view = (AdapterView<?>) ((Activity) context).findViewById(adapterViewResourceId);
+		view.requestFocusFromTouch();	// it is need when DPAD operation and back
+		view.setSelection(position);
 	}
 }

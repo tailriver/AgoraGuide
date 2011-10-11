@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,15 +28,15 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 		final int position = getIntent().getIntExtra("position", 0);
 
 		final Gallery gallery = (Gallery) findViewById(R.id.entrygallery);
-		gallery.setAdapter(new EntryGalleryAdapter(EntryGalleryActivity.this, gallery.getId(), entryIdList));
+		gallery.setAdapter(new EntryGalleryAdapter(EntryGalleryActivity.this, entryIdList));
 		gallery.setOnItemSelectedListener(this);
 		gallery.setSelection(position, false);
 	}
 
 	@Override
 	public void onBackPressed() {
-		Intent intent = getIntent();
-		intent.putExtra("position", theAdapter().getSelectedItemPosition());
+		Intent intent = new Intent();
+		intent.putExtra("position", ((Gallery) findViewById(R.id.entrygallery)).getSelectedItemPosition());
 		setResult(RESULT_OK, intent);
 		super.onBackPressed();
 	}
@@ -80,10 +81,6 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 		return false;
 	}
 
-	private EntryGalleryAdapter theAdapter() {
-		return (EntryGalleryAdapter) ((Gallery) findViewById(R.id.entrygallery)).getAdapter();
-	}
-
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view,
 			int position, long id) {
@@ -94,5 +91,18 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
+	}
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		final View v = ((Gallery) findViewById(R.id.entrygallery)).getSelectedView().findViewById(R.id.entrygallery_scroll);
+		if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_UP && event.getAction() == KeyEvent.ACTION_DOWN)
+			v.scrollBy(0, -20);
+		else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_DOWN && event.getAction() == KeyEvent.ACTION_DOWN)
+			v.scrollBy(0,  20);
+		else
+			return super.dispatchKeyEvent(event);
+
+		return true;
 	}
 }

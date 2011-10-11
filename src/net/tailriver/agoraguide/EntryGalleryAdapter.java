@@ -2,10 +2,11 @@ package net.tailriver.agoraguide;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.EnumMap;
+import java.util.Map;
 
 import net.tailriver.agoraguide.Entry.*;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -16,25 +17,29 @@ import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 public class EntryGalleryAdapter extends ArrayAdapter<String> {
-	private final static int textViewResourceId = R.layout.entrygallery_item;
+	private final static int textViewResourceId;
+	private final static Map<Tag, SpannableString> tagName;
 	private final Context context;
-	private final int adapterViewResourceId;
 
-	public EntryGalleryAdapter(Context context, int adapterViewResourceId, String[] objects) {
-		super(context, textViewResourceId, objects);
-		this.context = context;
-		this.adapterViewResourceId = adapterViewResourceId;
+	static {
+		textViewResourceId = R.layout.entrygallery_item;
+
+		tagName = new EnumMap<Tag, SpannableString>(Tag.class);
+		tagName.put(Tag.Abstract,		getBackgroundColorSpannableString("Abstract\n", Color.LTGRAY));
+		tagName.put(Tag.Content,		getBackgroundColorSpannableString("Content\n", Color.LTGRAY));
+		tagName.put(Tag.Guest,			getBackgroundColorSpannableString("Guest\n", Color.LTGRAY));
+		tagName.put(Tag.Reservation,	getBackgroundColorSpannableString("Reservation\n", Color.LTGRAY));
+		tagName.put(Tag.Note,			getBackgroundColorSpannableString("Note\n", Color.LTGRAY));
 	}
 
-	/** like AdapterView */
-	public int getSelectedItemPosition() {
-		return ((AdapterView<?>) ((Activity) context).findViewById(adapterViewResourceId)).getSelectedItemPosition();
+	public EntryGalleryAdapter(Context context, String[] objects) {
+		super(context, textViewResourceId, objects);
+		this.context = context;
 	}
 
 	@Override
@@ -47,14 +52,14 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		final String id = getItem(position);
 		final Entry entry = AgoraData.getEntry(id);
 
-		final TextView iconView = (TextView) convertView.findViewById(R.id.entrydetail_icon);
+		final TextView iconView = (TextView) convertView.findViewById(R.id.entrygallery_icon);
 		iconView.setText(entry.getId());
 		iconView.append(" " + entry.getCategory().toString());
 
-		final TextView titleView = (TextView) convertView.findViewById(R.id.entrydetail_title);
+		final TextView titleView = (TextView) convertView.findViewById(R.id.entrygallery_title);
 		titleView.setText(entry.getLocaleTitle());
 
-		final TextView sponsorView = (TextView) convertView.findViewById(R.id.entrydetail_sponsor);
+		final TextView sponsorView = (TextView) convertView.findViewById(R.id.entrygallery_sponsor);
 		sponsorView.setText(entry.getString(Tag.Sponsor));
 		final String coSponsor = entry.getString(Tag.CoSponsor);
 		if (coSponsor != null)
@@ -63,34 +68,17 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		final TextView scheduleView = (TextView) convertView.findViewById(R.id.entrygallery_schedule);
 		scheduleView.setText(entry.getColoredSchedule());
 
-		final SpannableString abstractTag	 = getBackgroundColorSpannableString("Abstract", Color.LTGRAY);
-		final SpannableString contentTag	 = getBackgroundColorSpannableString("Content", Color.LTGRAY);
-		final SpannableString guestTag		 = getBackgroundColorSpannableString("Guest", Color.LTGRAY);
-		final SpannableString reservationTag = getBackgroundColorSpannableString("Reservation", Color.LTGRAY);
-		final SpannableString noteTag		 = getBackgroundColorSpannableString("Note", Color.LTGRAY);
-
-		final SpannableStringBuilder text = new SpannableStringBuilder(abstractTag).append('\n').append(entry.getString(Tag.Abstract).replace("&#xA;", "\n"));
-		final String content = entry.getString(Tag.Content);
-		final String guest = entry.getString(Tag.Guest);
-		final String reservation = entry.getString(Tag.Reservation);
-		final String note = entry.getString(Tag.Note);
-
-		if (content != null)
-			text.append("\n\n").append(contentTag).append("\n").append(content.replace("&#xA;", "\n"));
-
-		if (guest != null)
-			text.append("\n\n").append(guestTag).append("\n").append(guest.replace("&#xA;", "\n"));
-
-		if (reservation != null)
-			text.append("\n\n").append(reservationTag).append("\n").append(reservation.replace("&#xA;", "\n"));
-
-		if (note != null)
-			text.append("\n\n").append(noteTag).append("\n").append(note.replace("&#xA;", "\n"));
+		final SpannableStringBuilder text = new SpannableStringBuilder(tagName.get(Tag.Abstract)).append(entry.getString(Tag.Abstract));
+		for (Tag tag : new Tag[]{Tag.Content, Tag.Guest, Tag.Reservation, Tag.Note}) {
+			final String tagValue = entry.getString(tag);
+			if (tagValue != null)
+				text.append("\n\n").append(tagName.get(tag)).append(tagValue);
+		}
 
 		final TextView scrollView = (TextView) convertView.findViewById(R.id.entrygallery_content);
 		scrollView.setText(text);
 
-		final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.entrydetail_thumbnail);
+		final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.entrygallery_image);
 		final URL imageURL = entry.getURL(Tag.Image);
 		if (imageURL != null && AgoraData.isConnected(context)) {
 			HttpURLConnection huc = null;
@@ -115,8 +103,8 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		return convertView;
 	}
 
-	public SpannableString getBackgroundColorSpannableString(CharSequence source, int color) {
-		SpannableString ss = new SpannableString(source);
+	private static SpannableString getBackgroundColorSpannableString(CharSequence source, int color) {
+		final SpannableString ss = new SpannableString(source);
 		ss.setSpan(new BackgroundColorSpan(color), 0, source.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ss;
 	}

@@ -57,13 +57,16 @@ public class AgoraData {
 
 	public static boolean isConnected(Context context) {
 		final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		final NetworkInfo ni = cm.getActiveNetworkInfo();
 
-		// TODO I don't have any confidence for this is right
+		return (ni.isAvailable() && ni.isConnected());
+
+		/*// TODO I don't have any confidence for this is right
 		for (NetworkInfo ni : cm.getAllNetworkInfo()) {
 			if (ni.isAvailable() && ni.getState() == NetworkInfo.State.CONNECTED)
 				return true;
 		}
-		return false;
+		return false;*/
 	}
 
 	/** @throws UpdateDataAbortException */

@@ -153,7 +153,7 @@ public class Entry {
 	public String getString(Tag tag) {
 		assert !tag.equalsClass(String.class);
 		final CharSequence s = data.get(tag);
-		return s != null ? s.toString() : null;
+		return s != null ? s.toString().replace("&#xA;", "\n") : null;
 	}
 
 	public String getLocaleTitle() {

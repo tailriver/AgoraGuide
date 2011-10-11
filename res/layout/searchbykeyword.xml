@@ -12,7 +12,7 @@
 	<TextView android:text="Not Found" android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/sbk_empty"></TextView>
 	<ListView android:layout_width="fill_parent" android:id="@+id/sbk_result"
-		android:layout_height="fill_parent">
+		android:layout_height="fill_parent" android:scrollingCache="false">
 		<!-- Preview: listitem=@layout/entrylist_item -->
 	</ListView>
 </LinearLayout>

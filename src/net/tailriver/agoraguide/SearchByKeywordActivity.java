@@ -23,17 +23,13 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 
 		final EditText editText = (EditText) findViewById(R.id.sbk_text);
 		editText.addTextChangedListener(this);
+		editText.setText(null);
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		afterTextChanged(((EditText) findViewById(R.id.sbk_text)).getText());
-	}
-
-	// TODO
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		final EditText editText = (EditText) findViewById(R.id.sbk_text);
+		editText.setText(editText.getText());
 		theAdapter().onActivityResult(requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
@@ -41,7 +37,7 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		theAdapter().clear();
-		if (s.length() > 0)
+		if (s != null && s.length() > 0)
 			theAdapter().add(AgoraData.getEntryByKeyword(s.toString()));
 		else
 			theAdapter().add(AgoraData.getAllEntryId());

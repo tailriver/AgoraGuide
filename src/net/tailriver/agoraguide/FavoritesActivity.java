@@ -22,29 +22,19 @@ public class FavoritesActivity extends Activity {
 		entryListView.setAdapter(new EntryArrayAdapter(FavoritesActivity.this, entryListView.getId()));
 		entryListView.setOnItemClickListener(theAdapter());
 		entryListView.setEmptyView(findViewById(R.id.favorites_empty));
-	}
 
-	@Override
-	public void onStart() {
-		super.onStart();
-		theAdapter().clear();
 		theAdapter().add(AgoraData.getFavoriteEntryId());
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
-		if (theAdapter().getCount() != AgoraData.getFavoriteEntryId().size()) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (theAdapter().getCount() == AgoraData.getFavoriteEntryId().size())
+			theAdapter().onActivityResult(requestCode, resultCode, data);
+		else {
 			theAdapter().clear();
 			theAdapter().add(AgoraData.getFavoriteEntryId());
 			findViewById(R.id.favorites_entrylist).invalidate();
 		}
-	}
-
-	// TODO
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		theAdapter().onActivityResult(requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
