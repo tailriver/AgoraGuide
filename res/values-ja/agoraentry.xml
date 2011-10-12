@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="tag_title">企画名</string>
+	<string name="tag_target">対象</string>
+	<string name="tag_schedule">日時</string>
+	<string name="tag_sponsor">主催・共催等</string>
+	<string name="tag_abstract">概要</string>
+	<string name="tag_content">内容</string>
+	<string name="tag_reservation">事前申込</string>
+	<string name="tag_guest">主な登壇者など</string>
+	<string name="tag_note">備考</string>
+	<string name="category_A1">ブース</string>
+	<string name="category_A2">ポスター</string>
+	<string name="category_A3">実演・工作</string>
+	<string name="category_A4">その他</string>
+	<string name="category_B1">シンポジウム・トークセッション</string>
+	<string name="category_B2">ワークショップ・サイエンスカフェ</string>
+	<string name="category_B3">サイエンスショー・上映・演示</string>
+	<string name="category_B4">その他</string>
+	<string name="days_fri">金</string>
+	<string name="days_sat">土</string>
+	<string name="days_sun">日</string>
+</resources>

@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 
-import net.tailriver.agoraguide.Entry.*;
+import net.tailriver.agoraguide.AgoraEntry.*;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -18,19 +18,14 @@ import android.os.Message;
 import android.util.Xml;
 
 public class AgoraData {
-	private static final EnumSet<Tag> searchByKeywordTags;
+	private static final Tag[] searchByKeywordTags = {
+		Tag.TITLE_JA, Tag.TITLE_EN, Tag.SPONSOR, Tag.CO_SPONSOR, Tag.ABSTRACT, Tag.CONTENT, Tag.GUEST, Tag.NOTE
+	};
 
-	private static Map<String, Entry> entryMap;
+	private static Map<String, AgoraEntry> agoraEntry;
 	private static List<TimeFrame> timeFrame;
 	private static List<String> favorites;
 	private static boolean isParseFinished = false;
-
-	static {
-		searchByKeywordTags = EnumSet.of(
-				Tag.TitleJa, Tag.TitleEn, Tag.Sponsor, Tag.CoSponsor,
-				Tag.Abstract, Tag.Content, Tag.Guest, Tag.Note
-				);
-	}
 
 	private final Context context;
 	private final SharedPreferences pref;
@@ -40,8 +35,8 @@ public class AgoraData {
 		this.context = context.getApplicationContext();
 		this.pref	 = this.context.getSharedPreferences("pref", Context.MODE_PRIVATE);
 
-		if (entryMap == null) {
-			entryMap	= new LinkedHashMap<String, Entry>(pref.getInt("initialCapacityOfEntry",	50));
+		if (agoraEntry == null) {
+			agoraEntry	= new LinkedHashMap<String, AgoraEntry>(pref.getInt("initialCapacityOfEntry",	50));
 			timeFrame	= new ArrayList<TimeFrame>(  pref.getInt("initialCapacityOfTimeFrame",		50));
 			favorites	= new ArrayList<String>(Arrays.asList(pref.getString("favorites", "").split(";")));
 		}
@@ -59,14 +54,7 @@ public class AgoraData {
 		final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		final NetworkInfo ni = cm.getActiveNetworkInfo();
 
-		return (ni.isAvailable() && ni.isConnected());
-
-		/*// TODO I don't have any confidence for this is right
-		for (NetworkInfo ni : cm.getAllNetworkInfo()) {
-			if (ni.isAvailable() && ni.getState() == NetworkInfo.State.CONNECTED)
-				return true;
-		}
-		return false;*/
+		return ni.isAvailable() && ni.isConnected();
 	}
 
 	/** @throws UpdateDataAbortException */
@@ -150,53 +138,53 @@ public class AgoraData {
 			final XmlPullParser xpp = Xml.newPullParser();
 			xpp.setInput(context.openFileInput(context.getString(useNewData ? R.string.path_local_data_new : R.string.path_local_data)), null);
 
-			Entry entry = null;
+			AgoraEntry entry = null;
+			String entryId	 = null;
 			for (int e = xpp.getEventType(); e != XmlPullParser.END_DOCUMENT; e = xpp.next()) {
 				switch (e) {
 				case XmlPullParser.START_TAG:
 					final String startTag = xpp.getName();
 					if ("entry".equals(startTag)) {
-						final String id			= xpp.getAttributeValue(null, "id");
+						entryId					= xpp.getAttributeValue(null, "id");
 						final String category	= xpp.getAttributeValue(null, "category");
 						final String target		= xpp.getAttributeValue(null, "target");
+						final String schedule	= xpp.getAttributeValue(null, "schedule");
 
-						if (id == null || category == null)
+						if (entryId == null || category == null)
 							throw new ParseDataAbortException("Parse error: it does not have required content");
 
-						entry = new Entry(id, category, target);
-						entry.set(Tag.TitleJa,		xpp.getAttributeValue(null, "title_ja"));
-						entry.set(Tag.TitleEn,		xpp.getAttributeValue(null, "title_en"));
-						entry.set(Tag.Sponsor,		xpp.getAttributeValue(null, "sponsor"));
-						entry.set(Tag.CoSponsor,	xpp.getAttributeValue(null, "cosponsor"));
-						entry.set(Tag.Image,		xpp.getAttributeValue(null, "image"));
-						entry.set(Tag.Location,		xpp.getAttributeValue(null, "location"));
-						entry.set(Tag.Schedule,		xpp.getAttributeValue(null, "schedule"));
-						entry.set(Tag.Guest,		xpp.getAttributeValue(null, "guest"));
-						entry.set(Tag.Website,		xpp.getAttributeValue(null, "website"));
-						entryMap.put(id, entry);
+						entry = new AgoraEntry(category, target, schedule);
+						entry.set(Tag.TITLE_JA,		xpp.getAttributeValue(null, "title_ja"));
+						entry.set(Tag.TITLE_EN,		xpp.getAttributeValue(null, "title_en"));
+						entry.set(Tag.SPONSOR,		xpp.getAttributeValue(null, "sponsor"));
+						entry.set(Tag.CO_SPONSOR,	xpp.getAttributeValue(null, "cosponsor"));
+						entry.set(Tag.IMAGE,		xpp.getAttributeValue(null, "image"));
+						entry.set(Tag.LOCATION,		xpp.getAttributeValue(null, "location"));
+						entry.set(Tag.GUEST,		xpp.getAttributeValue(null, "guest"));
+						entry.set(Tag.WEBSITE,		xpp.getAttributeValue(null, "website"));
+						agoraEntry.put(entryId, entry);
 						break;
 					}
 					if (entry == null)
 						break;
 
 					if ("timeframe".equals(startTag)) {
-						//final String tfid	= xpp.getAttributeValue(null, "id");
 						final String day	= xpp.getAttributeValue(null, "day");
 						final int start		= Integer.parseInt(xpp.getAttributeValue(null, "start"));
 						final int end		= Integer.parseInt(xpp.getAttributeValue(null, "end"));
-						timeFrame.add(new TimeFrame(entry.getId(), day, start, end));
+						timeFrame.add(new TimeFrame(entryId, day, start, end));
 						break;
 					}
 
 					if ("abstract".equals(startTag))
-						entry.set(Tag.Abstract,		xpp.nextText());
+						entry.set(Tag.ABSTRACT,		xpp.nextText());
 					else if ("content".equals(startTag))
-						entry.set(Tag.Content,		xpp.nextText());
+						entry.set(Tag.CONTENT,		xpp.nextText());
 					else if ("note".equals(startTag))
-						entry.set(Tag.Note,			xpp.nextText());
+						entry.set(Tag.NOTE,			xpp.nextText());
 					else if ("reservation".equals(startTag)) {
-						entry.set(Tag.ProgramURL,	xpp.getAttributeValue(null, "url"));
-						entry.set(Tag.Reservation,	xpp.nextText());
+						entry.set(Tag.RESERVE_ADDRESS,	xpp.getAttributeValue(null, "url"));
+						entry.set(Tag.RESERVATION,		xpp.nextText());
 					}
 					else
 						throw new ParseDataAbortException("Parse error: unknown tag found");
@@ -204,8 +192,10 @@ public class AgoraData {
 
 				case XmlPullParser.END_TAG:
 					final String closeTag = xpp.getName();
-					if ("entry".equals(closeTag))
-						entry = null;
+					if ("entry".equals(closeTag)) {
+						entry	= null;
+						entryId	= null;
+					}
 					break;
 				}
 			}
@@ -213,7 +203,7 @@ public class AgoraData {
 
 			Collections.sort(timeFrame);
 
-			ee.putInt("initialCapacityOfEntryMap", (int) (entryMap.size() * 1.5));
+			ee.putInt("initialCapacityOfEntryMap", (int) (agoraEntry.size() * 1.5));
 			ee.putInt("initialCapacityOfTimeFrameMap", (int) (timeFrame.size() * 1.5));
 
 			// the new data file is valid (correctly, well-formed) XML, it's time to replace
@@ -255,12 +245,11 @@ public class AgoraData {
 
 	public static void clear() {
 		isParseFinished = false;
-		entryMap.clear();
+		agoraEntry.clear();
 		timeFrame.clear();
 	}
 
 	/**
-	 * 
 	 * @param handler Handler.
 	 * @param progress int. argument of setProgress()
 	 * @param max int. argument of setMax()
@@ -273,16 +262,20 @@ public class AgoraData {
 		handler.sendMessage(message);
 	}
 
+	protected Context getContext() {
+		return context;
+	}
+
 	/**
 	 *  @param id entry id
 	 *  @throws IllegalArgumentException when {@code id} is invalid
 	 *  @throws IllegalStateException called before finishing parse
 	 */
-	public static Entry getEntry(String id) {
+	public static AgoraEntry getEntry(String id) {
 		if (!isParseFinished)
 			throw new IllegalStateException();
-		if (entryMap.containsKey(id))
-			return entryMap.get(id);
+		if (agoraEntry.containsKey(id))
+			return agoraEntry.get(id);
 		throw new IllegalArgumentException("Requiest id does not exist");
 	}
 
@@ -291,9 +284,13 @@ public class AgoraData {
 	 * @throws IllegalStateException called before finishing parse
 	 */
 	public static List<String> getAllEntryId() {
-		if (!isParseFinished)
-			throw new IllegalStateException();
-		return new ArrayList<String>(entryMap.keySet());
+		assert !isParseFinished;
+		return new ArrayList<String>(agoraEntry.keySet());
+	}
+
+	public static List<TimeFrame> getAllTimeFrame() {
+		assert !isParseFinished;
+		return timeFrame;
 	}
 
 	/**
@@ -317,36 +314,22 @@ public class AgoraData {
 		assert !isParseFinished;
 
 		final List<String> match = new ArrayList<String>();
-		if (entryMap.containsKey(query))
+
+		// id match
+		if (agoraEntry.containsKey(query))
 			match.add(query);
 
-		for (Entry entry : entryMap.values()) {
+		// keyword match
+		for (Map.Entry<String, AgoraEntry> e : agoraEntry.entrySet()) {
+			final String id = e.getKey();
+			final AgoraEntry entry = e.getValue();
 			for (Tag key : searchByKeywordTags) {
 				final String s = entry.getString(key);
 				if (s != null && s.contains(query)) {
-					match.add(entry.getId());
+					match.add(id);
 					break;
 				}
 			}
-		}
-		return match;
-	}
-
-	/**
-	 * @param day
-	 * @param startBegin
-	 * @param startEnd
-	 * @return search result, list of {@code id}(s)
-	 * @throws IllegalStateException called before finishing parse
-	 */
-	public static List<String> getEntryBySchedule(String day, int startBegin, int startEnd) {
-		assert !isParseFinished;
-
-		final List<String> match = new ArrayList<String>();
-		for (TimeFrame t : timeFrame) {
-			final int start = t.getStart();
-			if (t.equalsDay(day) && startBegin <= start && start <= startEnd)
-				match.add(t.getId());
 		}
 		return match;
 	}
@@ -372,9 +355,8 @@ public class AgoraData {
 
 	private void updateFavoriteList() {
 		final StringBuilder sb = new StringBuilder();
-		for (String favoriteId : favorites) {
+		for (String favoriteId : favorites)
 			sb.append(favoriteId).append(';');
-		}
 
 		final SharedPreferences.Editor ee = pref.edit();
 		ee.putString("favorites", sb.toString());
@@ -383,7 +365,7 @@ public class AgoraData {
 
 	@Override
 	public String toString() {
-		return String.format("AgoraData has %d (Entry) and %d (TimeFrame) data", entryMap.size(), timeFrame.size());
+		return String.format("AgoraData has %d (Entry) and %d (TimeFrame) data", agoraEntry.size(), timeFrame.size());
 	}
 
 

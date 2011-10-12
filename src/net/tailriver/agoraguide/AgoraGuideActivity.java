@@ -22,6 +22,8 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		AgoraEntry.setResources(getResources());
+
 		findViewById(R.id.main_progress).setVisibility(View.GONE);
 
 		final AgoraData ad = new AgoraData(getApplicationContext());

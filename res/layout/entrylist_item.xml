@@ -4,26 +4,27 @@
 	android:layout_height="fill_parent" style="@style/EntryListView">
 	<TextView android:layout_height="wrap_content" android:id="@+id/entrylist_item_title"
 		android:layout_width="fill_parent" style="@style/TitleView"
-		android:singleLine="true" android:ellipsize="end"></TextView>
-	<TextView android:text="Sponsor" android:layout_height="wrap_content"
-		android:id="@+id/entrylist_item_sponsor" android:layout_width="fill_parent"
-		android:textColor="@color/secondary_text" android:textSize="12dp"
-		android:singleLine="true" android:ellipsize="end"></TextView>
+		android:singleLine="true" android:ellipsize="end" android:text="@string/tag_title"></TextView>
+	<TextView android:layout_height="wrap_content" android:id="@+id/entrylist_item_sponsor"
+		android:layout_width="fill_parent" android:textColor="@color/secondary_text"
+		android:textSize="12dp" android:singleLine="true" android:ellipsize="end"
+		android:text="@string/tag_sponsor"></TextView>
 	<LinearLayout android:layout_width="fill_parent"
 		android:layout_height="wrap_content">
 		<TextView android:id="@+id/entrylist_item_schedule"
-			android:text="Schedule" android:layout_width="wrap_content"
-			android:textColor="@color/secondary_text" android:textSize="12dp"
-			android:layout_height="fill_parent" android:layout_weight="1.0"
-			android:singleLine="true" android:ellipsize="end"></TextView>
-		<TextView android:id="@+id/entrylist_item_reservation"
-			android:layout_width="30dp" android:textColor="@color/secondary_text"
-			android:layout_gravity="right" android:textSize="12dp"
-			android:layout_height="fill_parent" android:text="@android:string/ok"></TextView>
-		<TextView android:id="@+id/entrylist_item_category"
-			android:text="Category" android:layout_width="100dp"
-			android:textColor="@color/secondary_text" android:gravity="right"
+			android:layout_width="wrap_content" android:textColor="@color/secondary_text"
 			android:textSize="12dp" android:layout_height="fill_parent"
-			android:singleLine="true"></TextView>
+			android:layout_weight="1.0" android:singleLine="true"
+			android:ellipsize="end" android:text="@string/tag_schedule"></TextView>
+		<TextView android:id="@+id/entrylist_item_reservation"
+			android:layout_width="wrap_content" android:textColor="@color/secondary_text"
+			android:layout_gravity="right" android:textSize="12dp"
+			android:layout_height="fill_parent" android:singleLine="true"
+			android:text="@string/tag_reservation"></TextView>
+		<TextView android:id="@+id/entrylist_item_target"
+			android:layout_width="100dp" android:textColor="@color/secondary_text"
+			android:gravity="right" android:textSize="12dp"
+			android:layout_height="fill_parent" android:singleLine="true"
+			android:text="@string/tag_target"></TextView>
 	</LinearLayout>
 </LinearLayout>

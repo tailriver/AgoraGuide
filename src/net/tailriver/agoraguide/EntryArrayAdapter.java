@@ -3,7 +3,7 @@ package net.tailriver.agoraguide;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.tailriver.agoraguide.Entry.*;
+import net.tailriver.agoraguide.AgoraEntry.*;
 
 import android.app.Activity;
 import android.content.Context;
@@ -46,23 +46,22 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 			convertView = inflater.inflate(textViewResourceId, null);
 		}
 
-		final Entry entry = AgoraData.getEntry(getItem(position));
+		final AgoraEntry entry = AgoraData.getEntry(getItem(position));
 
 		final TextView titleView = (TextView) convertView.findViewById(R.id.entrylist_item_title);
 		titleView.setText(entry.getLocaleTitle());
 
 		final TextView sponsorView = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
-		sponsorView.setText(entry.getString(Tag.Sponsor));
+		sponsorView.setText(entry.getString(Tag.SPONSOR));
 
 		final TextView scheduleView = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
-		scheduleView.setText(entry.getColoredSchedule());
+		scheduleView.setText(entry.getSchedule());
 
-		final TextView categoryView = (TextView) convertView.findViewById(R.id.entrylist_item_category);
-		categoryView.setText(entry.getCategory().toString());
+		final TextView targetView = (TextView) convertView.findViewById(R.id.entrylist_item_target);
+		targetView.setVisibility(View.INVISIBLE);
 
 		final TextView reservaionView = (TextView) convertView.findViewById(R.id.entrylist_item_reservation);
-		if (entry.getString(Tag.Reservation) == null)
-			reservaionView.setVisibility(View.INVISIBLE);
+		reservaionView.setVisibility( entry.getString(Tag.RESERVATION) != null ? View.VISIBLE : View.INVISIBLE);
 
 		return convertView;
 	}

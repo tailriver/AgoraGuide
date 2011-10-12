@@ -2,7 +2,7 @@ package net.tailriver.agoraguide;
 
 import java.net.URL;
 
-import net.tailriver.agoraguide.Entry.*;
+import net.tailriver.agoraguide.AgoraEntry.*;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -53,14 +53,23 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
 
-		final MenuItem favoriteItem = menu.findItem(R.id.menu_entrygallery_favorite);
+		final MenuItem favoriteItem = menu.findItem(R.id.menu_entrygallery_favorites);
 		if (!AgoraData.isFavorite(selectedId))
 			favoriteItem.setTitle(R.string.addFavorite);
 		else
 			favoriteItem.setTitle(R.string.removeFavorite);
 
+		final MenuItem reserveItem = menu.findItem(R.id.menu_entrygallery_reserve);
+		final URL reserveAddress = AgoraData.getEntry(selectedId).getURL(Tag.RESERVE_ADDRESS);
+		if (reserveAddress != null) {
+			reserveItem.setEnabled(true);
+			reserveItem.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(reserveAddress.toExternalForm())));
+		}
+		else
+			reserveItem.setEnabled(false);
+
 		final MenuItem websiteItem = menu.findItem(R.id.menu_entrygallery_website);
-		final URL website = AgoraData.getEntry(selectedId).getURL(Tag.Website);
+		final URL website = AgoraData.getEntry(selectedId).getURL(Tag.WEBSITE);
 		if (website != null) {
 			websiteItem.setEnabled(true);
 			websiteItem.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(website.toExternalForm())));
@@ -74,7 +83,7 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
-		if (item.getItemId() == R.id.menu_entrygallery_favorite) {
+		if (item.getItemId() == R.id.menu_entrygallery_favorites) {
 			new AgoraData(this).setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
 			return false;
 		}
