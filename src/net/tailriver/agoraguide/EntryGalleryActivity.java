@@ -24,6 +24,8 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.entrygallery);
 
+		AgoraData.setApplicationContext(getApplicationContext());
+
 		final String[] entryIdList = getIntent().getStringArrayExtra("entryIdList");
 		final int position = getIntent().getIntExtra("position", 0);
 
@@ -84,7 +86,7 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 	public boolean onOptionsItemSelected(MenuItem item) {
 		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
 		if (item.getItemId() == R.id.menu_entrygallery_favorites) {
-			new AgoraData(this).setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
+			AgoraData.setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
 			return false;
 		}
 		return false;

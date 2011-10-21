@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE LinearLayout>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" style="@style/AgoraGuideLayout">
@@ -12,7 +14,7 @@
 	<TextView android:text="Not Found" android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/sbk_empty"></TextView>
 	<ListView android:layout_width="fill_parent" android:id="@+id/sbk_result"
-		android:layout_height="fill_parent" android:scrollingCache="false">
+		android:layout_height="fill_parent">
 		<!-- Preview: listitem=@layout/entrylist_item -->
 	</ListView>
 </LinearLayout>

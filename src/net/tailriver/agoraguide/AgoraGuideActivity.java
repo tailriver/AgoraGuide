@@ -1,7 +1,5 @@
 package net.tailriver.agoraguide;
 
-import net.tailriver.agoraguide.AgoraData.*;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,13 +20,11 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		AgoraEntry.setResources(getResources());
-
 		findViewById(R.id.main_progress).setVisibility(View.GONE);
 
-		final AgoraData ad = new AgoraData(getApplicationContext());
+		AgoraData.setApplicationContext(getApplicationContext());
 		try {
-			ad.parseData();
+			AgoraData.parseData();
 		}
 		catch (ParseDataAbortException e) {
 			// ignore
@@ -47,16 +43,15 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 		final Message message = new Message();
 		message.what = R.layout.main;
 		try {
-			final AgoraData ad = new AgoraData(getApplicationContext());
 			boolean isUpdated = false;
 			try {
-				isUpdated = ad.updateData(true, handler);
+				isUpdated = AgoraData.updateData(true, handler);
 			}
 			catch (UpdateDataAbortException e) {
-				isUpdated = ad.updateData(false, handler);
+				isUpdated = AgoraData.updateData(false, handler);
 			}
 			if (isUpdated)
-				ad.parseData();
+				AgoraData.parseData();
 		}
 		catch (UpdateDataAbortException e) {
 			message.arg1 = R.string.error_fail_update;
@@ -118,7 +113,7 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 			return true;
 		}
 		if (item.getItemId() == R.id.menu_preference) {
-			new AgoraData(getApplicationContext()).removeData();
+			AgoraData.removeData();
 			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_SHORT).show();
 			new Thread(AgoraGuideActivity.this).start();
 		}

@@ -16,6 +16,8 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 		setContentView(R.layout.searchbykeyword);
 		setTitle(R.string.searchByKeyword);
 
+		AgoraData.setApplicationContext(getApplicationContext());
+
 		final ListView entryList = (ListView) findViewById(R.id.sbk_result);
 		entryList.setAdapter(new EntryArrayAdapter(SearchByKeywordActivity.this, entryList.getId()));
 		entryList.setOnItemClickListener(theAdapter());

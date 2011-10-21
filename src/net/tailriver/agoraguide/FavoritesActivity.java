@@ -18,6 +18,8 @@ public class FavoritesActivity extends Activity {
 		setContentView(R.layout.favorites);
 		setTitle(R.string.favorites);
 
+		AgoraData.setApplicationContext(getApplicationContext());
+
 		final ListView entryListView = (ListView) findViewById(R.id.favorites_entrylist);
 		entryListView.setAdapter(new EntryArrayAdapter(FavoritesActivity.this, entryListView.getId()));
 		entryListView.setOnItemClickListener(theAdapter());
@@ -66,7 +68,7 @@ public class FavoritesActivity extends Activity {
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					new AgoraData(FavoritesActivity.this).clearFavorite();
+					AgoraData.clearFavorite();
 					theAdapter().clear();
 					findViewById(R.id.favorites_entrylist).invalidate();
 				}

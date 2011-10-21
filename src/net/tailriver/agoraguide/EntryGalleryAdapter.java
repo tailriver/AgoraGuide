@@ -40,7 +40,7 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 
 		final TextView iconView = (TextView) convertView.findViewById(R.id.entrygallery_icon);
 		iconView.setText(id);
-		iconView.append(" " + context.getString(entry.getCategory().getResourceId()));
+		iconView.append(" " + entry.getCategory().toString());
 
 		final TextView titleView = (TextView) convertView.findViewById(R.id.entrygallery_title);
 		titleView.setText(entry.getLocaleTitle());
@@ -58,8 +58,11 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		final SpannableStringBuilder text = new SpannableStringBuilder();
 		for (Tag tag : new Tag[]{Tag.ABSTRACT, Tag.CONTENT, Tag.GUEST, Tag.RESERVATION, Tag.NOTE}) {
 			final String tagValue = entry.getString(tag);
-			if (tagValue != null)
-				text.append(enhanceTagName(tag)).append(tagValue).append(delimiter);
+			if (tagValue != null) {
+				final SpannableString section = new SpannableString(tag.toString() + "\n");
+				section.setSpan(new BackgroundColorSpan(Color.LTGRAY), 0, section.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				text.append(section).append(tagValue).append(delimiter);
+			}
 		}
 		text.delete(text.length() - delimiter.length(), text.length());
 
@@ -68,7 +71,7 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 
 		final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.entrygallery_image);
 		final URL imageURL = entry.getURL(Tag.IMAGE);
-		if (imageURL != null && AgoraData.isConnected(context)) {
+		if (imageURL != null && AgoraData.isConnected()) {
 			HttpURLConnection huc = null;
 			try {
 				huc = (HttpURLConnection) imageURL.openConnection();
@@ -89,11 +92,5 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		}
 
 		return convertView;
-	}
-
-	private SpannableString enhanceTagName(Tag tag) {
-		final SpannableString ss = new SpannableString(context.getString(tag.getResourceId()) + "\n");
-		ss.setSpan(new BackgroundColorSpan(Color.LTGRAY), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-		return ss;
 	}
 }

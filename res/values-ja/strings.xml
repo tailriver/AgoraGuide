@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources>
+
 <resources>
     <string name="searchByKeyword">キーワードで探す</string>
     <string name="searchBySchedule">時間で探す</string>
@@ -11,6 +13,6 @@
     <string name="clearFavorite">すべてのお気に入りを削除する</string>
     <string name="preference">設定</string>
 	<string name="website">ウェブサイトに移動</string>
-	<string name="reservation">予約可</string>
-	<string name="reserve">予約する</string>
+	<string name="reservation">事前申込可</string>
+	<string name="reserve">申込詳細へ</string>
 </resources>

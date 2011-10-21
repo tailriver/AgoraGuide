@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources>
+
 <resources>
 	<!-- Activity level -->
 	<style name="AgoraGuide" parent="@android:style/Theme.Light">
@@ -37,6 +39,7 @@
 		<item name="android:paddingLeft">3dp</item>
 		<item name="android:paddingRight">3dp</item>
 		<item name="android:background">#F6F6E8</item>
+		<item name="android:scrollingCache">false</item>
 	</style>
 
 

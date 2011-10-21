@@ -22,35 +22,35 @@ public class AgoraData {
 		Tag.TITLE_JA, Tag.TITLE_EN, Tag.SPONSOR, Tag.CO_SPONSOR, Tag.ABSTRACT, Tag.CONTENT, Tag.GUEST, Tag.NOTE
 	};
 
+	private static Context context;
 	private static Map<String, AgoraEntry> agoraEntry;
 	private static List<TimeFrame> timeFrame;
 	private static List<String> favorites;
-	private static boolean isParseFinished = false;
 
-	private final Context context;
-	private final SharedPreferences pref;
+	public static void setApplicationContext(Context context) {
+		if (AgoraData.context != null)
+			return;
 
-	/** @param context	It should be {@code getApplicationContext()} */
-	public AgoraData(Context context) {
-		this.context = context.getApplicationContext();
-		this.pref	 = this.context.getSharedPreferences("pref", Context.MODE_PRIVATE);
+		AgoraData.context = context.getApplicationContext();
 
-		if (agoraEntry == null) {
-			agoraEntry	= new LinkedHashMap<String, AgoraEntry>(pref.getInt("initialCapacityOfEntry",	50));
-			timeFrame	= new ArrayList<TimeFrame>(  pref.getInt("initialCapacityOfTimeFrame",		50));
-			favorites	= new ArrayList<String>(Arrays.asList(pref.getString("favorites", "").split(";")));
-		}
+		AgoraEntry.setResources(AgoraData.context.getResources());
+		TimeFrame.setResources(AgoraData.context.getResources());
+
+		final SharedPreferences pref = getSharedPreferences();
+		agoraEntry	= new LinkedHashMap<String, AgoraEntry>(pref.getInt("initialCapacityOfEntry",	50));
+		timeFrame	= new ArrayList<TimeFrame>(  pref.getInt("initialCapacityOfTimeFrame",		50));
+		favorites	= new ArrayList<String>(Arrays.asList(pref.getString("favorites", "").split(";")));
 	}
 
-	public static boolean isParseFinished() {
-		return isParseFinished;
+	private static SharedPreferences getSharedPreferences() {
+		return context.getSharedPreferences(context.getString(R.string.path_pref), Context.MODE_PRIVATE);
 	}
 
-	public boolean isConnected() {
-		return AgoraData.isConnected(context);
+	private static boolean isParseFinished() {
+		return agoraEntry.size() > 0;
 	}
 
-	public static boolean isConnected(Context context) {
+	public static boolean isConnected() {
 		final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		final NetworkInfo ni = cm.getActiveNetworkInfo();
 
@@ -58,7 +58,7 @@ public class AgoraData {
 	}
 
 	/** @throws UpdateDataAbortException */
-	public boolean updateData(boolean useGZIP, Handler handler) throws UpdateDataAbortException {
+	public static boolean updateData(boolean useGZIP, Handler handler) throws UpdateDataAbortException {
 		if (!isConnected())
 			return false;
 
@@ -75,7 +75,7 @@ public class AgoraData {
 
 		// format of version.txt
 		//		version ; file size of data.xml ; file size of data.xml.gz
-		final int localVersion	= pref.getInt("localVersion", 0);
+		final int localVersion	= getSharedPreferences().getInt("localVersion", 0);
 		final int serverVersion	= Integer.parseInt(versionText[0]);
 		final int size			= Integer.parseInt(versionText[useGZIP ? 2 : 1]);
 
@@ -112,7 +112,7 @@ public class AgoraData {
 			bos.flush();
 			bos.close();
 
-			SharedPreferences.Editor ee = pref.edit();
+			SharedPreferences.Editor ee = getSharedPreferences().edit();
 			ee.putInt("localVersionNew", serverVersion);
 			ee.commit();
 
@@ -128,11 +128,11 @@ public class AgoraData {
 	}
 
 	/** @throws ParseDataAbortException */
-	public void parseData() throws ParseDataAbortException {
+	public static void parseData() throws ParseDataAbortException {
 		clear();
 
-		boolean useNewData = pref.contains("localVersionNew");
-		final SharedPreferences.Editor ee = pref.edit();
+		boolean useNewData = getSharedPreferences().contains("localVersionNew");
+		final SharedPreferences.Editor ee = getSharedPreferences().edit();
 
 		try {
 			final XmlPullParser xpp = Xml.newPullParser();
@@ -199,8 +199,6 @@ public class AgoraData {
 					break;
 				}
 			}
-			isParseFinished = true;
-
 			Collections.sort(timeFrame);
 
 			ee.putInt("initialCapacityOfEntryMap", (int) (agoraEntry.size() * 1.5));
@@ -211,7 +209,7 @@ public class AgoraData {
 				final String newFile = context.getString(R.string.path_local_data_new);
 				final String oldFile = context.getString(R.string.path_local_data);
 				context.getFileStreamPath(newFile).renameTo(context.getFileStreamPath(oldFile));
-				ee.putInt("localVersion", pref.getInt("localVersionNew", 0));
+				ee.putInt("localVersion", getSharedPreferences().getInt("localVersionNew", 0));
 			}
 		}
 		catch (ParseDataAbortException e) {
@@ -228,23 +226,22 @@ public class AgoraData {
 
 			// delete invalid new XML file
 			// retry. parseData() run under using old data
-			if (useNewData && !isParseFinished) {
+			if (useNewData && !isParseFinished()) {
 				context.deleteFile(context.getString(R.string.path_local_data_new));
 				parseData();
 			}
 		}
 	}
 
-	public void removeData() {
+	public static void removeData() {
 		context.deleteFile(context.getString(R.string.path_local_data));
-		final SharedPreferences.Editor ee = pref.edit();
+		final SharedPreferences.Editor ee = getSharedPreferences().edit();
 		ee.remove("lovalVersionNew");
 		ee.remove("localVersion");
 		ee.commit();
 	}
 
 	public static void clear() {
-		isParseFinished = false;
 		agoraEntry.clear();
 		timeFrame.clear();
 	}
@@ -262,40 +259,31 @@ public class AgoraData {
 		handler.sendMessage(message);
 	}
 
-	protected Context getContext() {
-		return context;
-	}
-
 	/**
 	 *  @param id entry id
-	 *  @throws IllegalArgumentException when {@code id} is invalid
-	 *  @throws IllegalStateException called before finishing parse
 	 */
 	public static AgoraEntry getEntry(String id) {
-		if (!isParseFinished)
-			throw new IllegalStateException();
-		if (agoraEntry.containsKey(id))
-			return agoraEntry.get(id);
-		throw new IllegalArgumentException("Requiest id does not exist");
+		assert !isParseFinished();
+		assert !agoraEntry.containsKey(id) : "Request id does not exist";
+		return agoraEntry.get(id);
 	}
 
 	/**
 	 * @return list of entry {@code id}(s)
-	 * @throws IllegalStateException called before finishing parse
+	 * @throws AssertionError called before finishing parse
 	 */
 	public static List<String> getAllEntryId() {
-		assert !isParseFinished;
+		assert !isParseFinished();
 		return new ArrayList<String>(agoraEntry.keySet());
 	}
 
 	public static List<TimeFrame> getAllTimeFrame() {
-		assert !isParseFinished;
+		assert !isParseFinished();
 		return timeFrame;
 	}
 
 	/**
 	 * @return list of favorite entry {@code id}(s)
-	 * @throws IllegalStateException called before finishing parse
 	 */
 	public static List<String> getFavoriteEntryId() {
 		// normalize
@@ -311,7 +299,7 @@ public class AgoraData {
 	 * @throws IllegalStateException called before finishing parse
 	 */
 	public static List<String> getEntryByKeyword(String query) {
-		assert !isParseFinished;
+		assert !isParseFinished();
 
 		final List<String> match = new ArrayList<String>();
 
@@ -338,7 +326,7 @@ public class AgoraData {
 		return favorites.contains(id);
 	}
 
-	public void setFavorite(String id, boolean state) {
+	public static void setFavorite(String id, boolean state) {
 		if (state && !favorites.contains(id)) {
 			favorites.add(id);
 			updateFavoriteList();
@@ -348,38 +336,18 @@ public class AgoraData {
 		}
 	}
 
-	public void clearFavorite() {
+	public static void clearFavorite() {
 		favorites.clear();
 		updateFavoriteList();
 	}
 
-	private void updateFavoriteList() {
+	private static void updateFavoriteList() {
 		final StringBuilder sb = new StringBuilder();
 		for (String favoriteId : favorites)
 			sb.append(favoriteId).append(';');
 
-		final SharedPreferences.Editor ee = pref.edit();
+		final SharedPreferences.Editor ee = getSharedPreferences().edit();
 		ee.putString("favorites", sb.toString());
 		ee.commit();
-	}
-
-	@Override
-	public String toString() {
-		return String.format("AgoraData has %d (Entry) and %d (TimeFrame) data", agoraEntry.size(), timeFrame.size());
-	}
-
-
-	@SuppressWarnings("serial")
-	class UpdateDataAbortException extends Exception {
-		public UpdateDataAbortException(String s) {
-			super(s);
-		}
-	}
-
-	@SuppressWarnings("serial")
-	class ParseDataAbortException extends Exception {
-		public ParseDataAbortException(String s) {
-			super(s);
-		}
 	}
 }

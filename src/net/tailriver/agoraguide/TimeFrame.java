@@ -2,6 +2,8 @@ package net.tailriver.agoraguide;
 
 import java.util.ArrayList;
 
+import android.content.res.Resources;
+
 public class TimeFrame implements Comparable<TimeFrame> {
 	public enum Days {
 		FRI("Fri", R.string.days_fri),
@@ -9,23 +11,25 @@ public class TimeFrame implements Comparable<TimeFrame> {
 		SUN("Sun", R.string.days_sun),
 		;
 
-		private final String name;
+		private final String xmlName;
 		private final int resId;
 
 		private Days(String name, int resId) {
-			this.name = name;
+			this.xmlName = name;
 			this.resId = resId;
 		}
 
-		public int getResourceId() {
-			return resId;
+		public String toString() {
+			assert res == null;
+			return res.getString(resId);
 		}
 
-		@Override
-		public String toString() {
-			return name;
+		public String getXMLString() {
+			return xmlName;
 		}
 	}
+
+	private static Resources res;
 
 	private final String eid;	// entry id
 	private final Days day;
@@ -37,6 +41,10 @@ public class TimeFrame implements Comparable<TimeFrame> {
 		this.day	= Days.valueOf(day.toUpperCase());
 		this.start	= start;
 		this.end	= end;
+	}
+
+	public static void setResources(Resources res) {
+		TimeFrame.res = res;
 	}
 
 	public String getId() {

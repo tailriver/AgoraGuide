@@ -24,6 +24,8 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 		setContentView(R.layout.searchbyschedule);
 		setTitle(R.string.searchBySchedule);
 
+		AgoraData.setApplicationContext(getApplicationContext());
+
 		final ListView entryList = (ListView) findViewById(R.id.sbs_result);
 		entryList.setAdapter(new EntryArrayAdapter(SearchByScheduleActivity.this, entryList.getId()));
 		entryList.setOnItemClickListener(theAdapter());

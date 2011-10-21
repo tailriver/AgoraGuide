@@ -50,9 +50,11 @@ public class AgoraEntry {
 			return c.equals(theClass);
 		}
 
-		public int getResourceId() {
+		@Override
+		public String toString() {
 			assert resId == -1;
-			return resId;
+			assert res == null;
+			return res.getString(resId);
 		}
 	}
 
@@ -73,8 +75,10 @@ public class AgoraEntry {
 			this.resId = resId;
 		}
 
-		public int getResourceId() {
-			return resId;
+		@Override
+		public String toString() {
+			assert res == null;
+			return res.getString(resId);
 		}
 	}
 
@@ -91,7 +95,7 @@ public class AgoraEntry {
 
 	// static variables
 
-	private static Resources mRes;
+	private static Resources res;
 	private static final Map<Days, Integer> bgColor;
 
 	static {
@@ -123,7 +127,7 @@ public class AgoraEntry {
 	}
 
 	public static void setResources(Resources res) {
-		mRes = res;
+		AgoraEntry.res = res;
 	}
 
 	public Category getCategory() {
@@ -180,11 +184,11 @@ public class AgoraEntry {
 		for (Map.Entry<Days, Integer> e : bgColor.entrySet()) {
 			final Days day		= e.getKey();
 			final int color		= e.getValue();
-			final String seek	= String.format("[%s]", day.toString());
+			final String seek	= String.format("[%s]", day.getXMLString());
 
 			int p = text.toString().indexOf(seek);
 			while (p > -1) {
-				final SpannableString ss = new SpannableString(mRes.getText(day.getResourceId()));
+				final SpannableString ss = new SpannableString(day.toString());
 				ss.setSpan(android.graphics.Typeface.BOLD, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				ss.setSpan(new ForegroundColorSpan(color), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				text.replace(p, p + seek.length(), ss);
