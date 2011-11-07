@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/EntryListView"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/agori_item_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="Title"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/agori_item_comment"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Comment"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/agori_item_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:gravity="right"
+        android:text="Name"
+        android:textSize="14sp" />
+
+</LinearLayout>

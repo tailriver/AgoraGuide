@@ -1,7 +1,9 @@
 package net.tailriver.agoraguide;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import net.tailriver.agoraguide.AgoraEntry.*;
 
@@ -23,6 +25,8 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 	private final int adapterViewResourceId;
 	private final List<String> objects;			// it shares reference with private list of the superclass
 
+	private final Map<Category, Boolean> filter;
+
 	public EntryArrayAdapter(Context context, int adapterViewResourceId) {
 		this(context, adapterViewResourceId, new ArrayList<String>());
 	}
@@ -32,11 +36,27 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 		this.context = context;
 		this.adapterViewResourceId = adapterViewResourceId;
 		this.objects = objects;
+
+		this.filter = new EnumMap<Category, Boolean>(Category.class);
+		for (Category cat : Category.values())
+			filter.put(cat, true);
 	}
 
 	public void add(List<String> objects) {
 		for (String e : objects)
 			super.add(e);
+	}
+
+	public boolean getFilter(Category cat) {
+		return filter.get(cat);
+	}
+
+	public void setFilter(Category cat, boolean isChecked) {
+		filter.put(cat, isChecked);
+	}
+
+	public Map<Category, Boolean> tellFilter() {
+		return filter;
 	}
 
 	@Override

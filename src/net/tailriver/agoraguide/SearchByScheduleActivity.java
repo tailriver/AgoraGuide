@@ -3,8 +3,6 @@ package net.tailriver.agoraguide;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.tailriver.agoraguide.TimeFrame.Days;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,7 +20,6 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.searchbyschedule);
-		setTitle(R.string.searchBySchedule);
 
 		AgoraData.setApplicationContext(getApplicationContext());
 
@@ -37,10 +34,10 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 
 		theAdapter().add(timeFrameOrderedEntry);
 
-		final String[] times = { "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00" };
-		final SpinnerAdapter dayAdapter = new ArrayAdapter<String>(SearchByScheduleActivity.this, android.R.layout.simple_spinner_item, TimeFrame.getDaysString());
-		final SpinnerAdapter timeAdapter = new ArrayAdapter<String>(SearchByScheduleActivity.this, android.R.layout.simple_spinner_item, times);
-
+		final SpinnerAdapter dayAdapter = new ArrayAdapter<String>(SearchByScheduleActivity.this,
+				android.R.layout.simple_spinner_item, Day.getDaysLocale());
+		final SpinnerAdapter timeAdapter = new ArrayAdapter<String>(SearchByScheduleActivity.this,
+				android.R.layout.simple_spinner_item, getApplicationContext().getResources().getStringArray(R.array.sbs_times));
 		final Spinner daySpinner = (Spinner) findViewById(R.id.sbs_day);
 		final Spinner timeSpinner = (Spinner) findViewById(R.id.sbs_time);
 
@@ -59,17 +56,16 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view,
 			int position, long id) {
-		final String day	= (String) ((Spinner) findViewById(R.id.sbs_day) ).getSelectedItem();
-		final String time	= (String) ((Spinner) findViewById(R.id.sbs_time)).getSelectedItem();
+		final int day	= ((Spinner) findViewById(R.id.sbs_day)).getSelectedItemPosition();
+		final int time	= Integer.parseInt(((String) ((Spinner) findViewById(R.id.sbs_time)).getSelectedItem()).replace(":", ""));
 
-		final int dayOrdinal = Days.valueOf(day.toUpperCase()).ordinal();
-		final int start = Integer.parseInt(time.replace(":", ""));
-
+		final TimeFrame pivot = new TimeFrame(null, Day.getDays().get(day), time, time);
 		final List<TimeFrame> timeFrame = AgoraData.getAllTimeFrame();
+
 		int viewPosition = 0;
 		while (viewPosition < timeFrame.size()) {
-			final TimeFrame tf = timeFrame.get(viewPosition);
-			if (tf.getDay().ordinal() > dayOrdinal || tf.equalsDay(day) && tf.getStart() >= start)
+			final TimeFrame seek = timeFrame.get(viewPosition);
+			if (seek.compareTo(pivot) > -1)
 				break;
 			viewPosition++;
 		}

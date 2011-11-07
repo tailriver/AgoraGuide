@@ -1,20 +1,26 @@
 package net.tailriver.agoraguide;
 
+import net.tailriver.agoraguide.AgoraEntry.Category;
+
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
 import android.widget.EditText;
 import android.widget.ListView;
 
-public class SearchByKeywordActivity extends Activity implements TextWatcher {
+public class SearchByKeywordActivity extends Activity implements TextWatcher, OnMultiChoiceClickListener, OnClickListener {
 	/** Called when the activity is first created. */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.searchbykeyword);
-		setTitle(R.string.searchByKeyword);
 
 		AgoraData.setApplicationContext(getApplicationContext());
 
@@ -30,19 +36,14 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		final EditText editText = (EditText) findViewById(R.id.sbk_text);
-		editText.setText(editText.getText());
+		search(null);
 		theAdapter().onActivityResult(requestCode, resultCode, data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		theAdapter().clear();
-		if (s != null && s.length() > 0)
-			theAdapter().add(AgoraData.getEntryByKeyword(s.toString()));
-		else
-			theAdapter().add(AgoraData.getAllEntryId());
+		search(s);
 	}
 
 	@Override
@@ -52,6 +53,50 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher {
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		final String[] choices = new String[Category.values().length];
+		final boolean[] checked = new boolean[Category.values().length];
+		for (Category cat : Category.values()) {
+			choices[cat.ordinal()] = cat.toString();
+			checked[cat.ordinal()] = theAdapter().getFilter(cat);
+		}
+
+		new AlertDialog.Builder(SearchByKeywordActivity.this)
+		.setTitle(R.string.filtering)
+		.setIcon(android.R.drawable.ic_search_category_default)
+		.setMultiChoiceItems(choices, checked, this)
+		.setPositiveButton(android.R.string.ok, this)
+		.setNeutralButton(R.string.selectAll, this)
+		.create()
+		.show();
+
+		return false;
+	}
+
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		if (which == AlertDialog.BUTTON_NEUTRAL) {
+			for (Category cat : Category.values())
+				theAdapter().setFilter(cat, true);
+		}
+
+		dialog.dismiss();
+		search(null);
+	}
+
+	@Override
+	public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+		theAdapter().setFilter(Category.values()[which], isChecked);
+	}
+
+	private void search(Editable s) {
+		if (s == null)
+			s = ((EditText) findViewById(R.id.sbk_text)).getText();
+		theAdapter().clear();
+		theAdapter().add(AgoraData.getEntryByKeyword(s.toString(), theAdapter().tellFilter()));	
 	}
 
 	private EntryArrayAdapter theAdapter() {

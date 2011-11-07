@@ -1,25 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE resources>
-
 <resources>
-	<string name="tag_title">title</string>
-	<string name="tag_target">Target</string>
-	<string name="tag_schedule">Schedule</string>
-	<string name="tag_sponsor">Sponsor</string>
-	<string name="tag_abstract">Abstract</string>
-	<string name="tag_content">Content</string>
-	<string name="tag_reservation">Appointment</string>
-	<string name="tag_guest">Guest</string>
-	<string name="tag_note">Note</string>
-	<string name="category_A1">Booth</string>
-	<string name="category_A2">Poster</string>
-	<string name="category_A3">Display &amp; Craft</string>
-	<string name="category_A4">Other</string>
-	<string name="category_B1">Symposium &amp; Talk Session</string>
-	<string name="category_B2">Workshop &amp; Science Cafe</string>
-	<string name="category_B3">Science Show &amp; Display</string>
-	<string name="category_B4">Other</string>
-	<string name="days_fri">Fri</string>
-	<string name="days_sat">Sat</string>
-	<string name="days_sun">Sun</string>
+
+    <string name="tag_title">title</string>
+    <string name="tag_target">Target</string>
+    <string name="tag_schedule">Schedule</string>
+    <string name="tag_sponsor">Sponsor</string>
+    <string name="tag_abstract">Abstract</string>
+    <string name="tag_content">Content</string>
+    <string name="tag_reservation">Appointment</string>
+    <string name="tag_guest">Guest</string>
+    <string name="tag_note">Note</string>
+    <string name="category_A1">Booth</string>
+    <string name="category_A2">Poster</string>
+    <string name="category_A3">Display &amp; Craft</string>
+    <string name="category_A4">Other</string>
+    <string name="category_B1">Symposium &amp; Talk Session</string>
+    <string name="category_B2">Workshop &amp; Science Cafe</string>
+    <string name="category_B3">Science Show &amp; Display</string>
+    <string name="category_B4">Other</string>
+
+    <string-array name="days">
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string-array name="days_locale">
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string-array name="sbs_times">
+        <item>10:00</item>
+        <item>11:00</item>
+        <item>12:00</item>
+        <item>13:00</item>
+        <item>14:00</item>
+        <item>15:00</item>
+        <item>16:00</item>
+    </string-array>
+
 </resources>

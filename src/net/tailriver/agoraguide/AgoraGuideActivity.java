@@ -20,24 +20,17 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		findViewById(R.id.main_progress).setVisibility(View.GONE);
+		findViewById(R.id.main_progressLayout).setVisibility(View.INVISIBLE);
 
 		AgoraData.setApplicationContext(getApplicationContext());
 		try {
 			AgoraData.parseData();
 		}
-		catch (ParseDataAbortException e) {
-			// ignore
-		}
+		catch (ParseDataAbortException e) { }
 		new Thread(AgoraGuideActivity.this).start();
 	}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-	}
-
-	/** You must not try to change UI here, go to {@link Handler}.  */
+	/** You must not try to change UI here, go to {@link Handler}. */
 	@Override
 	public synchronized void run() {
 		final Message message = new Message();
@@ -57,13 +50,13 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 			message.arg1 = R.string.error_fail_update;
 			message.arg2 = Toast.LENGTH_LONG;
 			handler.sendMessage(message);
-			Log.e("AgoraGuide", e.toString());
+			LogError(e.toString());
 		}
 		catch (ParseDataAbortException e) {
 			message.arg1 = R.string.error_fail_parse;
 			message.arg2 = Toast.LENGTH_LONG;
 			handler.sendMessage(message);
-			Log.e("AgoraGuide", e.toString());
+			LogError(e.toString());
 		}
 	}
 
@@ -77,8 +70,8 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 
 				if (msg.arg1 == 0) {
 					pb.setMax(msg.arg2);
-					pb.setVisibility(msg.arg2 > 0 ? View.VISIBLE : View.GONE);
-					findViewById(R.id.main_text).invalidate();
+					findViewById(R.id.main_progressLayout)
+					.setVisibility(msg.arg2 > 0 ? View.VISIBLE : View.INVISIBLE);
 				}
 				break;
 
@@ -87,7 +80,7 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 				break;
 
 			default:
-				Log.w("AgoraGuide", "unknown message received: " + msg.toString());
+				LogError("unknown message received: " + msg.toString());
 			}
 		}
 	};
@@ -96,27 +89,48 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		final MenuInflater mi = new MenuInflater(AgoraGuideActivity.this);
 		mi.inflate(R.menu.main, menu);
-
-		menu.findItem(R.id.menu_sbk).setIntent(new Intent(AgoraGuideActivity.this, SearchByKeywordActivity.class));
-		menu.findItem(R.id.menu_sbs).setIntent(new Intent(AgoraGuideActivity.this, SearchByScheduleActivity.class));
-		menu.findItem(R.id.menu_sbm).setEnabled(false);
-		menu.findItem(R.id.menu_favorites).setIntent(new Intent(AgoraGuideActivity.this, FavoritesActivity.class));
-		//menu.findItem(R.id.menu_agora).setEnabled(false);
-		menu.findItem(R.id.menu_preference).setEnabled(true);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getIntent() != null) {
-			startActivity(item.getIntent());
-			return true;
-		}
-		if (item.getItemId() == R.id.menu_preference) {
+		Class<?> nextActivity = null;
+		switch (item.getItemId()) {
+		case R.id.menu_sbk:
+			nextActivity = SearchByKeywordActivity.class;
+			break;
+
+		case R.id.menu_sbs:
+			nextActivity = SearchByScheduleActivity.class;
+			break;
+
+		case R.id.menu_favorites:
+			nextActivity = FavoritesActivity.class;
+			break;
+
+		case R.id.menu_agori:
+			nextActivity = AgoriActivity.class;
+			break;
+
+		case R.id.menu_preferences:
 			AgoraData.removeData();
 			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_SHORT).show();
 			new Thread(AgoraGuideActivity.this).start();
+			return true;
+
+		default:
+			break;
 		}
-		return false;
+
+		if (nextActivity != null) {
+			startActivity(new Intent(AgoraGuideActivity.this, nextActivity));
+			return true;
+		}
+		else
+			return false;
+	}
+
+	private void LogError(String s) {
+		Log.e(getApplicationContext().getString(R.string.app_name), s);
 	}
 }

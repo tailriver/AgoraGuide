@@ -17,8 +17,9 @@
 		</activity>
 		<activity android:name="EntryGalleryActivity"
 			android:screenOrientation="portrait"></activity>
-		<activity android:name="FavoritesActivity"></activity>
-		<activity android:name="SearchByKeywordActivity"></activity>
-		<activity android:name="SearchByScheduleActivity"></activity>
+		<activity android:name="FavoritesActivity" android:label="@string/favorites"></activity>
+		<activity android:name="SearchByKeywordActivity" android:label="@string/searchByKeyword"></activity>
+		<activity android:name="SearchByScheduleActivity" android:label="@string/searchBySchedule"></activity>
+		<activity android:name="AgoriActivity" android:label="@string/agori"></activity>
 	</application>
 </manifest>

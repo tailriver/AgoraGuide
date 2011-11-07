@@ -1,14 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE menu>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/menu_sbk" android:title="@string/searchByKeyword"
-		android:icon="@drawable/icon" />
-	<item android:id="@+id/menu_sbs" android:title="@string/searchBySchedule"
-		android:icon="@drawable/icon" />
-	<item android:id="@+id/menu_sbm" android:title="@string/searchByMap"
-		android:icon="@drawable/icon" />
-	<item android:id="@+id/menu_favorites" android:title="@string/favorites"
-		android:icon="@drawable/icon"></item>
-	<item android:id="@+id/menu_preference" android:title="@string/preference"></item>
+    <item
+        android:id="@+id/menu_sbk"
+        android:icon="@drawable/menu_sbk"
+        android:title="@string/searchByKeyword"/>
+
+    <item
+        android:id="@+id/menu_sbs"
+        android:icon="@drawable/menu_sbs"
+        android:title="@string/searchBySchedule"/>
+
+    <item
+        android:id="@+id/menu_sbm"
+        android:title="@string/searchByMap"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_favorites"
+        android:icon="@android:drawable/star_big_on"
+        android:title="@string/favorites"/>
+
+    <item
+        android:id="@+id/menu_agori"
+        android:icon="@android:drawable/sym_action_chat"
+        android:title="@string/agori"/>
+
+    <item
+        android:id="@+id/menu_preferences"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/preferences"/>
+
 </menu>

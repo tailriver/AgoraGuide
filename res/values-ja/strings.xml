@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE resources>
-
 <resources>
+
+    <string name="app_name">アゴラガイド</string>
     <string name="searchByKeyword">キーワードで探す</string>
     <string name="searchBySchedule">時間で探す</string>
     <string name="searchByMap">地図で探す</string>
@@ -11,8 +12,13 @@
     <string name="addFavorite">お気に入りに追加</string>
     <string name="removeFavorite">お気に入りから削除</string>
     <string name="clearFavorite">すべてのお気に入りを削除する</string>
-    <string name="preference">設定</string>
-	<string name="website">ウェブサイトに移動</string>
-	<string name="reservation">事前申込可</string>
-	<string name="reserve">申込詳細へ</string>
+    <string name="preferences">設定</string>
+    <string name="website">ウェブサイトに移動</string>
+    <string name="reservation">事前申込可</string>
+    <string name="reserve">申込詳細へ</string>
+    <string name="filtering">絞り込み検索</string>
+    <string name="selectAll">すべて選択</string>
+    <string name="agori">さいえんすあごる！</string>
+    <string name="updating">企画データを取得中...</string>
+
 </resources>

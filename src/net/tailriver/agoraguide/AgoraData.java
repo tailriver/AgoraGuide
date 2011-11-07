@@ -11,6 +11,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
@@ -33,8 +34,10 @@ public class AgoraData {
 
 		AgoraData.context = context.getApplicationContext();
 
-		AgoraEntry.setResources(AgoraData.context.getResources());
-		TimeFrame.setResources(AgoraData.context.getResources());
+		final Resources res = AgoraData.context.getResources();
+		AgoraEntry.setResources(res);
+		Day.setResources(res);
+		Agori.setResources(res);
 
 		final SharedPreferences pref = getSharedPreferences();
 		agoraEntry	= new LinkedHashMap<String, AgoraEntry>(pref.getInt("initialCapacityOfEntry",	50));
@@ -68,7 +71,7 @@ public class AgoraData {
 			versionText = br.readLine().split(";");
 			br.close();
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			// fail to download versionTextURL; we cannot continue
 			throw new UpdateDataAbortException("Fail to check update information: " + e);
 		}
@@ -298,7 +301,7 @@ public class AgoraData {
 	 * @return search result, list of {@code id}(s)
 	 * @throws IllegalStateException called before finishing parse
 	 */
-	public static List<String> getEntryByKeyword(String query) {
+	public static List<String> getEntryByKeyword(String query, Map<Category, Boolean> filter) {
 		assert !isParseFinished();
 
 		final List<String> match = new ArrayList<String>();
@@ -311,6 +314,15 @@ public class AgoraData {
 		for (Map.Entry<String, AgoraEntry> e : agoraEntry.entrySet()) {
 			final String id = e.getKey();
 			final AgoraEntry entry = e.getValue();
+
+			if (!filter.get(entry.getCategory()))
+				continue;
+
+			if (query.length() == 0) {
+				match.add(id);
+				continue;
+			}
+
 			for (Tag key : searchByKeywordTags) {
 				final String s = entry.getString(key);
 				if (s != null && s.contains(query)) {

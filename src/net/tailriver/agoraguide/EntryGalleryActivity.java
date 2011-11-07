@@ -55,11 +55,9 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
 
-		final MenuItem favoriteItem = menu.findItem(R.id.menu_entrygallery_favorites);
-		if (!AgoraData.isFavorite(selectedId))
-			favoriteItem.setTitle(R.string.addFavorite);
-		else
-			favoriteItem.setTitle(R.string.removeFavorite);
+		final boolean isFavorite = AgoraData.isFavorite(selectedId);
+		menu.findItem(R.id.menu_entrygallery_favorites_add).setVisible(!isFavorite);
+		menu.findItem(R.id.menu_entrygallery_favorites_remove).setVisible(isFavorite);
 
 		final MenuItem reserveItem = menu.findItem(R.id.menu_entrygallery_reserve);
 		final URL reserveAddress = AgoraData.getEntry(selectedId).getURL(Tag.RESERVE_ADDRESS);
@@ -85,16 +83,19 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
-		if (item.getItemId() == R.id.menu_entrygallery_favorites) {
+		switch (item.getItemId()) {
+		case R.id.menu_entrygallery_favorites_add:
+		case R.id.menu_entrygallery_favorites_remove:
 			AgoraData.setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
-			return false;
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
 		}
-		return false;
 	}
 
 	@Override
-	public void onItemSelected(AdapterView<?> parent, View view,
-			int position, long id) {
+	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		final String entryId = getIntent().getStringArrayExtra("entryIdList")[position];
 
 		setTitle(AgoraData.getEntry(entryId).getLocaleTitle());

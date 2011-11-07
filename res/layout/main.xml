@@ -1,18 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE LinearLayout>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" style="@style/AgoraGuideLayout">
-	<LinearLayout android:orientation="vertical"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:layout_weight="1.0">
-		<TextView android:text="ScienceAgora2011"
-			android:layout_width="fill_parent" android:id="@+id/main_text"
-			android:layout_height="fill_parent" android:textSize="30dp"
-			android:gravity="center"></TextView>
-	</LinearLayout>
-	<ProgressBar android:id="@+id/main_progress"
-		android:layout_height="wrap_content" style="?android:attr/progressBarStyleHorizontal"
-		android:layout_width="fill_parent"></ProgressBar>
+    style="@style/AgoraGuideLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.9"
+        android:padding="5dp"
+        android:src="@drawable/main" />
+
+    <LinearLayout
+        android:id="@+id/main_progressLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
+            android:gravity="center"
+            android:text="@string/updating" />
+
+        <ProgressBar
+            android:id="@+id/main_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="25dp" />
+
+    </LinearLayout>
+
 </LinearLayout>

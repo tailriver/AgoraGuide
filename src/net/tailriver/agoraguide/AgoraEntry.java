@@ -8,8 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import net.tailriver.agoraguide.TimeFrame.Days;
-
 import android.content.res.Resources;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -96,14 +94,9 @@ public class AgoraEntry {
 	// static variables
 
 	private static Resources res;
-	private static final Map<Days, Integer> bgColor;
-
-	static {
-		bgColor = new EnumMap<Days, Integer>(Days.class);
-		bgColor.put(Days.FRI, 0xFF666666);
-		bgColor.put(Days.SAT, 0xFF0000CC);
-		bgColor.put(Days.SUN, 0xFFCC0000);
-	}
+	private static String[] days;
+	private static String[] daysLocale;
+	private static int[] bgColor;
 
 	// member variables
 
@@ -127,7 +120,10 @@ public class AgoraEntry {
 	}
 
 	public static void setResources(Resources res) {
-		AgoraEntry.res = res;
+		AgoraEntry.res			= res;
+		AgoraEntry.days			= res.getStringArray(R.array.days);
+		AgoraEntry.daysLocale	= res.getStringArray(R.array.days_locale);
+		AgoraEntry.bgColor		= res.getIntArray(R.array.days_color);
 	}
 
 	public Category getCategory() {
@@ -181,16 +177,14 @@ public class AgoraEntry {
 
 	private CharSequence enhanceSchedule(CharSequence schedule) {
 		final SpannableStringBuilder text = new SpannableStringBuilder(schedule);
-		for (Map.Entry<Days, Integer> e : bgColor.entrySet()) {
-			final Days day		= e.getKey();
-			final int color		= e.getValue();
-			final String seek	= String.format("[%s]", day.getXMLString());
+		for (int i = 0; i < daysLocale.length; i++) {
+			final String seek = String.format("[%s]", days[i]);
 
 			int p = text.toString().indexOf(seek);
 			while (p > -1) {
-				final SpannableString ss = new SpannableString(day.toString());
+				final SpannableString ss = new SpannableString(daysLocale[i].toString());
 				ss.setSpan(android.graphics.Typeface.BOLD, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-				ss.setSpan(new ForegroundColorSpan(color), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				ss.setSpan(new ForegroundColorSpan(bgColor[i]), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				text.replace(p, p + seek.length(), ss);
 
 				p = text.toString().indexOf(seek, p + ss.length());

@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE menu>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/menu_entrygallery_favorites"></item>
-	<item android:title="@string/reserve" android:id="@+id/menu_entrygallery_reserve"></item>
-	<item android:title="@string/website" android:id="@+id/menu_entrygallery_website"></item>
+    <item
+        android:id="@+id/menu_entrygallery_favorites_add"
+        android:icon="@android:drawable/star_big_off"
+        android:title="@string/addFavorite" />
+
+    <item
+        android:id="@+id/menu_entrygallery_favorites_remove"
+        android:icon="@android:drawable/star_big_on"
+        android:title="@string/removeFavorite" />
+    
+    <item
+        android:id="@+id/menu_entrygallery_reserve"
+        android:title="@string/reserve"></item>
+
+    <item
+        android:id="@+id/menu_entrygallery_website"
+        android:title="@string/website"></item>
+
 </menu>

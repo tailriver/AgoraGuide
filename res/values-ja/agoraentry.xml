@@ -19,7 +19,9 @@
 	<string name="category_B2">ワークショップ・サイエンスカフェ</string>
 	<string name="category_B3">サイエンスショー・上映・演示</string>
 	<string name="category_B4">その他</string>
-	<string name="days_fri">金</string>
-	<string name="days_sat">土</string>
-	<string name="days_sun">日</string>
+	<string-array name="days_locale">
+		<item >金</item>
+		<item >土</item>
+		<item >日</item>
+	</string-array>
 </resources>
