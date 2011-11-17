@@ -120,11 +120,15 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 			nextActivity = AgoriActivity.class;
 			break;
 
-		case R.id.menu_preferences:
+		case R.id.menu_credits:
+/*
 			AgoraData.removeData();
 			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_SHORT).show();
 			new Thread(AgoraGuideActivity.this).start();
 			return true;
+ */
+			nextActivity = CreditsActivity.class;
+			break;
 
 		default:
 			break;

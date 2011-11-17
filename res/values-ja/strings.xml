@@ -12,7 +12,7 @@
     <string name="addFavorite">お気に入りに追加</string>
     <string name="removeFavorite">お気に入りから削除</string>
     <string name="clearFavorite">すべてのお気に入りを削除する</string>
-    <string name="preferences">設定</string>
+    <string name="credits">情報</string>
     <string name="website">ウェブサイトに移動</string>
     <string name="reservation">事前申込可</string>
     <string name="reserve">申込詳細へ</string>

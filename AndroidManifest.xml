@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE manifest>
 
-<manifest android:versionCode="2" android:versionName="1.01"
+<manifest android:versionCode="3" android:versionName="1.02"
 	package="net.tailriver.agoraguide" xmlns:android="http://schemas.android.com/apk/res/android">
 	<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="10" />
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
@@ -15,12 +15,13 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name="EntryGalleryActivity"
+		<activity android:name="CreditsActivity" android:label="@string/credits"></activity><activity android:name="EntryGalleryActivity"
 			android:screenOrientation="portrait"></activity>
 		<activity android:name="FavoritesActivity" android:label="@string/favorites"></activity>
 		<activity android:name="SearchByKeywordActivity" android:label="@string/searchByKeyword"></activity>
 		<activity android:name="SearchByScheduleActivity" android:label="@string/searchBySchedule"></activity>
 		<activity android:name="AgoriActivity" android:label="@string/agori"></activity>
 		<activity android:name="AgoruActivity" android:label="@string/agoru"></activity>
+		
 	</application>
 </manifest>
