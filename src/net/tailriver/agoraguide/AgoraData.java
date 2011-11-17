@@ -57,7 +57,7 @@ public class AgoraData {
 		final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		final NetworkInfo ni = cm.getActiveNetworkInfo();
 
-		return ni.isAvailable() && ni.isConnected();
+		return ni != null && ni.isAvailable() && ni.isConnected();
 	}
 
 	/** @throws UpdateDataAbortException */

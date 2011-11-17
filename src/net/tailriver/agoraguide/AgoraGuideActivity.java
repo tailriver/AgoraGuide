@@ -93,6 +93,14 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		final MenuItem agoriItem = menu.findItem(R.id.menu_agori);
+		agoriItem.setEnabled(AgoraData.isConnected());
+
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Class<?> nextActivity = null;
 		switch (item.getItemId()) {

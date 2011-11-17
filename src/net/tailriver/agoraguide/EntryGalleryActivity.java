@@ -76,8 +76,13 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 		}
 		else
 			websiteItem.setEnabled(false);
-		
-		return true;
+
+		final MenuItem agoriItem = menu.findItem(R.id.menu_entrygallery_agori);
+		final MenuItem agoruItem = menu.findItem(R.id.menu_entrygallery_agoru);
+		agoriItem.setEnabled(AgoraData.isConnected());
+		agoruItem.setEnabled(AgoraData.isConnected());
+
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
