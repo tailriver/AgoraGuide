@@ -76,7 +76,7 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 		}
 		else
 			websiteItem.setEnabled(false);
-
+		
 		return true;
 	}
 
@@ -87,6 +87,18 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 		case R.id.menu_entrygallery_favorites_add:
 		case R.id.menu_entrygallery_favorites_remove:
 			AgoraData.setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
+			return true;
+
+		case R.id.menu_entrygallery_agori:
+			final Intent agoriIntent = new Intent(EntryGalleryActivity.this, AgoriActivity.class);
+			agoriIntent.putExtra("entryId", selectedId);
+			startActivity(agoriIntent);
+			return true;
+		
+		case R.id.menu_entrygallery_agoru:
+			final Intent agoruIntent = new Intent(EntryGalleryActivity.this, AgoruActivity.class);
+			agoruIntent.putExtra("entryId", selectedId);
+			startActivity(agoruIntent);
 			return true;
 
 		default:

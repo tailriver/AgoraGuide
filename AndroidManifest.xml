@@ -21,5 +21,6 @@
 		<activity android:name="SearchByKeywordActivity" android:label="@string/searchByKeyword"></activity>
 		<activity android:name="SearchByScheduleActivity" android:label="@string/searchBySchedule"></activity>
 		<activity android:name="AgoriActivity" android:label="@string/agori"></activity>
+		<activity android:name="AgoruActivity" android:label="@string/agoru"></activity>
 	</application>
 </manifest>

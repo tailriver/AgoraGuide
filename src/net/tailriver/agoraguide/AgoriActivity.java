@@ -12,12 +12,15 @@ public class AgoriActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.agori);
 
+		final Intent intent = getIntent();
+		final String entryId = intent.getStringExtra("entryId");
+
 		AgoraData.setApplicationContext(getApplicationContext());
 
 		final ListView view = (ListView) findViewById(R.id.agori_list);
-		view.setAdapter(new AgoriAdapter(AgoriActivity.this, Agori.get()));
+		view.setAdapter(new AgoriAdapter(AgoriActivity.this, entryId == null ? Agori.get() : Agori.get(entryId)));
+		view.setEmptyView(findViewById(R.id.agori_empty));
 		view.setOnItemClickListener(theAdapter());
-		
 	}
 
 	@Override

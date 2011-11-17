@@ -18,7 +18,8 @@
     <string name="reserve">申込詳細へ</string>
     <string name="filtering">絞り込み検索</string>
     <string name="selectAll">すべて選択</string>
-    <string name="agori">さいえんすあごる！</string>
+    <string name="agori">あごりんく！</string>
+    <string name="agoru">あごる！</string>
     <string name="updating">企画データを取得中...</string>
 
 </resources>

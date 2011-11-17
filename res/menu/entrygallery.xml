@@ -19,5 +19,7 @@
     <item
         android:id="@+id/menu_entrygallery_website"
         android:title="@string/website"></item>
+    <item android:id="@+id/menu_entrygallery_agori" android:title="@string/agori"></item><item android:id="@+id/menu_entrygallery_agoru" android:title="@string/agoru"></item>
+    
 
 </menu>

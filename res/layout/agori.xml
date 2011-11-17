@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/agori_list"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/AgoraGuideLayout"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" style="@style/AgoraGuideLayout">
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
-    <!-- Preview: listitem=@layout/agori_item -->
+    <TextView
+        android:id="@+id/agori_empty"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="まだあごり！がありません" >
+    </TextView>
 
-</ListView>
+    <ListView
+        android:id="@+id/agori_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <!-- Preview: listitem=@layout/agori_item -->
+
+    </ListView>
+
+</LinearLayout>
