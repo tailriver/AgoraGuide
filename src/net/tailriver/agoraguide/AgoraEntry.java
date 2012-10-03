@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,8 +16,7 @@ import android.text.style.ForegroundColorSpan;
 
 public class AgoraEntry {
 	public enum Tag {
-		TITLE_JA(String.class,		R.string.tag_title),
-		TITLE_EN(String.class,		R.string.tag_title),
+		TITLE(String.class,		R.string.tag_title),
 		SPONSOR(String.class,		R.string.tag_sponsor),
 		CO_SPONSOR(String.class),
 		ABSTRACT(String.class,		R.string.tag_abstract),
@@ -100,7 +98,7 @@ public class AgoraEntry {
 
 	// member variables
 
-	private final Category category;
+	private final String category;
 	private final Set<Target> target;
 	private final Map<Tag, CharSequence> data;
 	private CharSequence schedule;
@@ -108,7 +106,7 @@ public class AgoraEntry {
 	// constructor and methods
 
 	public AgoraEntry(String category, String target, String schedule) {
-		this.category	= Category.valueOf(category);
+		this.category	= category;
 		this.target		= EnumSet.noneOf(Target.class);
 		this.data		= new EnumMap<Tag, CharSequence>(Tag.class);
 		this.schedule	= schedule;
@@ -126,7 +124,7 @@ public class AgoraEntry {
 		AgoraEntry.bgColor		= res.getIntArray(R.array.days_color);
 	}
 
-	public Category getCategory() {
+	public String getCategory() {
 		return category;
 	}
 
@@ -165,9 +163,7 @@ public class AgoraEntry {
 	}
 
 	public String getLocaleTitle() {
-		final String ja = getString(Tag.TITLE_JA);
-		final String en = getString(Tag.TITLE_EN);
-		return (Locale.getDefault().getLanguage().equals(Locale.JAPANESE.getLanguage()) || en == null) ? ja : en;
+		return getString(Tag.TITLE);
 	}
 
 	public void set(Tag tag, String value) {

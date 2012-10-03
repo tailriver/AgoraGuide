@@ -6,7 +6,6 @@
     <color name="secondary_text">#333333</color>
 
     <integer-array name="days_color">
-        <item>0xFF666666</item>
         <item>0xFF0000CC</item>
         <item>0xFFCC0000</item>
     </integer-array>

@@ -21,12 +21,10 @@
     <string name="category_B4">Other</string>
 
     <string-array name="days">
-        <item>Fri</item>
         <item>Sat</item>
         <item>Sun</item>
     </string-array>
     <string-array name="days_locale">
-        <item>Fri</item>
         <item>Sat</item>
         <item>Sun</item>
     </string-array>

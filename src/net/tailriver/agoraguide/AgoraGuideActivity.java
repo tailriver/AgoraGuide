@@ -1,5 +1,7 @@
 package net.tailriver.agoraguide;
 
+import java.io.IOException;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -31,22 +33,14 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 	}
 
 	/** You must not try to change UI here, go to {@link Handler}. */
-	@Override
 	public synchronized void run() {
 		final Message message = new Message();
 		message.what = R.layout.main;
 		try {
-			boolean isUpdated = false;
-			try {
-				isUpdated = AgoraData.updateData(true, handler);
-			}
-			catch (UpdateDataAbortException e) {
-				isUpdated = AgoraData.updateData(false, handler);
-			}
-			if (isUpdated)
-				AgoraData.parseData();
+			AgoraData.updateData(handler);
+			AgoraData.parseData();
 		}
-		catch (UpdateDataAbortException e) {
+		catch (IOException e) {
 			message.arg1 = R.string.error_fail_update;
 			message.arg2 = Toast.LENGTH_LONG;
 			handler.sendMessage(message);
@@ -93,14 +87,6 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		final MenuItem agoriItem = menu.findItem(R.id.menu_agori);
-		agoriItem.setEnabled(AgoraData.isConnected());
-
-		return super.onPrepareOptionsMenu(menu);
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Class<?> nextActivity = null;
 		switch (item.getItemId()) {
@@ -114,10 +100,6 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 
 		case R.id.menu_favorites:
 			nextActivity = FavoritesActivity.class;
-			break;
-
-		case R.id.menu_agori:
-			nextActivity = AgoriActivity.class;
 			break;
 
 		case R.id.menu_credits:

@@ -69,7 +69,6 @@ public class FavoritesActivity extends Activity implements OnClickListener {
 		return false;
 	}
 
-	@Override
 	public void onClick(DialogInterface dialog, int which) {
 		AgoraData.clearFavorite();
 		theAdapter().clear();

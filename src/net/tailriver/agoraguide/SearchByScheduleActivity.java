@@ -53,7 +53,6 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	@Override
 	public void onItemSelected(AdapterView<?> parent, View view,
 			int position, long id) {
 		final int day	= ((Spinner) findViewById(R.id.sbs_day)).getSelectedItemPosition();
@@ -73,7 +72,6 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 		((AdapterView<?>) findViewById(R.id.sbs_result)).setSelection(viewPosition);
 	}
 
-	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
 	}
 

@@ -2,16 +2,10 @@
 <!DOCTYPE resources>
 <resources>
 
-    <string name="path_version_check">http://www.tailriver.net/scienceagora/2011/app/version.txt
-	</string>
-    <string name="path_data_xml">http://www.tailriver.net/scienceagora/2011/app/data.xml
-	</string>
-    <string name="path_data_xml_gz">http://www.tailriver.net/scienceagora/2011/app/data.xml.gz
-	</string>
-    <string name="path_agori_get">http://www.tailriver.net/scienceagora/2011/agori/get
-	</string>
-        <string name="path_local_data">data.xml</string>
-    <string name="path_local_data_new">data.new.xml</string>
+    <string name="path_data_xml">http://tailriver.net/agoraguide/2012.xml</string>
+    <string name="path_data_xml_gz">http://tailriver.net/agoraguide/2012.xml.gz</string>
+    <string name="path_local_data">2012.xml</string>
+    <string name="path_local_data_new">2012.new.xml</string>
     <string name="path_pref">pref</string>
 
 </resources>

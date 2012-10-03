@@ -34,7 +34,6 @@ class Day implements Comparable<Day> {
 		return o instanceof Day && this.day == ((Day) o).day || super.equals(o);
 	}
 
-	@Override
 	public int compareTo(Day another) {
 		return this.day - another.day;
 	}

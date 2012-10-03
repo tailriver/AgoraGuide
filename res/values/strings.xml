@@ -14,14 +14,12 @@
     <string name="clearFavorite">Clear Favorites</string>
     <string name="credits">Information</string>
     <string name="website">Go to web site</string>
-    <string name="error_fail_update">Fail to update the data...</string>
-    <string name="error_fail_parse">Fail to parse the data...\n(please wait a few hours)</string>
+    <string name="error_fail_update">Fail to update the data&#8230;</string>
+    <string name="error_fail_parse">Fail to parse the data&#8230;\n(please wait a few hours)</string>
     <string name="reservation">Appointment</string>
     <string name="reserve">Reserve</string>
     <string name="filtering">Filtering</string>
     <string name="selectAll">Select all</string>
-    <string name="agori">Agorink!</string>
-    <string name="agoru">Agoru!</string>
-    <string name="updating">Updating ...</string>
+    <string name="updating">Updating &#8230;</string>
 
 </resources>

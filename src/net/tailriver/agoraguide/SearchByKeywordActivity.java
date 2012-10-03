@@ -41,17 +41,14 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	@Override
 	public void afterTextChanged(Editable s) {
 		search(s);
 	}
 
-	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 	}
 
-	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
 
@@ -76,7 +73,6 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 		return false;
 	}
 
-	@Override
 	public void onClick(DialogInterface dialog, int which) {
 		if (which == AlertDialog.BUTTON_NEUTRAL) {
 			for (Category cat : Category.values())
@@ -87,7 +83,6 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 		search(null);
 	}
 
-	@Override
 	public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 		theAdapter().setFilter(Category.values()[which], isChecked);
 	}

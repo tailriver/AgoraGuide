@@ -77,11 +77,6 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 		else
 			websiteItem.setEnabled(false);
 
-		final MenuItem agoriItem = menu.findItem(R.id.menu_entrygallery_agori);
-		final MenuItem agoruItem = menu.findItem(R.id.menu_entrygallery_agoru);
-		agoriItem.setEnabled(AgoraData.isConnected());
-		agoruItem.setEnabled(AgoraData.isConnected());
-
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -94,31 +89,17 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 			AgoraData.setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
 			return true;
 
-		case R.id.menu_entrygallery_agori:
-			final Intent agoriIntent = new Intent(EntryGalleryActivity.this, AgoriActivity.class);
-			agoriIntent.putExtra("entryId", selectedId);
-			startActivity(agoriIntent);
-			return true;
-		
-		case R.id.menu_entrygallery_agoru:
-			final Intent agoruIntent = new Intent(EntryGalleryActivity.this, AgoruActivity.class);
-			agoruIntent.putExtra("entryId", selectedId);
-			startActivity(agoruIntent);
-			return true;
-
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
 
-	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		final String entryId = getIntent().getStringArrayExtra("entryIdList")[position];
 
 		setTitle(AgoraData.getEntry(entryId).getLocaleTitle());
 	}
 
-	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 	}
 

@@ -1,10 +1,9 @@
 package net.tailriver.agoraguide;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
-
 import net.tailriver.agoraguide.AgoraEntry.*;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -12,15 +11,13 @@ import org.xmlpull.v1.XmlPullParser;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Xml;
 
 public class AgoraData {
 	private static final Tag[] searchByKeywordTags = {
-		Tag.TITLE_JA, Tag.TITLE_EN, Tag.SPONSOR, Tag.CO_SPONSOR, Tag.ABSTRACT, Tag.CONTENT, Tag.GUEST, Tag.NOTE
+		Tag.TITLE, Tag.SPONSOR, Tag.CO_SPONSOR, Tag.ABSTRACT, Tag.CONTENT, Tag.GUEST, Tag.NOTE
 	};
 
 	private static Context context;
@@ -37,7 +34,6 @@ public class AgoraData {
 		final Resources res = AgoraData.context.getResources();
 		AgoraEntry.setResources(res);
 		Day.setResources(res);
-		Agori.setResources(res);
 
 		final SharedPreferences pref = getSharedPreferences();
 		agoraEntry	= new LinkedHashMap<String, AgoraEntry>(pref.getInt("initialCapacityOfEntry",	50));
@@ -53,80 +49,17 @@ public class AgoraData {
 		return agoraEntry.size() > 0;
 	}
 
-	public static boolean isConnected() {
-		final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		final NetworkInfo ni = cm.getActiveNetworkInfo();
-
-		return ni != null && ni.isAvailable() && ni.isConnected();
-	}
-
-	/** @throws UpdateDataAbortException */
-	public static boolean updateData(boolean useGZIP, Handler handler) throws UpdateDataAbortException {
-		if (!isConnected())
-			return false;
-
-		final String[] versionText;
+	public static void updateData(Handler handler) throws IOException {
+		String urlString = context.getString(R.string.path_data_xml_gz);
 		try {
-			final BufferedReader br = new BufferedReader(new InputStreamReader(new URL(context.getString(R.string.path_version_check)).openStream()), 64);
-			versionText = br.readLine().split(";");
-			br.close();
-		}
-		catch (Exception e) {
-			// fail to download versionTextURL; we cannot continue
-			throw new UpdateDataAbortException("Fail to check update information: " + e);
-		}
-
-		// format of version.txt
-		//		version ; file size of data.xml ; file size of data.xml.gz
-		final int localVersion	= getSharedPreferences().getInt("localVersion", 0);
-		final int serverVersion	= Integer.parseInt(versionText[0]);
-		final int size			= Integer.parseInt(versionText[useGZIP ? 2 : 1]);
-
-		if (serverVersion == localVersion)
-			return false;
-
-		// show progress bar with start state
-		if (handler != null)
-			sendProgressMessage(handler, 0, size);
-
-		try {
-			final InputStream			is = new URL(context.getString(useGZIP ? R.string.path_data_xml_gz : R.string.path_data_xml)).openStream();
-			final FileOutputStream	   fos = context.openFileOutput(context.getString(R.string.path_local_data_new), Context.MODE_PRIVATE);
-
-			final int BUFFER_SIZE = 4096;
-			final BufferedInputStream  bis = new BufferedInputStream(useGZIP ? new GZIPInputStream(is) : is, BUFFER_SIZE);
-			final BufferedOutputStream bos = new BufferedOutputStream(fos, BUFFER_SIZE);
-
-			byte[] buffer = new byte[BUFFER_SIZE];
-			int totalRead = 0;
-			while (true) {
-				final int byteRead = bis.read(buffer, 0, BUFFER_SIZE);
-				if (byteRead == -1)
-					break;
-				bos.write(buffer, 0, byteRead);
-
-				// update progress bar
-				if (handler != null) {
-					totalRead += byteRead;
-					sendProgressMessage(handler, totalRead, size);
-				}
-			}
-			bis.close();
-			bos.flush();
-			bos.close();
-
-			SharedPreferences.Editor ee = getSharedPreferences().edit();
-			ee.putInt("localVersionNew", serverVersion);
-			ee.commit();
-
-			// hide progress bar
-			sendProgressMessage(handler, 0, 0);
-
-			return true;
-		}
-		catch (IOException e) {
-			// fail to download XMLDataURL; we cannot continue
-			throw new UpdateDataAbortException("Fail to update data file: " + e);
+			URL  url  = new URL(urlString);
+			File file = context.getFileStreamPath(context.getString(R.string.path_local_data));
+			AgoraHttpClient ahc = new AgoraHttpClient(context, url);
+			ahc.download(file);
+		} catch (MalformedURLException e) {
+			throw new IllegalArgumentException("Malformed url: " + urlString);
+		} catch (StandAloneException e) {
+			// noop
 		}
 	}
 
@@ -134,12 +67,10 @@ public class AgoraData {
 	public static void parseData() throws ParseDataAbortException {
 		clear();
 
-		boolean useNewData = getSharedPreferences().contains("localVersionNew");
 		final SharedPreferences.Editor ee = getSharedPreferences().edit();
-
 		try {
 			final XmlPullParser xpp = Xml.newPullParser();
-			xpp.setInput(context.openFileInput(context.getString(useNewData ? R.string.path_local_data_new : R.string.path_local_data)), null);
+			xpp.setInput(context.openFileInput(context.getString(R.string.path_local_data)), null);
 
 			AgoraEntry entry = null;
 			String entryId	 = null;
@@ -157,8 +88,7 @@ public class AgoraData {
 							throw new ParseDataAbortException("Parse error: it does not have required content");
 
 						entry = new AgoraEntry(category, target, schedule);
-						entry.set(Tag.TITLE_JA,		xpp.getAttributeValue(null, "title_ja"));
-						entry.set(Tag.TITLE_EN,		xpp.getAttributeValue(null, "title_en"));
+						entry.set(Tag.TITLE,		xpp.getAttributeValue(null, "title"));
 						entry.set(Tag.SPONSOR,		xpp.getAttributeValue(null, "sponsor"));
 						entry.set(Tag.CO_SPONSOR,	xpp.getAttributeValue(null, "cosponsor"));
 						entry.set(Tag.IMAGE,		xpp.getAttributeValue(null, "image"));
@@ -206,14 +136,7 @@ public class AgoraData {
 
 			ee.putInt("initialCapacityOfEntryMap", (int) (agoraEntry.size() * 1.5));
 			ee.putInt("initialCapacityOfTimeFrameMap", (int) (timeFrame.size() * 1.5));
-
-			// the new data file is valid (correctly, well-formed) XML, it's time to replace
-			if (useNewData) {
-				final String newFile = context.getString(R.string.path_local_data_new);
-				final String oldFile = context.getString(R.string.path_local_data);
-				context.getFileStreamPath(newFile).renameTo(context.getFileStreamPath(oldFile));
-				ee.putInt("localVersion", getSharedPreferences().getInt("localVersionNew", 0));
-			}
+			ee.commit();
 		}
 		catch (ParseDataAbortException e) {
 			clear();
@@ -222,17 +145,6 @@ public class AgoraData {
 		catch (Exception e) {
 			clear();
 			throw new ParseDataAbortException("Parse error: " + e);
-		}
-		finally {
-			ee.remove("localVersionNew");
-			ee.commit();
-
-			// delete invalid new XML file
-			// retry. parseData() run under using old data
-			if (useNewData && !isParseFinished()) {
-				context.deleteFile(context.getString(R.string.path_local_data_new));
-				parseData();
-			}
 		}
 	}
 
@@ -254,6 +166,7 @@ public class AgoraData {
 	 * @param progress int. argument of setProgress()
 	 * @param max int. argument of setMax()
 	 */
+	@SuppressWarnings("unused")
 	private static void sendProgressMessage(Handler handler, int progress, int max) {
 		final Message message = new Message();
 		message.what = R.id.main_progress;
@@ -315,8 +228,8 @@ public class AgoraData {
 			final String id = e.getKey();
 			final AgoraEntry entry = e.getValue();
 
-			if (!filter.get(entry.getCategory()))
-				continue;
+//			if (!filter.get(entry.getCategory()))
+//				continue;
 
 			if (query.length() == 0) {
 				match.add(id);

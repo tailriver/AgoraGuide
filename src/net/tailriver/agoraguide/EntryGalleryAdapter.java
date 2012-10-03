@@ -1,12 +1,12 @@
 package net.tailriver.agoraguide;
 
-import java.net.HttpURLConnection;
+import java.io.IOException;
 import java.net.URL;
 
 import net.tailriver.agoraguide.AgoraEntry.*;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -64,27 +64,23 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 				text.append(section).append(tagValue).append(delimiter);
 			}
 		}
-		text.delete(text.length() - delimiter.length(), text.length());
+
+		if (text.length() > delimiter.length()) {
+			text.delete(text.length() - delimiter.length(), text.length());
+		}
 
 		final TextView scrollView = (TextView) convertView.findViewById(R.id.entrygallery_content);
 		scrollView.setText(text);
 
 		final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.entrygallery_image);
 		final URL imageURL = entry.getURL(Tag.IMAGE);
-		if (imageURL != null && AgoraData.isConnected()) {
-			HttpURLConnection huc = null;
+		if (imageURL != null) {
 			try {
-				huc = (HttpURLConnection) imageURL.openConnection();
-				huc.setDoInput(true);
-				huc.connect();
-				thumbnail.setImageBitmap(BitmapFactory.decodeStream(huc.getInputStream()));
-			}
-			catch (Exception e) {
+				AgoraHttpClient ahc = new AgoraHttpClient(context, imageURL);
+				Bitmap bm = ahc.getBitmap();
+				thumbnail.setImageBitmap(bm);
+			} catch (IOException e) {
 				thumbnail.setVisibility(View.GONE);
-			}
-			finally {
-				if (huc != null)
-					huc.disconnect();
 			}
 		}
 		else {

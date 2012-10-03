@@ -17,7 +17,6 @@ public class TimeFrame implements Comparable<TimeFrame> {
 		return eid;
 	}
 
-	@Override
 	public int compareTo(TimeFrame another) {
 		if (this.day != another.day)
 			return this.day.compareTo(another.day);
