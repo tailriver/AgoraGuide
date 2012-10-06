@@ -1,9 +1,5 @@
 package net.tailriver.agoraguide;
 
-import java.net.URL;
-
-import net.tailriver.agoraguide.AgoraEntry.*;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -24,7 +20,7 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.entrygallery);
 
-		AgoraData.setApplicationContext(getApplicationContext());
+		AgoraDatabase.init(getApplicationContext());
 
 		final String[] entryIdList = getIntent().getStringArrayExtra("entryIdList");
 		final int position = getIntent().getIntExtra("position", 0);
@@ -53,26 +49,27 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
+		String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
+		EntryDetail detail = new EntryDetail(selectedId);
 
-		final boolean isFavorite = AgoraData.isFavorite(selectedId);
+		final boolean isFavorite = Favorite.isFavorite(detail.getSummary());
 		menu.findItem(R.id.menu_entrygallery_favorites_add).setVisible(!isFavorite);
 		menu.findItem(R.id.menu_entrygallery_favorites_remove).setVisible(isFavorite);
 
 		final MenuItem reserveItem = menu.findItem(R.id.menu_entrygallery_reserve);
-		final URL reserveAddress = AgoraData.getEntry(selectedId).getURL(Tag.RESERVE_ADDRESS);
+		final String reserveAddress = detail.getDetailValue("original");
 		if (reserveAddress != null) {
 			reserveItem.setEnabled(true);
-			reserveItem.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(reserveAddress.toExternalForm())));
+			reserveItem.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(reserveAddress)));
 		}
 		else
 			reserveItem.setEnabled(false);
 
 		final MenuItem websiteItem = menu.findItem(R.id.menu_entrygallery_website);
-		final URL website = AgoraData.getEntry(selectedId).getURL(Tag.WEBSITE);
+		final String website = detail.getDetailValue("website");
 		if (website != null) {
 			websiteItem.setEnabled(true);
-			websiteItem.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(website.toExternalForm())));
+			websiteItem.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(website)));
 		}
 		else
 			websiteItem.setEnabled(false);
@@ -82,11 +79,12 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		final String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
+		String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
+		EntrySummary summary = EntrySummary.parse(selectedId);
 		switch (item.getItemId()) {
 		case R.id.menu_entrygallery_favorites_add:
 		case R.id.menu_entrygallery_favorites_remove:
-			AgoraData.setFavorite(selectedId, !AgoraData.isFavorite(selectedId));
+			Favorite.setFavorite(summary, !Favorite.isFavorite(summary));
 			return true;
 
 		default:
@@ -97,7 +95,7 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		final String entryId = getIntent().getStringArrayExtra("entryIdList")[position];
 
-		setTitle(AgoraData.getEntry(entryId).getLocaleTitle());
+		setTitle(EntrySummary.parse(entryId).getTitle());
 	}
 
 	public void onNothingSelected(AdapterView<?> arg0) {

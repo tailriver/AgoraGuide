@@ -1,11 +1,9 @@
 package net.tailriver.agoraguide;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.tailriver.agoraguide.AgoraEntry.*;
 
 import android.app.Activity;
 import android.content.Context;
@@ -37,8 +35,10 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 		this.adapterViewResourceId = adapterViewResourceId;
 		this.objects = objects;
 
-		this.filter = new EnumMap<Category, Boolean>(Category.class);
-		for (Category cat : Category.values())
+		EntrySummary.init();
+
+		this.filter = new HashMap<Category, Boolean>();
+		for (Category cat : Category.asList())
 			filter.put(cat, true);
 	}
 
@@ -51,8 +51,8 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 		return filter.get(cat);
 	}
 
-	public void setFilter(Category cat, boolean isChecked) {
-		filter.put(cat, isChecked);
+	public void setFilter(Category category, boolean isChecked) {
+		filter.put(category, isChecked);
 	}
 
 	public Map<Category, Boolean> tellFilter() {
@@ -66,22 +66,23 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 			convertView = inflater.inflate(textViewResourceId, null);
 		}
 
-		final AgoraEntry entry = AgoraData.getEntry(getItem(position));
+		EntrySummary summary = EntrySummary.parse(getItem(position));
 
-		final TextView titleView = (TextView) convertView.findViewById(R.id.entrylist_item_title);
-		titleView.setText(entry.getLocaleTitle());
+		TextView titleView = (TextView) convertView.findViewById(R.id.entrylist_item_title);
+		titleView.setText(summary.getTitle());
 
-		final TextView sponsorView = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
-		sponsorView.setText(entry.getString(Tag.SPONSOR));
+		TextView sponsorView = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
+		sponsorView.setText(summary.getSponsor());
 
-		final TextView scheduleView = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
-		scheduleView.setText(entry.getSchedule());
+		TextView scheduleView = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
+		scheduleView.setText(summary.getSchedule());
 
-		final TextView targetView = (TextView) convertView.findViewById(R.id.entrylist_item_target);
+		TextView targetView = (TextView) convertView.findViewById(R.id.entrylist_item_target);
 		targetView.setVisibility(View.INVISIBLE);
 
-		final TextView reservaionView = (TextView) convertView.findViewById(R.id.entrylist_item_reservation);
-		reservaionView.setVisibility( entry.getString(Tag.RESERVATION) != null ? View.VISIBLE : View.INVISIBLE);
+		TextView reservaionView = (TextView) convertView.findViewById(R.id.entrylist_item_reservation);
+		reservaionView.setVisibility(View.GONE);
+//		reservaionView.setVisibility( entry.getString(Tag.RESERVATION) != null ? View.VISIBLE : View.INVISIBLE);
 
 		return convertView;
 	}

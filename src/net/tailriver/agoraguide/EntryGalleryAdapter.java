@@ -1,12 +1,6 @@
 package net.tailriver.agoraguide;
 
-import java.io.IOException;
-import java.net.URL;
-
-import net.tailriver.agoraguide.AgoraEntry.*;
-
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -35,31 +29,32 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 			convertView = inflater.inflate(textViewResourceId, null);
 		}
 
-		final String id = getItem(position);
-		final AgoraEntry entry = AgoraData.getEntry(id);
+		String id = getItem(position);
+		EntryDetail detail   = new EntryDetail(id);
+		EntrySummary summary = detail.getSummary();
 
 		final TextView iconView = (TextView) convertView.findViewById(R.id.entrygallery_icon);
 		iconView.setText(id);
-		iconView.append(" " + entry.getCategory().toString());
+		iconView.append(" " + summary.getCategory());
 
 		final TextView titleView = (TextView) convertView.findViewById(R.id.entrygallery_title);
-		titleView.setText(entry.getLocaleTitle());
+		titleView.setText(summary.getTitle());
 
 		final TextView sponsorView = (TextView) convertView.findViewById(R.id.entrygallery_sponsor);
-		sponsorView.setText(entry.getString(Tag.SPONSOR));
-		final String coSponsor = entry.getString(Tag.CO_SPONSOR);
+		sponsorView.setText(summary.getSponsor());
+		final String coSponsor = detail.getDetailValue("cosponsor");
 		if (coSponsor != null)
 			sponsorView.append("\n" + coSponsor);
 
 		final TextView scheduleView = (TextView) convertView.findViewById(R.id.entrygallery_schedule);
-		scheduleView.setText(entry.getSchedule());
+		scheduleView.setText(summary.getSchedule());
 
 		final CharSequence delimiter = "\n\n";
 		final SpannableStringBuilder text = new SpannableStringBuilder();
-		for (Tag tag : new Tag[]{Tag.ABSTRACT, Tag.CONTENT, Tag.GUEST, Tag.RESERVATION, Tag.NOTE}) {
-			final String tagValue = entry.getString(tag);
+		for (String tag : new String[]{ "abstract", "content", "guest", "reservation", "note" }) {
+			final String tagValue = detail.getDetailValue(tag);
 			if (tagValue != null) {
-				final SpannableString section = new SpannableString(tag.toString() + "\n");
+				final SpannableString section = new SpannableString(tag + "\n");
 				section.setSpan(new BackgroundColorSpan(Color.LTGRAY), 0, section.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				text.append(section).append(tagValue).append(delimiter);
 			}
@@ -73,19 +68,20 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 		scrollView.setText(text);
 
 		final ImageView thumbnail = (ImageView) convertView.findViewById(R.id.entrygallery_image);
-		final URL imageURL = entry.getURL(Tag.IMAGE);
-		if (imageURL != null) {
-			try {
-				AgoraHttpClient ahc = new AgoraHttpClient(context, imageURL);
-				Bitmap bm = ahc.getBitmap();
-				thumbnail.setImageBitmap(bm);
-			} catch (IOException e) {
-				thumbnail.setVisibility(View.GONE);
-			}
-		}
-		else {
-			thumbnail.setVisibility(View.GONE);
-		}
+		thumbnail.setVisibility(View.GONE);
+//		final URL imageURL = entry.getURL(Tag.IMAGE);
+//		if (imageURL != null) {
+//			try {
+//				HttpClient ahc = new HttpClient(imageURL);
+//				Bitmap bm = ahc.getBitmap();
+//				thumbnail.setImageBitmap(bm);
+//			} catch (IOException e) {
+//				thumbnail.setVisibility(View.GONE);
+//			}
+//		}
+//		else {
+//			thumbnail.setVisibility(View.GONE);
+//		}
 
 		return convertView;
 	}

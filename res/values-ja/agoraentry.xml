@@ -2,25 +2,17 @@
 <!DOCTYPE resources>
 
 <resources>
-	<string name="tag_title">企画名</string>
-	<string name="tag_target">対象</string>
-	<string name="tag_schedule">日時</string>
-	<string name="tag_sponsor">主催・共催等</string>
-	<string name="tag_abstract">概要</string>
-	<string name="tag_content">内容</string>
-	<string name="tag_reservation">事前申込</string>
-	<string name="tag_guest">主な登壇者など</string>
-	<string name="tag_note">備考</string>
-	<string name="category_A1">ブース</string>
-	<string name="category_A2">ポスター</string>
-	<string name="category_A3">実演・工作</string>
-	<string name="category_A4">その他</string>
-	<string name="category_B1">シンポジウム・トークセッション</string>
-	<string name="category_B2">ワークショップ・サイエンスカフェ</string>
-	<string name="category_B3">サイエンスショー・上映・演示</string>
-	<string name="category_B4">その他</string>
 	<string-array name="days_locale">
 		<item >土</item>
 		<item >日</item>
 	</string-array>
+    <string-array name="entrydetail_locale">
+        <item>主催・共催等</item>
+        <item>主な登壇者など</item>
+        <item>概要</item>
+        <item>内容</item>
+        <item>事前申込</item>
+        <item>備考</item>
+        <item>詳細ページ</item>
+    </string-array>
 </resources>

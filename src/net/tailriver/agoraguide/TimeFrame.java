@@ -1,34 +1,93 @@
 package net.tailriver.agoraguide;
 
-public class TimeFrame implements Comparable<TimeFrame> {
-	private final String eid;	// entry id
-	private final Day day;
-	private final int start;
-	private final int end;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-	public TimeFrame(String eid, String day, int start, int end) {
-		this.eid	= eid;
-		this.day	= new Day(day);
-		this.start	= start;
-		this.end	= end;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+public class TimeFrame implements Comparable<TimeFrame> {
+	private static List<TimeFrame> cache;
+
+	private EntrySummary summary;
+	private Day day;
+	private int start;
+	private int end;
+
+	private TimeFrame(EntrySummary summary, Day day, int start, int end) {
+		this.summary = summary;
+		this.day     = day;
+		this.start   = start;
+		this.end     = end;
 	}
 
-	public String getId() {
-		return eid;
+	public static synchronized final void init() {
+		if (cache != null) {
+			return;
+		}
+
+		EntrySummary.init();
+		Day.init();
+
+		long startTime = System.currentTimeMillis();
+		cache = new ArrayList<TimeFrame>();
+
+		SQLiteDatabase dbh = AgoraDatabase.get();
+		String table = "timeframe";
+		String[] columns = { "entry", "day", "start", "end" };
+		Cursor c = dbh.query(table, columns, null, null, null, null, null);
+
+		c.moveToFirst();
+		for (int i = 0, rows = c.getCount(); i < rows; i++) {
+			EntrySummary summary = EntrySummary.parse(c.getString(0));
+			Day day   = Day.parse(c.getString(1));
+			int start = c.getInt(2);
+			int end   = c.getInt(3);
+			if (!summary.getCategory().isAllday()) {
+				TimeFrame tf = new TimeFrame(summary, day, start, end);
+				cache.add(tf);
+			}
+			c.moveToNext();
+		}
+		c.close();
+		Collections.sort(cache);
+		cache = Collections.unmodifiableList(cache);
+
+		long endTime = System.currentTimeMillis();
+		Log.d("timer", "TimeFrame#init() took " + (endTime - startTime) + "ms");
+	}
+
+	public static List<TimeFrame> asList() {
+		return cache;
+	}
+
+	public static int search(Day day, int time) {
+		TimeFrame pivot = new TimeFrame(null, day, time, time);
+		return - Collections.binarySearch(cache, pivot) - 1;
+	}
+
+	public EntrySummary getSummary() {
+		return summary;
+	}
+
+	public static void clear() {
+		cache = null;
 	}
 
 	public int compareTo(TimeFrame another) {
-		if (this.day != another.day)
+		if (!this.day.equals(another.day))
 			return this.day.compareTo(another.day);
 		if (this.start != another.start)
 			return this.start - another.start;
 		if (this.end != another.end)
 			return this.end - another.end;
-		return this.eid.compareTo(another.eid);
+		return summary.compareTo(another.summary);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s: %s %02d:%02d-%02d:%02d", eid, day, start/100, start%100, end/100, end%100);
+		return String.format("%s: %s %04d-%04d", summary.getId(), day, start, end);
 	}
 }

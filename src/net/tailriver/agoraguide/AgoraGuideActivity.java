@@ -24,11 +24,7 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 
 		findViewById(R.id.main_progressLayout).setVisibility(View.INVISIBLE);
 
-		AgoraData.setApplicationContext(getApplicationContext());
-		try {
-			AgoraData.parseData();
-		}
-		catch (ParseDataAbortException e) { }
+		AgoraDatabase.init(getApplicationContext());
 		new Thread(AgoraGuideActivity.this).start();
 	}
 
@@ -37,20 +33,16 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 		final Message message = new Message();
 		message.what = R.layout.main;
 		try {
-			AgoraData.updateData(handler);
-			AgoraData.parseData();
+			Log.i(getClass().getSimpleName(), "update start");
+			AgoraDatabase.update();
+			Log.i(getClass().getSimpleName(), "update end");
+			EntrySummary.init();
 		}
 		catch (IOException e) {
 			message.arg1 = R.string.error_fail_update;
 			message.arg2 = Toast.LENGTH_LONG;
 			handler.sendMessage(message);
-			LogError(e.toString());
-		}
-		catch (ParseDataAbortException e) {
-			message.arg1 = R.string.error_fail_parse;
-			message.arg2 = Toast.LENGTH_LONG;
-			handler.sendMessage(message);
-			LogError(e.toString());
+			Log.e(getClass().getSimpleName(), message.toString(), e);
 		}
 	}
 

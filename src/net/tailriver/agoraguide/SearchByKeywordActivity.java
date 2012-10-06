@@ -1,6 +1,6 @@
 package net.tailriver.agoraguide;
 
-import net.tailriver.agoraguide.AgoraEntry.Category;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -22,7 +22,7 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.searchbykeyword);
 
-		AgoraData.setApplicationContext(getApplicationContext());
+		AgoraDatabase.init(getApplicationContext());
 
 		final ListView entryList = (ListView) findViewById(R.id.sbk_result);
 		entryList.setAdapter(new EntryArrayAdapter(SearchByKeywordActivity.this, entryList.getId()));
@@ -54,11 +54,12 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		final String[] choices = new String[Category.values().length];
-		final boolean[] checked = new boolean[Category.values().length];
-		for (Category cat : Category.values()) {
-			choices[cat.ordinal()] = cat.toString();
-			checked[cat.ordinal()] = theAdapter().getFilter(cat);
+		List<Category> categoryList = Category.asList();
+		final String[] choices = new String[categoryList.size()];
+		final boolean[] checked = new boolean[categoryList.size()];
+		for (int i = 0; i < categoryList.size(); i++) {
+			choices[i] = categoryList.get(i).toString();
+			checked[i] = theAdapter().getFilter(categoryList.get(i));
 		}
 
 		new AlertDialog.Builder(SearchByKeywordActivity.this)
@@ -75,7 +76,7 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 
 	public void onClick(DialogInterface dialog, int which) {
 		if (which == AlertDialog.BUTTON_NEUTRAL) {
-			for (Category cat : Category.values())
+			for (Category cat : Category.asList())
 				theAdapter().setFilter(cat, true);
 		}
 
@@ -84,14 +85,14 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 	}
 
 	public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-		theAdapter().setFilter(Category.values()[which], isChecked);
+		theAdapter().setFilter(Category.asList().get(which), isChecked);
 	}
 
 	private void search(Editable s) {
 		if (s == null)
 			s = ((EditText) findViewById(R.id.sbk_text)).getText();
 		theAdapter().clear();
-		theAdapter().add(AgoraData.getEntryByKeyword(s.toString(), theAdapter().tellFilter()));	
+		theAdapter().add(EntrySummary.getEntryByKeyword(s.toString(), theAdapter().tellFilter()));	
 	}
 
 	private EntryArrayAdapter theAdapter() {

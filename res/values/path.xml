@@ -7,5 +7,8 @@
     <string name="path_local_data">2012.xml</string>
     <string name="path_local_data_new">2012.new.xml</string>
     <string name="path_pref">pref</string>
-
+    <string name="path_remote_sqlite">http://tailriver.net/agoraguide/2012.sqlite3</string>
+    <string name="path_remote_sqlite_gz">http://tailriver.net/agoraguide/2012.sqlite3.gz</string>
+    <string name="path_local_database">agora2012</string>
+    
 </resources>
