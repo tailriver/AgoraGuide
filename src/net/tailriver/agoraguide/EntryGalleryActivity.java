@@ -80,7 +80,7 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		String selectedId = ((Gallery) findViewById(R.id.entrygallery)).getSelectedItem().toString();
-		EntrySummary summary = EntrySummary.parse(selectedId);
+		EntrySummary summary = EntrySummary.get(selectedId);
 		switch (item.getItemId()) {
 		case R.id.menu_entrygallery_favorites_add:
 		case R.id.menu_entrygallery_favorites_remove:
@@ -93,9 +93,8 @@ public class EntryGalleryActivity extends Activity implements OnItemSelectedList
 	}
 
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		final String entryId = getIntent().getStringArrayExtra("entryIdList")[position];
-
-		setTitle(EntrySummary.parse(entryId).getTitle());
+		String entryId = getIntent().getStringArrayExtra("entryIdList")[position];
+		setTitle((EntrySummary.get(entryId)).getTitle());
 	}
 
 	public void onNothingSelected(AdapterView<?> arg0) {

@@ -54,11 +54,11 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		List<Category> categoryList = Category.asList();
-		final String[] choices = new String[categoryList.size()];
-		final boolean[] checked = new boolean[categoryList.size()];
+		List<Category> categoryList = Category.values();
+		String[] choices  = new String[categoryList.size()];
+		boolean[] checked = new boolean[categoryList.size()];
 		for (int i = 0; i < categoryList.size(); i++) {
-			choices[i] = categoryList.get(i).toString();
+			choices[i] = categoryList.get(i).getName();
 			checked[i] = theAdapter().getFilter(categoryList.get(i));
 		}
 
@@ -76,7 +76,7 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 
 	public void onClick(DialogInterface dialog, int which) {
 		if (which == AlertDialog.BUTTON_NEUTRAL) {
-			for (Category cat : Category.asList())
+			for (Category cat : Category.values())
 				theAdapter().setFilter(cat, true);
 		}
 
@@ -85,7 +85,7 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 	}
 
 	public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-		theAdapter().setFilter(Category.asList().get(which), isChecked);
+		theAdapter().setFilter(Category.values().get(which), isChecked);
 	}
 
 	private void search(Editable s) {

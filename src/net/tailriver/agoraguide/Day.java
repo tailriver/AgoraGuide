@@ -1,33 +1,35 @@
 package net.tailriver.agoraguide;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import android.content.res.Resources;
 
-class Day implements Comparable<Day> {
-	public static final String CLASS_NAME = Day.class.getSimpleName();
-	private static List<Day> days;
+public class Day extends AbstractModel<Day> {
+	private static Day singleton = new Day();
+	private static ModelFactory<Day> factory;
 
-	private String common;
 	private String local;
 	private int color;
 	private int order;
 
+	private Day() {}
+
 	private Day(String common, String local, int color, int order) {
-		this.common = common;
+		super(common);
 		this.local  = local;
 		this.color  = color;
 		this.order  = order;
 	}
 
-	public static synchronized final void init() {
-		if (days != null) {
-			return;
+	public static synchronized void init() {
+		if (factory == null) {
+			factory = new ModelFactory<Day>();
+			singleton.init_base();
 		}
-		days = new ArrayList<Day>();
-
+	}
+	
+	@Override
+	protected void init_factory() {
 		Resources res = AgoraDatabase.getContext().getResources();
 		String[] common = res.getStringArray(R.array.days);
 		String[] local  = res.getStringArray(R.array.days_locale);
@@ -35,22 +37,16 @@ class Day implements Comparable<Day> {
 
 		for (int i = 0; i < common.length; i++) {
 			Day day = new Day(common[i], local[i], color[i], i);
-			days.add(day);
+			factory.put(common[i], day);
 		}
-		days = Collections.unmodifiableList(days);
 	}
 
-	public static List<Day> asList() {
-		return days;
+	public static Day get(String id) {
+		return factory.get(id);
 	}
 
-	public static Day parse(String day) {
-		for (Day d : days) {
-			if (d.common.equals(day)) {
-				return d;
-			}
-		}
-		return null;
+	public static List<Day> values() {
+		return factory.values();
 	}
 
 	public String getLocalString() {
@@ -64,14 +60,5 @@ class Day implements Comparable<Day> {
 	@Override
 	public boolean equals(Object o) {
 		return o instanceof Day && this.order == ((Day) o).order;
-	}
-
-	public int compareTo(Day another) {
-		return this.order - another.order;
-	}
-
-	@Override
-	public String toString() {
-		return common;
 	}
 }

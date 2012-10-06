@@ -38,7 +38,7 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 		EntrySummary.init();
 
 		this.filter = new HashMap<Category, Boolean>();
-		for (Category cat : Category.asList())
+		for (Category cat : Category.values())
 			filter.put(cat, true);
 	}
 
@@ -66,7 +66,7 @@ public class EntryArrayAdapter extends ArrayAdapter<String> implements ListAdapt
 			convertView = inflater.inflate(textViewResourceId, null);
 		}
 
-		EntrySummary summary = EntrySummary.parse(getItem(position));
+		EntrySummary summary = EntrySummary.get(getItem(position));
 
 		TextView titleView = (TextView) convertView.findViewById(R.id.entrylist_item_title);
 		titleView.setText(summary.getTitle());

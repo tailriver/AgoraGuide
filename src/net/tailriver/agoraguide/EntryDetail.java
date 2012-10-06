@@ -19,7 +19,7 @@ public class EntryDetail {
 	private Location location;
 
 	public EntryDetail(String id) {
-		this(EntrySummary.parse(id));
+		this(EntrySummary.get(id));
 	}
 
 	public EntryDetail(EntrySummary summary) {
@@ -28,11 +28,10 @@ public class EntryDetail {
 		location = new Location(summary);
 
 		SQLiteDatabase dbh = AgoraDatabase.get();
-
 		String table = "entry";
 		String[] columns = (String[]) EntryDetail.columns.toArray();
 		String selection = "id=?";
-		String[] selectionArgs = { summary.getId() };
+		String[] selectionArgs = { summary.toString() };
 		Cursor c = dbh.query(table, columns, selection, selectionArgs, null, null, null);
 
 		c.moveToFirst();
@@ -72,10 +71,5 @@ public class EntryDetail {
 
 	public Location getLocation() {
 		return location;
-	}
-
-	@Override
-	public String toString() {
-		return summary.getId() + ": (detail)";
 	}
 }

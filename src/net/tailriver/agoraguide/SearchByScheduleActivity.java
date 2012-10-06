@@ -30,14 +30,14 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 
 		TimeFrame.init();
 		final List<String> timeFrameOrderedEntry = new ArrayList<String>();
-		for (TimeFrame tf : TimeFrame.asList()) {
-			timeFrameOrderedEntry.add(tf.getSummary().getId());
+		for (TimeFrame tf : TimeFrame.values()) {
+			timeFrameOrderedEntry.add(tf.getSummary().toString());
 		}
 
 		theAdapter().add(timeFrameOrderedEntry);
 
 		List<String> localDays = new ArrayList<String>();
-		for (Day d : Day.asList()) {
+		for (Day d : Day.values()) {
 			localDays.add(d.getLocalString());
 		}
 		SpinnerAdapter dayAdapter = new ArrayAdapter<String>(SearchByScheduleActivity.this,
@@ -64,7 +64,7 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 		int day	 = ((Spinner) findViewById(R.id.sbs_day)).getSelectedItemPosition();
 		int time = Integer.parseInt(((String) ((Spinner) findViewById(R.id.sbs_time)).getSelectedItem()).replace(":", ""));
 
-		int viewPosition = TimeFrame.search(Day.asList().get(day), time);
+		int viewPosition = TimeFrame.search(Day.values().get(day), time);
 		((AdapterView<?>) findViewById(R.id.sbs_result)).setSelection(viewPosition);
 	}
 

@@ -30,7 +30,7 @@ public class FavoritesActivity extends Activity implements OnClickListener {
 
 		List<String> favorites = new ArrayList<String>();
 		for (EntrySummary summary : Favorite.asList()) {
-			favorites.add(summary.getId());
+			favorites.add(summary.toString());
 		}
 		theAdapter().add(favorites);
 	}
@@ -42,7 +42,7 @@ public class FavoritesActivity extends Activity implements OnClickListener {
 		else {
 			List<String> favorites = new ArrayList<String>();
 			for (EntrySummary summary : Favorite.asList()) {
-				favorites.add(summary.getId());
+				favorites.add(summary.toString());
 			}
 			theAdapter().clear();
 			theAdapter().add(favorites);

@@ -14,11 +14,11 @@ public class Location {
 		String table = "location";
 		String[] columns = { "area", "x", "y" };
 		String selection = "entry=?";
-		String[] selectionArgs = { es.getId() };
+		String[] selectionArgs = { es.toString() };
 		Cursor c = dbh.query(table, columns, selection, selectionArgs, null, null, null);
 
 		c.moveToFirst();
-		area = Area.parse(c.getString(0));
+		area = Area.get(c.getString(0));
 		x = c.getDouble(1);
 		y = c.getDouble(2);
 	}
@@ -37,6 +37,6 @@ public class Location {
 
 	@Override
 	public String toString() {
-		return "area=" + area.getId() + ",x=" + x + ",y=" + y;
+		return "area=" + area + ",x=" + x + ",y=" + y;
 	}
 }

@@ -35,7 +35,7 @@ public class EntryGalleryAdapter extends ArrayAdapter<String> {
 
 		final TextView iconView = (TextView) convertView.findViewById(R.id.entrygallery_icon);
 		iconView.setText(id);
-		iconView.append(" " + summary.getCategory());
+		iconView.append(" " + summary.getCategory().getName());
 
 		final TextView titleView = (TextView) convertView.findViewById(R.id.entrygallery_title);
 		titleView.setText(summary.getTitle());

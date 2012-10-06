@@ -22,7 +22,6 @@ public class AgoraDatabase {
 
 		AgoraDatabase.context = context.getApplicationContext();
 		HttpClient.init(context);
-		Day.init();
 	}
 
 	public static void update() throws IOException {
