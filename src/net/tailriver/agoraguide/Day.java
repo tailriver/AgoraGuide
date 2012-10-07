@@ -3,6 +3,7 @@ package net.tailriver.agoraguide;
 import java.util.List;
 
 import android.content.res.Resources;
+import android.database.sqlite.SQLiteDatabase;
 
 public class Day extends AbstractModel<Day> {
 	private static Day singleton = new Day();
@@ -16,21 +17,19 @@ public class Day extends AbstractModel<Day> {
 
 	private Day(String common, String local, int color, int order) {
 		super(common);
-		this.local  = local;
-		this.color  = color;
-		this.order  = order;
+		this.local = local;
+		this.color = color;
+		this.order = order;
 	}
 
-	public static synchronized void init() {
-		if (factory == null) {
-			factory = new ModelFactory<Day>();
-			singleton.init_base();
-		}
+	public static void init() {
+		factory = new ModelFactory<Day>();
+		singleton.execute();
 	}
 	
 	@Override
-	protected void init_factory() {
-		Resources res = AgoraDatabase.getContext().getResources();
+	protected void init_factory(SQLiteDatabase database) {
+		Resources res = context.getResources();
 		String[] common = res.getStringArray(R.array.days);
 		String[] local  = res.getStringArray(R.array.days_locale);
 		int[] color  = res.getIntArray(R.array.days_color);

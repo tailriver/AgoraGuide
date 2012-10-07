@@ -25,22 +25,16 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 		this.end     = end;
 	}
 
-	public static synchronized void init() {
-		if (factory == null) {
-			Day.init();
-			EntrySummary.init();
-
-			factory = new ModelFactory<TimeFrame>();
-			singleton.init_base();
-		}
+	public static void init() {
+		factory = new ModelFactory<TimeFrame>();
+		singleton.execute();
 	}
 
 	@Override
-	protected void init_factory() {
-		SQLiteDatabase dbh = AgoraDatabase.get();
+	protected void init_factory(SQLiteDatabase database) {
 		String table = "timeframe";
 		String[] columns = { "entry", "day", "start", "end" };
-		Cursor c = dbh.query(table, columns, null, null, null, null, null);
+		Cursor c = database.query(table, columns, null, null, null, null, null);
 
 		c.moveToFirst();
 		for (int i = 0, rows = c.getCount(); i < rows; i++) {

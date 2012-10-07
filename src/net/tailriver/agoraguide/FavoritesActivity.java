@@ -1,8 +1,5 @@
 package net.tailriver.agoraguide;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -21,31 +18,23 @@ public class FavoritesActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.favorites);
 
-		AgoraDatabase.init(getApplicationContext());
+		AgoraGuideActivity.initDatabase(getApplicationContext());
 
 		final ListView entryListView = (ListView) findViewById(R.id.favorites_entrylist);
 		entryListView.setAdapter(new EntryArrayAdapter(FavoritesActivity.this, entryListView.getId()));
 		entryListView.setOnItemClickListener(theAdapter());
 		entryListView.setEmptyView(findViewById(R.id.favorites_empty));
 
-		List<String> favorites = new ArrayList<String>();
-		for (EntrySummary summary : Favorite.asList()) {
-			favorites.add(summary.toString());
-		}
-		theAdapter().add(favorites);
+		theAdapter().add(Favorite.values());
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (theAdapter().getCount() == Favorite.asList().size())
+		if (theAdapter().getCount() == Favorite.values().size())
 			theAdapter().onActivityResult(requestCode, resultCode, data);
 		else {
-			List<String> favorites = new ArrayList<String>();
-			for (EntrySummary summary : Favorite.asList()) {
-				favorites.add(summary.toString());
-			}
 			theAdapter().clear();
-			theAdapter().add(favorites);
+			theAdapter().add(Favorite.values());
 			findViewById(R.id.favorites_entrylist).invalidate();
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -81,7 +70,7 @@ public class FavoritesActivity extends Activity implements OnClickListener {
 	}
 
 	public void onClick(DialogInterface dialog, int which) {
-		Favorite.clearAll();
+		Favorite.clear();
 		theAdapter().clear();
 		findViewById(R.id.favorites_entrylist).invalidate();
 	}

@@ -13,11 +13,11 @@ public class Favorite {
 		return;
 	}
 
-	public static List<EntrySummary> asList() {
+	public static List<EntrySummary> values() {
 		return new ArrayList<EntrySummary>();
 	}
 
-	public static void clearAll() {
+	public static void clear() {
 		return;
 	}
 }

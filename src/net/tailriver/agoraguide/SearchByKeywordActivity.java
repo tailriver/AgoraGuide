@@ -12,22 +12,26 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ListView;
 
-public class SearchByKeywordActivity extends Activity implements TextWatcher, OnMultiChoiceClickListener, OnClickListener {
+public class SearchByKeywordActivity extends Activity
+implements OnClickListener, OnMultiChoiceClickListener, TextWatcher
+{
 	/** Called when the activity is first created. */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		setContentView(R.layout.searchbykeyword);
 
-		AgoraDatabase.init(getApplicationContext());
+		AgoraGuideActivity.initDatabase(getApplicationContext());
 
-		final ListView entryList = (ListView) findViewById(R.id.sbk_result);
-		entryList.setAdapter(new EntryArrayAdapter(SearchByKeywordActivity.this, entryList.getId()));
+		ListView entryList = (ListView) findViewById(R.id.search_result);
+		entryList.setAdapter(new EntryArrayAdapter(SearchByKeywordActivity.this, R.id.search_result));
 		entryList.setOnItemClickListener(theAdapter());
-		entryList.setEmptyView(findViewById(R.id.sbk_empty));
+		entryList.setEmptyView(findViewById(R.id.search_not_found));
 
 		final EditText editText = (EditText) findViewById(R.id.sbk_text);
 		editText.addTextChangedListener(this);
@@ -92,10 +96,10 @@ public class SearchByKeywordActivity extends Activity implements TextWatcher, On
 		if (s == null)
 			s = ((EditText) findViewById(R.id.sbk_text)).getText();
 		theAdapter().clear();
-		theAdapter().add(EntrySummary.getEntryByKeyword(s.toString(), theAdapter().tellFilter()));	
+		theAdapter().add(EntrySummary.getEntryByKeyword(s.toString(), theAdapter().tellFilter()));
 	}
 
 	private EntryArrayAdapter theAdapter() {
-		return (EntryArrayAdapter) ((ListView) findViewById(R.id.sbk_result)).getAdapter();
+		return (EntryArrayAdapter) ((ListView) findViewById(R.id.search_result)).getAdapter();
 	}
 }

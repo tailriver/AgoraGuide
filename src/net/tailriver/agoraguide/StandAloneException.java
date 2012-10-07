@@ -8,4 +8,8 @@ public class StandAloneException extends IOException {
 	public StandAloneException() {
 		super("not connected to the internet");
 	}
+
+	public StandAloneException(Throwable e) {
+		super(e);
+	}
 }

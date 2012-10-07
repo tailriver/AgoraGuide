@@ -27,12 +27,12 @@ public class EntryDetail {
 		data     = new HashMap<String, String>();
 		location = new Location(summary);
 
-		SQLiteDatabase dbh = AgoraDatabase.get();
+		SQLiteDatabase database = AgoraGuideActivity.getDatabase();
 		String table = "entry";
 		String[] columns = (String[]) EntryDetail.columns.toArray();
 		String selection = "id=?";
 		String[] selectionArgs = { summary.toString() };
-		Cursor c = dbh.query(table, columns, selection, selectionArgs, null, null, null);
+		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
 
 		c.moveToFirst();
 		for (int i = 0; i < columns.length; i++) {
@@ -43,7 +43,7 @@ public class EntryDetail {
 
 	public static synchronized void init() {
 		if (columns == null) {
-			Resources res = AgoraDatabase.getContext().getResources();
+			Resources res = AgoraGuideActivity.getContext().getResources();
 			columns = Arrays.asList(res.getStringArray(R.array.entrydetail));
 		}
 	}
@@ -53,7 +53,7 @@ public class EntryDetail {
 	}
 
 	public String getDetailName(int index) {
-		Resources res = AgoraDatabase.getContext().getResources();
+		Resources res = AgoraGuideActivity.getContext().getResources();
 		return res.getStringArray(R.array.entrydetail_locale)[index];
 	}
 

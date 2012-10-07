@@ -21,20 +21,19 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.searchbyschedule);
 
-		AgoraDatabase.init(getApplicationContext());
+		AgoraGuideActivity.initDatabase(getApplicationContext());
 
-		final ListView entryList = (ListView) findViewById(R.id.sbs_result);
+		final ListView entryList = (ListView) findViewById(R.id.search_result);
 		entryList.setAdapter(new EntryArrayAdapter(SearchByScheduleActivity.this, entryList.getId()));
 		entryList.setOnItemClickListener(theAdapter());
-		entryList.setEmptyView(findViewById(R.id.sbs_empty));
+		entryList.setEmptyView(findViewById(R.id.search_not_found));
 
 		TimeFrame.init();
-		final List<String> timeFrameOrderedEntry = new ArrayList<String>();
+		List<EntrySummary> entries = new ArrayList<EntrySummary>();
 		for (TimeFrame tf : TimeFrame.values()) {
-			timeFrameOrderedEntry.add(tf.getSummary().toString());
+			entries.add(tf.getSummary());
 		}
-
-		theAdapter().add(timeFrameOrderedEntry);
+		theAdapter().add(entries);
 
 		List<String> localDays = new ArrayList<String>();
 		for (Day d : Day.values()) {
@@ -65,13 +64,13 @@ public class SearchByScheduleActivity extends Activity implements OnItemSelected
 		int time = Integer.parseInt(((String) ((Spinner) findViewById(R.id.sbs_time)).getSelectedItem()).replace(":", ""));
 
 		int viewPosition = TimeFrame.search(Day.values().get(day), time);
-		((AdapterView<?>) findViewById(R.id.sbs_result)).setSelection(viewPosition);
+		((AdapterView<?>) findViewById(R.id.search_result)).setSelection(viewPosition);
 	}
 
 	public void onNothingSelected(AdapterView<?> parent) {
 	}
 
 	private EntryArrayAdapter theAdapter() {
-		return (EntryArrayAdapter) ((ListView) findViewById(R.id.sbs_result)).getAdapter();
+		return (EntryArrayAdapter) ((ListView) findViewById(R.id.search_result)).getAdapter();
 	}
 }

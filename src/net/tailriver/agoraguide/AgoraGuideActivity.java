@@ -1,21 +1,25 @@
 package net.tailriver.agoraguide;
 
-import java.io.IOException;
+import java.io.File;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
-public class AgoraGuideActivity extends Activity implements Runnable {
+public class AgoraGuideActivity extends Activity {
+	private static final String databaseURL  = "http://tailriver.net/agoraguide/2012.sqlite3.gz";
+	private static final String databaseName = "2012.sqlite3";
+	private static Context context;
+	private static SQLiteDatabase database;
+	private static boolean initFinished;
+
 	/** Called when the activity is first created. */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -24,52 +28,8 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 
 		findViewById(R.id.main_progressLayout).setVisibility(View.INVISIBLE);
 
-		AgoraDatabase.init(getApplicationContext());
-		new Thread(AgoraGuideActivity.this).start();
+		initDatabase(getApplicationContext());
 	}
-
-	/** You must not try to change UI here, go to {@link Handler}. */
-	public synchronized void run() {
-		final Message message = new Message();
-		message.what = R.layout.main;
-		try {
-			Log.i(getClass().getSimpleName(), "update start");
-			AgoraDatabase.update();
-			Log.i(getClass().getSimpleName(), "update end");
-			EntrySummary.init();
-		}
-		catch (IOException e) {
-			message.arg1 = R.string.error_fail_update;
-			message.arg2 = Toast.LENGTH_LONG;
-			handler.sendMessage(message);
-			Log.e(getClass().getSimpleName(), message.toString(), e);
-		}
-	}
-
-	private final Handler handler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case R.id.main_progress:
-				final ProgressBar pb = (ProgressBar) findViewById(msg.what);
-				pb.setProgress(msg.arg1);
-
-				if (msg.arg1 == 0) {
-					pb.setMax(msg.arg2);
-					findViewById(R.id.main_progressLayout)
-					.setVisibility(msg.arg2 > 0 ? View.VISIBLE : View.INVISIBLE);
-				}
-				break;
-
-			case R.layout.main:
-				Toast.makeText(AgoraGuideActivity.this, msg.arg1, msg.arg2).show();
-				break;
-
-			default:
-				LogError("unknown message received: " + msg.toString());
-			}
-		}
-	};
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -95,12 +55,6 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 			break;
 
 		case R.id.menu_credits:
-/*
-			AgoraData.removeData();
-			Toast.makeText(AgoraGuideActivity.this, "Data removed", Toast.LENGTH_SHORT).show();
-			new Thread(AgoraGuideActivity.this).start();
-			return true;
- */
 			nextActivity = CreditsActivity.class;
 			break;
 
@@ -116,7 +70,65 @@ public class AgoraGuideActivity extends Activity implements Runnable {
 			return false;
 	}
 
-	private void LogError(String s) {
-		Log.e(getApplicationContext().getString(R.string.app_name), s);
+	public static final void initDatabase(Context context) {
+		AgoraGuideActivity.context = context;
+		if (!initFinished) {
+			initDatabase();
+		}
 	}
+
+	private static synchronized void initDatabase() {
+		if (!initFinished) {
+			final File databaseFile = context.getFileStreamPath(databaseName);
+			databaseFile.getParentFile().mkdirs();
+
+			class DatabaseLoader extends Downloader {
+				public DatabaseLoader(Context context) throws StandAloneException {
+					super(context);
+				}
+
+				@Override
+				protected Void doInBackground(Downloader.Pair... params) {
+					super.doInBackground(params);
+
+					if (!databaseFile.exists()) {
+						Log.e("AgoraGuide", "NO DATABASE");
+					}
+					database = SQLiteDatabase.openDatabase(databaseFile.getPath(), null, Context.MODE_PRIVATE);
+					Area.init();
+					Category.init();
+					Day.init();
+					EntrySummary.init();
+					TimeFrame.init();
+					initFinished = true;
+					return null;
+				}
+			}
+
+			Downloader.Pair pair = null;
+			if (System.currentTimeMillis() - databaseFile.lastModified() > 3600 * 1000) {
+				pair = new Downloader.Pair(databaseURL, databaseFile);
+			}
+
+			try {
+				new DatabaseLoader(context).execute(pair);
+			} catch (StandAloneException e) {}
+		}
+	}
+
+	public static final SQLiteDatabase getDatabase() {
+		if (database == null || !database.isOpen()) {
+			throw new IllegalArgumentException("database has been closed");
+		}
+		return database;
+	}
+
+	public static final boolean isInitFinished() {
+		return initFinished;
+	}
+
+	public static final Context getContext() {
+		return context;
+	}
+
 }

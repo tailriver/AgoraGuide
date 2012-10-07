@@ -2,17 +2,18 @@ package net.tailriver.agoraguide;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 
-public class EntrySummary extends AbstractModel<EntrySummary> {
+public class EntrySummary extends AbstractModel<EntrySummary> implements Parcelable {
 	private static EntrySummary singleton = new EntrySummary();
 	private static ModelFactory<EntrySummary> factory;
 
@@ -32,25 +33,17 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 		this.schedule = schedule;
 	}
 
-	public static synchronized void init() {
-		if (factory == null) {
-			Area.init();
-			Category.init();
-			Day.init();		// hidden dependency (related with #enhanceSchedule)
-			EntryDetail.init();
-
-			factory = new ModelFactory<EntrySummary>();
-			singleton.init_base();
-		}
+	public static void init() {
+		factory = new ModelFactory<EntrySummary>();
+		singleton.execute();
 	}
 
 	@Override
-	protected void init_factory() {
-		SQLiteDatabase dbh = AgoraDatabase.get();
+	protected void init_factory(SQLiteDatabase database) {
 		String table1 = "entry";
 		String[] columns1 = { "id", "title", "category", "sponsor", "schedule" };
-		Cursor c1 = dbh.query(table1, columns1, null, null, null, null, null);
-		
+		Cursor c1 = database.query(table1, columns1, null, null, null, null, null);
+
 		c1.moveToFirst();
 		for (int i = 0, rows = c1.getCount(); i < rows; i++) {
 			String id = c1.getString(0);
@@ -66,8 +59,8 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 
 		String table2 = "location";
 		String[] columns2 = { "entry", "area" };
-		Cursor c2 = dbh.query(table2, columns2, null, null, null, null, null);
-		
+		Cursor c2 = database.query(table2, columns2, null, null, null, null, null);
+
 		c2.moveToFirst();
 		for (int i = 0, rows = c2.getCount(); i < rows; i++) {
 			String id = c2.getString(0);
@@ -130,27 +123,50 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 		return text;
 	}
 
-	public static List<String> getEntryByKeyword(String query, Map<Category, Boolean> filter) {
-		List<String> match = new ArrayList<String>();
+	public static List<EntrySummary> getEntryByKeyword(String query, Set<Category> filter) {
+		List<EntrySummary> match = new ArrayList<EntrySummary>();
 
 		// id match
 		if (keySet().contains(query))
-			match.add(query);
+			match.add(EntrySummary.get(query));
 
 		// keyword match
 		for (EntrySummary es : values()) {
+			if (!filter.contains(es.getCategory())) {
+				continue;
+			}
+
 			if (query.length() == 0) {
-				match.add(es.toString());
+				match.add(es);
 				continue;
 			}
 
 			for (String word : new String[]{ es.getTitle(), es.getSponsor() }) {
 				if (word != null && word.contains(query)) {
-					match.add(es.toString());
+					match.add(es);
 					break;
 				}
 			}
 		}
 		return match;
 	}
+
+	public int describeContents() {
+		return 0;
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(toString());
+	}
+
+	public static final Parcelable.Creator<EntrySummary> CREATOR =
+			new Parcelable.Creator<EntrySummary>() {
+		public EntrySummary createFromParcel(Parcel source) {
+			return EntrySummary.get(source.readString());
+		}
+
+		public EntrySummary[] newArray(int size) {
+			throw new UnsupportedOperationException();
+		}
+	};
 }

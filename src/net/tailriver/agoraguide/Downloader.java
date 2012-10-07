@@ -7,26 +7,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
-public class HttpClient {
-	private static final String thisClass = HttpClient.class.getSimpleName();
-	static final int BUFFER_SIZE = 4096;
+public class Downloader extends AsyncTask<Downloader.Pair, Void, Void> {
+	private static final String thisClass = Downloader.class.getSimpleName();
+	private static final int BUFFER_SIZE = 4096;
+	private static final int MAX_WORKER = 3;
 
-	private static Context context;
-
-	URL url;
-	HttpURLConnection http;
+	private File localDirectory;
 
 	static {
 		// patch
@@ -35,25 +32,7 @@ public class HttpClient {
 		}
 	}
 
-	public HttpClient(URL url) throws StandAloneException, IOException {
-		this.url = url;
-		openConnection();
-	}
-
-	public HttpClient(String urlString) throws StandAloneException, IOException {
-		try {
-			url = new URL(urlString);
-			openConnection();
-		} catch (MalformedURLException e) {
-			throw new IOException(e);
-		}
-	}
-
-	public static void init(Context context) {
-		HttpClient.context = context;
-	}
-
-	private void openConnection() throws StandAloneException, IOException {
+	public Downloader(Context context) throws StandAloneException {
 		// connectivity check
 		Object cm = context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo ni = ((ConnectivityManager)cm).getActiveNetworkInfo();
@@ -61,30 +40,40 @@ public class HttpClient {
 			throw new StandAloneException();
 		}
 
-		http = (HttpURLConnection) url.openConnection();
-		http.setRequestProperty("User-Agent", "AgoraGuide/2012 (Android)");		
+		localDirectory = context.getFilesDir();
 	}
 
-	public void download(File file) throws IOException {
-		if (file == null) {
-			throw new IllegalArgumentException("file is null");
+	private boolean download(Pair p) {
+		if (p == null) {
+			return true;
+		}
+		if (p.url == null || p.file == null) {
+			throw new IllegalArgumentException("pair is null");
 		}
 
-		http.setIfModifiedSince(file.lastModified());
-		http.setRequestProperty("Accept-Encoding", "gzip");
-		http.setDoInput(true);
-
-		File tempFile = File.createTempFile("downloading", null, context.getFilesDir());
+		HttpURLConnection http;
 		try {
+			URL url = new URL(p.url);
+			http = (HttpURLConnection) url.openConnection();
+			http.setRequestProperty("Accept-Encoding", "gzip");
+			http.setRequestProperty("User-Agent", "AgoraGuide/2012 (Android)");		
+			http.setIfModifiedSince(p.file.lastModified());
+			http.setDoInput(true);
 			http.connect();
+		} catch (IOException e) {
+			Log.w("HttpURLConnection", e.getMessage(), e);
+			return false;
+		}
+
+		File tempFile = null;
+		try {
 			int code = http.getResponseCode();
 
-			Log.i(thisClass, "Downloading: " + url);
-			Log.i(thisClass, code + " " + http.getResponseMessage());
+			Log.v(thisClass, code + " " + http.getResponseMessage());
 
 			if (code == HttpURLConnection.HTTP_NOT_MODIFIED) {
-				file.setLastModified(System.currentTimeMillis());
-				return;
+				p.file.setLastModified(System.currentTimeMillis());
+				return true;
 			}
 
 			if (code != HttpURLConnection.HTTP_OK) {
@@ -100,6 +89,7 @@ public class HttpClient {
 				bis = new BufferedInputStream(is, BUFFER_SIZE);
 			}
 
+			tempFile = File.createTempFile("downloading", null, localDirectory);
 			FileOutputStream fos = new FileOutputStream(tempFile);
 			BufferedOutputStream bos = new BufferedOutputStream(fos, BUFFER_SIZE);
 
@@ -116,32 +106,53 @@ public class HttpClient {
 			bos.flush();
 			bos.close();
 
-			if (!tempFile.renameTo(file)) {
+			if (!tempFile.renameTo(p.file)) {
 				throw new IOException("download successed but cannot write specific file");
 			}
 			Log.i(thisClass, "Downloaded " + String.valueOf(totalRead) + " bytes");
+			return true;
+		} catch (Exception e) {
+			Log.e(thisClass, "Exception", e);
+			return false;
 		} finally {
-			if (tempFile.exists()) {
+			if (tempFile != null && tempFile.exists()) {
 				tempFile.delete();
 			}
-			disconnect();
+			if (http != null) {
+				http.disconnect();
+			}
 		}
 	}
 
-	public Bitmap getBitmap() throws IOException {
-		http.setDoInput(true);
+	@Override
+	protected Void doInBackground(Pair... params) {
 		try {
-			http.connect();
-			InputStream is = http.getInputStream();
-			return BitmapFactory.decodeStream(is);
-		} finally {
-			disconnect();
+			int worker = 0;
+			for (Pair p : params) {
+				if (worker < MAX_WORKER) {
+					worker++;
+					download(p);
+					worker--;
+				} else {
+					wait(200);
+				}
+			}
+		} catch (InterruptedException e) {
+			Log.e("Downloader", "interrupted", e);
 		}
+		return null;
 	}
 
-	private final void disconnect() {
-		if (http != null) {
-			http.disconnect();
+	public final AsyncTask<Pair, Void, Void> execute(List<Pair> list) {
+		return execute(list.toArray(new Pair[list.size()]));
+	}
+
+	static class Pair {
+		final String url;
+		final File   file;
+		Pair(String url, File file) {
+			this.url  = url;
+			this.file = file;
 		}
 	}
 }

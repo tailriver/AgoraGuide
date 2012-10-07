@@ -5,33 +5,33 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class Location {
 	private Area area;
-	private double x;
-	private double y;
+	private float x;
+	private float y;
 
 	public Location(EntrySummary es) {
-		SQLiteDatabase dbh = AgoraDatabase.get();
+		SQLiteDatabase database = AgoraGuideActivity.getDatabase();
 
 		String table = "location";
 		String[] columns = { "area", "x", "y" };
 		String selection = "entry=?";
 		String[] selectionArgs = { es.toString() };
-		Cursor c = dbh.query(table, columns, selection, selectionArgs, null, null, null);
+		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
 
 		c.moveToFirst();
 		area = Area.get(c.getString(0));
-		x = c.getDouble(1);
-		y = c.getDouble(2);
+		x = c.getFloat(1);
+		y = c.getFloat(2);
 	}
 
 	public Area getArea() {
 		return area;
 	}
 
-	public double getX() {
+	public float getX() {
 		return x;
 	}
 
-	public double getY() {
+	public float getY() {
 		return y;
 	}
 

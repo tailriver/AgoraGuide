@@ -1,21 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE LinearLayout>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" style="@style/AgoraGuideLayout">
-	<LinearLayout android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:orientation="horizontal">
-		<Spinner android:layout_height="fill_parent"
-			android:layout_width="wrap_content" android:layout_weight="0.5"
-			android:id="@+id/sbs_day"></Spinner>
-		<Spinner android:id="@+id/sbs_time" android:layout_width="wrap_content"
-			android:layout_weight="0.5" android:layout_height="fill_parent"></Spinner>
-	</LinearLayout>
-	<TextView android:text="Not Found" android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:id="@+id/sbs_empty"></TextView>
-	<ListView android:layout_width="fill_parent" android:id="@+id/sbs_result"
-		android:layout_height="fill_parent" android:scrollingCache="false">
-		<!-- Preview: listitem=@layout/entrylist_item -->
-	</ListView>
+    style="@style/AgoraGuideLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Spinner
+            android:id="@+id/sbs_day"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.5" >
+        </Spinner>
+
+        <Spinner
+            android:id="@+id/sbs_time"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.5" >
+        </Spinner>
+    </LinearLayout>
+
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/search_result" />
+
 </LinearLayout>

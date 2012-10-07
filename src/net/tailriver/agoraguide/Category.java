@@ -3,6 +3,7 @@ package net.tailriver.agoraguide;
 import java.util.List;
 
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 public class Category extends AbstractModel<Category> {
 	private static Category singleton = new Category();
@@ -19,19 +20,17 @@ public class Category extends AbstractModel<Category> {
 		this.isAllday = isAllday;
 	}
 
-	public static synchronized void init() {
-		if (factory == null) {
-			factory = new ModelFactory<Category>();
-			singleton.init_base();
-		}
+	public static void init() {
+		factory = new ModelFactory<Category>();
+		singleton.execute();
 	}
 
 	@Override
-	protected void init_factory() {
+	protected void init_factory(SQLiteDatabase database) {
 		String table = "category";
 		String[] columns = { "id", "name", "is_allday" };
-		Cursor c = AgoraDatabase.get().query(table, columns, null, null, null, null, null);
-		
+		Cursor c = database.query(table, columns, null, null, null, null, null);
+
 		c.moveToFirst();
 		for (int i = 0, rows = c.getCount(); i < rows; i++) {
 			String id = c.getString(0);
