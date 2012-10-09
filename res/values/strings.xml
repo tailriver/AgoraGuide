@@ -3,7 +3,7 @@
 <resources>
 
     <string name="app_name">AgoraGuide</string>
-    <string name="addFavorite">Add Favorite</string>
+    <string name="app_name_locale">AgoraGuide</string><string name="addFavorite">Add Favorite</string>
     <string name="removeFavorite">Remove Favorite</string>
     <string name="favorites">Favorites</string>
     <string name="entryDetail">Program</string>
@@ -15,11 +15,45 @@
     <string name="clearFavorite">Clear Favorites</string>
     <string name="credits">Information</string>
     <string name="website">Go to web site</string>
-    <string name="error_fail_update">Fail to update the data&#8230;</string>
     <string name="reservation">Appointment</string>
     <string name="reserve">Reserve</string>
     <string name="filtering">Filtering</string>
     <string name="selectAll">Select all</string>
-    <string name="updating">Updating &#8230;</string>
+
+    <string-array name="days">
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string-array name="days_locale">
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string-array name="sbs_times">
+        <item>10:00</item>
+        <item>11:00</item>
+        <item>12:00</item>
+        <item>13:00</item>
+        <item>14:00</item>
+        <item>15:00</item>
+    </string-array>
+    <string-array name="entrydetail">
+        <item>cosponsor</item>
+        <item>guest</item>
+        <item>abstract</item>
+        <item>content</item>
+        <item>reservation</item>
+        <item>note</item>
+        <item>original</item>
+    </string-array>
+    <string-array name="entrydetail_locale">
+        <item>CoSponsor</item>
+        <item>Guest</item>
+        <item>Abstract</item>
+        <item>Content</item>
+        <item>Reseration</item>
+        <item>Note</item>
+        <item>Original</item>
+    </string-array>
+    
 
 </resources>

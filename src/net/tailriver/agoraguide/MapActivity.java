@@ -18,7 +18,7 @@ public class MapActivity extends Activity {
 
 		AgoraGuideActivity.initDatabase(getApplicationContext());
 
-		EntrySummary summary = getIntent().getParcelableExtra(EntryDetailActivity.INTENT_ENTRY);
+		EntrySummary summary = EntrySummary.get(getIntent().getStringExtra(EntryDetailActivity.INTENT_ENTRY));
 		EntryDetail detail = new EntryDetail(summary);
 		Location location = detail.getLocation();
 		Area area = location.getArea();
@@ -45,11 +45,11 @@ public class MapActivity extends Activity {
 		root.setOrientation(LinearLayout.VERTICAL);
 		TextView map = new TextView(this);
 		map.setGravity(Gravity.CENTER);
-		map.setText(area.getName());
+		map.setText(area.toString());
 		map.setCompoundDrawables(null, null, null, mapDrawable);
 
 		root.addView(map);
-		setTitle(summary.getTitle());
+		setTitle(summary.toString());
 		setContentView(root);
 	}
 }

@@ -1,37 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE LinearLayout>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/AgoraGuideLayout"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
-    <ImageView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.9"
-        android:padding="5dp"
-        android:src="@drawable/main" />
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp" >
 
     <LinearLayout
-        android:id="@+id/main_progressLayout"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/main_buttons"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
         android:orientation="vertical" >
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="3dp"
-            android:gravity="center"
-            android:text="@string/updating" />
+        <ImageView
+            android:id="@+id/main_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:src="@drawable/main"
+            android:contentDescription="@string/app_name_locale" />
 
-        <ProgressBar
-            android:id="@+id/main_progress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="25dp" />
     </LinearLayout>
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/main_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/button_search_keyword"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@android:drawable/ic_menu_search"
+            android:contentDescription="@string/searchByKeyword" />
+
+        <ImageButton
+            android:id="@+id/button_search_schedule"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@android:drawable/ic_menu_recent_history"
+            android:contentDescription="@string/searchBySchedule" />
+
+        <ImageButton
+            android:id="@+id/button_search_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@android:drawable/ic_menu_mapmode"
+            android:contentDescription="@string/searchByMap" />
+
+        <ImageButton
+            android:id="@+id/button_search_favorite"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@android:drawable/btn_star_big_off"
+            android:contentDescription="@string/favorites" />
+
+        <ImageButton
+            android:id="@+id/button_information"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@android:drawable/ic_menu_info_details"
+            android:contentDescription="@string/credits" />
+    </LinearLayout>
+
+</RelativeLayout>

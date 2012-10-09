@@ -1,45 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE resources>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Activity level -->
-    <style name="AgoraGuide" parent="@android:style/Theme.Light">
-        <item name="android:windowTitleBackgroundStyle">@style/TitleBackground</item>
-        <item name="android:windowTitleStyle">@style/WindowTitle</item>
-    </style>
-
-    <style name="TitleBackground">
-        <item name="android:background">#999999</item>
-    </style>
-
-    <style name="WindowTitle" parent="@android:style/TextAppearance.WindowTitle">
-        <item name="android:paddingLeft">4dp</item>
-        <item name="android:paddingRight">4dp</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">end</item>
-    </style>
-
-    <!-- Layout level -->
-    <style name="AgoraGuideLayout">
-        <item name="android:paddingLeft">4dp</item>
-        <item name="android:paddingRight">4dp</item>
-        <item name="android:background">#FFFFFF</item>
-        <item name="android:textColor">#000000</item>
-        <item name="android:textSize">14sp</item>
+    <!--  level -->
+    <style name="AgoraGuideLayout" parent="@android:style/Theme.Holo.Light">
+        <item name="android:textSize">15sp</item>
     </style>
 
     <!-- View level -->
-    <style name="TitleView" parent="@android:style/TextAppearance.Large">
-        <item name="android:text">Title</item>
-        <item name="android:textColor">#000000</item>
-        <item name="android:textSize">18sp</item>
+    <style name="TitleTextAppearance" parent="@android:style/TextAppearance.Holo.Large">
+        <item name="android:text">Title Text Appearance</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:textSize">21sp</item>
     </style>
-
-    <style name="EntryListView">
-        <item name="android:paddingLeft">3dp</item>
-        <item name="android:paddingRight">3dp</item>
-        <item name="android:background">#FFFFFF</item>
-        <item name="android:scrollingCache">false</item>
+    <style name="SummaryTextAppearance" parent="@android:style/TextAppearance.Holo.Small">
+        <item name="android:textColor">#666666</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
     </style>
 
 </resources>

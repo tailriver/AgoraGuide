@@ -1,6 +1,5 @@
 package net.tailriver.agoraguide;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -9,33 +8,23 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ListView;
 
-public class FavoritesActivity extends Activity implements OnClickListener {
+public class FavoritesActivity extends SearchActivity implements OnClickListener {
 	/** Called when the activity is first created. */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.favorites);
 
-		AgoraGuideActivity.initDatabase(getApplicationContext());
-
-		final ListView entryListView = (ListView) findViewById(R.id.favorites_entrylist);
-		entryListView.setAdapter(new EntryArrayAdapter(FavoritesActivity.this, entryListView.getId()));
-		entryListView.setOnItemClickListener(theAdapter());
-		entryListView.setEmptyView(findViewById(R.id.favorites_empty));
-
-		theAdapter().add(Favorite.values());
+		searchAdapter.add(Favorite.values());
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (theAdapter().getCount() == Favorite.values().size())
-			theAdapter().onActivityResult(requestCode, resultCode, data);
-		else {
-			theAdapter().clear();
-			theAdapter().add(Favorite.values());
-			findViewById(R.id.favorites_entrylist).invalidate();
+		if (searchAdapter.getCount() != Favorite.values().size()) {
+			searchAdapter.clear();
+			searchAdapter.add(Favorite.values());
+			resultView.invalidate();
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
@@ -50,7 +39,7 @@ public class FavoritesActivity extends Activity implements OnClickListener {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		menu.findItem(R.id.menu_favorites_clear).setEnabled( !theAdapter().isEmpty() );
+		menu.findItem(R.id.menu_favorites_clear).setEnabled( !searchAdapter.isEmpty() );
 		return true;
 	}
 
@@ -71,11 +60,7 @@ public class FavoritesActivity extends Activity implements OnClickListener {
 
 	public void onClick(DialogInterface dialog, int which) {
 		Favorite.clear();
-		theAdapter().clear();
-		findViewById(R.id.favorites_entrylist).invalidate();
-	}
-
-	private EntryArrayAdapter theAdapter() {
-		return (EntryArrayAdapter) ((ListView) findViewById(R.id.favorites_entrylist)).getAdapter();
+		searchAdapter.clear();
+		resultView.invalidate();
 	}
 }

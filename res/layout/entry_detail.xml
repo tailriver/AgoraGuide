@@ -1,59 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE LinearLayout>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="5dp" >
 
     <TextView
         android:id="@+id/entrygallery_icon"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Icon"
-        android:textSize="14sp" >
+        android:text="Icon" >
     </TextView>
 
     <TextView
         android:id="@+id/entrygallery_title"
-        style="@style/TitleView"
-        android:layout_width="fill_parent"
+        style="@style/TitleTextAppearance"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:text="TITLE" >
+        android:paddingTop="5dp" android:paddingBottom="5dp">
+
     </TextView>
 
     <TextView
         android:id="@+id/entrygallery_sponsor"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="bottom"
-        android:text="SPONSOR"
-        android:textColor="@color/secondary_text"
-        android:textSize="14sp" >
+        android:text="SPONSOR" >
     </TextView>
 
     <TextView
         android:id="@+id/entrygallery_schedule"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SCHEDULE"
-        android:textColor="@color/secondary_text"
-        android:textSize="14sp" >
+        android:text="SCHEDULE" >
     </TextView>
 
     <TextView
         android:id="@+id/entrygallery_content"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autoLink="web"
-        android:paddingRight="5dp"
         android:scrollHorizontally="true"
         android:text="CONTENT" />
 
     <Button
         android:id="@+id/mapButton"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Check the Location!" />
 

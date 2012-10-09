@@ -1,25 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE LinearLayout>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/AgoraGuideLayout"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp" >
 
-    <TextView
-        android:id="@+id/favorites_empty"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="お気に入りがありません" >
-    </TextView>
-
-    <ListView
-        android:id="@+id/favorites_entrylist"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:scrollingCache="false" >
-
-        <!-- Preview: listitem=@layout/entrylist_item -->
-    </ListView>
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        layout="@layout/search_result" />
 
 </LinearLayout>

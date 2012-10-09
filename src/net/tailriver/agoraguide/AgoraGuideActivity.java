@@ -12,11 +12,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
-public class AgoraGuideActivity extends Activity {
+public class AgoraGuideActivity extends Activity implements OnClickListener {
 	private static final String databaseURL  = "http://tailriver.net/agoraguide/2012.sqlite3.gz";
 	private static final String databaseName = "2012.sqlite3";
-	private static Context context;
+	private static Context applicationContext;
 	private static SQLiteDatabase database;
 	private static boolean initFinished;
 
@@ -26,52 +29,71 @@ public class AgoraGuideActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		findViewById(R.id.main_progressLayout).setVisibility(View.INVISIBLE);
-
 		initDatabase(getApplicationContext());
+
+		ViewGroup vg = ((ViewGroup) findViewById(R.id.main_buttons));
+		for (int i = 0, max = vg.getChildCount(); i < max; i++) {
+			View v = vg.getChildAt(i);
+			v.setOnClickListener(this);
+		}
+		findViewById(R.id.button_search_area).setVisibility(View.GONE);
+	}
+
+	public void onClick(View v) {
+		try {
+			jumpNextActivity(v.getId());
+		} catch (UnsupportedOperationException e) {
+			Toast.makeText(applicationContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		final MenuInflater mi = new MenuInflater(AgoraGuideActivity.this);
+		MenuInflater mi = new MenuInflater(AgoraGuideActivity.this);
 		mi.inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Class<?> nextActivity = null;
-		switch (item.getItemId()) {
+		try {
+			jumpNextActivity(item.getItemId());
+			return true;
+		} catch (UnsupportedOperationException e) {
+			return false;
+		}
+	}
+
+	private final void jumpNextActivity(int resID) {
+		Class<?> nextActivity;
+		switch (resID) {
+		case R.id.button_search_keyword:
 		case R.id.menu_sbk:
-			nextActivity = SearchByKeywordActivity.class;
+			nextActivity = KeywordSearchActivity.class;
 			break;
-
+		case R.id.button_search_schedule:
 		case R.id.menu_sbs:
-			nextActivity = SearchByScheduleActivity.class;
+			nextActivity = ScheduleSearchActivity.class;
 			break;
-
+		case R.id.button_search_area:
+		case R.id.menu_sbm:
+			throw new UnsupportedOperationException("under construction...");
+		case R.id.button_search_favorite:
 		case R.id.menu_favorites:
 			nextActivity = FavoritesActivity.class;
 			break;
-
+		case R.id.button_information:
 		case R.id.menu_credits:
 			nextActivity = CreditsActivity.class;
 			break;
-
 		default:
-			break;
+			throw new UnsupportedOperationException("invalid call");
 		}
-
-		if (nextActivity != null) {
-			startActivity(new Intent(AgoraGuideActivity.this, nextActivity));
-			return true;
-		}
-		else
-			return false;
+		startActivity(new Intent(applicationContext, nextActivity));
 	}
 
 	public static final void initDatabase(Context context) {
-		AgoraGuideActivity.context = context;
+		applicationContext = context.getApplicationContext();
 		if (!initFinished) {
 			initDatabase();
 		}
@@ -79,7 +101,7 @@ public class AgoraGuideActivity extends Activity {
 
 	private static synchronized void initDatabase() {
 		if (!initFinished) {
-			final File databaseFile = context.getFileStreamPath(databaseName);
+			final File databaseFile = applicationContext.getFileStreamPath(databaseName);
 			databaseFile.getParentFile().mkdirs();
 
 			class DatabaseLoader extends Downloader {
@@ -99,6 +121,7 @@ public class AgoraGuideActivity extends Activity {
 					Category.init();
 					Day.init();
 					EntrySummary.init();
+					EntryDetail.init();
 					TimeFrame.init();
 					initFinished = true;
 					return null;
@@ -111,7 +134,7 @@ public class AgoraGuideActivity extends Activity {
 			}
 
 			try {
-				new DatabaseLoader(context).execute(pair);
+				new DatabaseLoader(applicationContext).execute(pair);
 			} catch (StandAloneException e) {}
 		}
 	}
@@ -127,8 +150,8 @@ public class AgoraGuideActivity extends Activity {
 		return initFinished;
 	}
 
+	/** returns application context. */
 	public static final Context getContext() {
-		return context;
+		return applicationContext;
 	}
-
 }

@@ -14,13 +14,17 @@ public class Location {
 		String table = "location";
 		String[] columns = { "area", "x", "y" };
 		String selection = "entry=?";
-		String[] selectionArgs = { es.toString() };
+		String[] selectionArgs = { es.getId() };
 		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
 
 		c.moveToFirst();
 		area = Area.get(c.getString(0));
 		x = c.getFloat(1);
 		y = c.getFloat(2);
+	}
+
+	public static void init() {
+		// for symmetry
 	}
 
 	public Area getArea() {

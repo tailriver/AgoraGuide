@@ -31,7 +31,7 @@ public class EntryDetail {
 		String table = "entry";
 		String[] columns = (String[]) EntryDetail.columns.toArray();
 		String selection = "id=?";
-		String[] selectionArgs = { summary.toString() };
+		String[] selectionArgs = { summary.getId() };
 		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
 
 		c.moveToFirst();

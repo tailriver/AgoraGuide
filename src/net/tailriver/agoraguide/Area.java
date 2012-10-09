@@ -76,6 +76,7 @@ public class Area extends AbstractModel<Area> {
 		return factory.values();
 	}
 
+	@Deprecated
 	public String getName() {
 		return name;
 	}
@@ -98,14 +99,19 @@ public class Area extends AbstractModel<Area> {
 		}
 
 		try {
+			Context context = AgoraGuideActivity.getContext();
 			new Downloader(context).execute(list);
-		} catch (StandAloneException e) {
-			// noop
-		}
+		} catch (StandAloneException e) {}
 	}
 
 	private File getImageFile() {
+		Context context = AgoraGuideActivity.getContext();
 		File imageDir = context.getDir("2012_area", Context.MODE_PRIVATE);
-		return new File(imageDir, super.toString() + ".png");		
+		return new File(imageDir, getId() + ".png");		
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 }

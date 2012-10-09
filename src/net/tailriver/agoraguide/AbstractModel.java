@@ -1,13 +1,11 @@
 package net.tailriver.agoraguide;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 abstract public class AbstractModel<T extends AbstractModel<T>>
 implements Comparable<T>
 {
-	protected static Context        context  = AgoraGuideActivity.getContext(); 
 	private String id;
 
 	protected AbstractModel() {}
@@ -27,6 +25,10 @@ implements Comparable<T>
 
 	abstract protected void init_factory(SQLiteDatabase database);
 
+	public final String getId() {
+		return id;
+	}
+
 	public int compareTo(T another) {
 		return id.compareTo(another.id);
 	}
@@ -45,7 +47,5 @@ implements Comparable<T>
 	}
 
 	@Override
-	public final String toString() {
-		return id;
-	}
+	abstract public String toString();
 }

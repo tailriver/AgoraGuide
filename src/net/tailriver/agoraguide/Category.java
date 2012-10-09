@@ -51,11 +51,12 @@ public class Category extends AbstractModel<Category> {
 		return factory.values();
 	}
 
-	public String getName() {
-		return name;
-	}
-
 	public boolean isAllday() {
 		return isAllday;
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 }

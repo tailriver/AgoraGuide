@@ -66,12 +66,17 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 
 	@Override
 	public int compareTo(TimeFrame another) {
-		if (!this.day.equals(another.day))
-			return this.day.compareTo(another.day);
-		if (this.start != another.start)
-			return this.start - another.start;
-		if (this.end != another.end)
-			return this.end - another.end;
+		if (!day.equals(another.day))
+			return day.compareTo(another.day);
+		if (start != another.start)
+			return start - another.start;
+		if (end != another.end)
+			return end - another.end;
 		return summary.compareTo(another.summary);
+	}
+
+	@Override
+	public String toString() {
+		return getId();
 	}
 }

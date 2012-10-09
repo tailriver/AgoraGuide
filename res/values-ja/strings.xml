@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE resources>
-<resources>
-
-    <string name="app_name">アゴラガイド</string>
+<resources><string name="app_name_locale" >アゴラガイド</string>
     <string name="searchByKeyword">キーワードで探す</string>
     <string name="searchBySchedule">時間で探す</string>
     <string name="searchByMap">地図で探す</string>
@@ -18,6 +16,20 @@
     <string name="reserve">申込詳細へ</string>
     <string name="filtering">絞り込み検索</string>
     <string name="selectAll">すべて選択</string>
-    <string name="updating">企画データを取得中&#8230;</string>
+
+    <string-array name="days_locale">
+        <item>土</item>
+        <item>日</item>
+    </string-array>
+    <string-array name="entrydetail_locale">
+        <item>主催・共催等</item>
+        <item>主な登壇者など</item>
+        <item>概要</item>
+        <item>内容</item>
+        <item>事前申込</item>
+        <item>備考</item>
+        <item>詳細ページ</item>
+    </string-array>
+    
 
 </resources>

@@ -6,14 +6,12 @@ import java.util.Set;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 
-public class EntrySummary extends AbstractModel<EntrySummary> implements Parcelable {
+public class EntrySummary extends AbstractModel<EntrySummary> {
 	private static EntrySummary singleton = new EntrySummary();
 	private static ModelFactory<EntrySummary> factory;
 
@@ -83,6 +81,7 @@ public class EntrySummary extends AbstractModel<EntrySummary> implements Parcela
 		return factory.values();
 	}
 
+	@Deprecated
 	public String getTitle() {
 		return title;
 	}
@@ -108,11 +107,11 @@ public class EntrySummary extends AbstractModel<EntrySummary> implements Parcela
 	private CharSequence enhanceSchedule(CharSequence schedule) {
 		final SpannableStringBuilder text = new SpannableStringBuilder(schedule);
 		for (Day day : Day.values()) {
-			String seek = String.format("[%s]", day);
+			String seek = String.format("[%s]", day.getId());
 
 			int p = text.toString().indexOf(seek);
 			while (p > -1) {
-				final SpannableString ss = new SpannableString(day.getLocalString());
+				final SpannableString ss = new SpannableString(day.toString());
 				ss.setSpan(android.graphics.Typeface.BOLD, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				ss.setSpan(new ForegroundColorSpan(day.getColor()), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				text.replace(p, p + seek.length(), ss);
@@ -141,7 +140,7 @@ public class EntrySummary extends AbstractModel<EntrySummary> implements Parcela
 				continue;
 			}
 
-			for (String word : new String[]{ es.getTitle(), es.getSponsor() }) {
+			for (String word : new String[]{ es.title, es.sponsor }) {
 				if (word != null && word.contains(query)) {
 					match.add(es);
 					break;
@@ -151,22 +150,8 @@ public class EntrySummary extends AbstractModel<EntrySummary> implements Parcela
 		return match;
 	}
 
-	public int describeContents() {
-		return 0;
+	@Override
+	public String toString() {
+		return title;
 	}
-
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(toString());
-	}
-
-	public static final Parcelable.Creator<EntrySummary> CREATOR =
-			new Parcelable.Creator<EntrySummary>() {
-		public EntrySummary createFromParcel(Parcel source) {
-			return EntrySummary.get(source.readString());
-		}
-
-		public EntrySummary[] newArray(int size) {
-			throw new UnsupportedOperationException();
-		}
-	};
 }
