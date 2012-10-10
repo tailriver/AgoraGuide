@@ -122,6 +122,7 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 		return text;
 	}
 
+	@Deprecated
 	public static List<EntrySummary> getEntryByKeyword(String query, Set<Category> filter) {
 		List<EntrySummary> match = new ArrayList<EntrySummary>();
 

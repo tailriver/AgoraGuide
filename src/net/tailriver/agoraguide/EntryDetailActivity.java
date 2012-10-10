@@ -28,8 +28,6 @@ public class EntryDetailActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.entry_detail);
 
-		AgoraGuideActivity.initDatabase(getApplicationContext());
-
 		int notificationId = getIntent().getIntExtra(INTENT_NOTIFICATION_ID, -1);
 		if (notificationId > -1) {
 			ScheduleAlarm.cancelNotification(notificationId);

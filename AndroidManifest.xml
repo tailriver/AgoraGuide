@@ -54,6 +54,8 @@
             android:name="ScheduleAlarm"
             android:process=":remote" >
         </receiver>
+        <activity android:name="AreaSearchIndexActivity" android:label="@string/searchByMap"></activity>
+        <activity android:name="AreaSearchActivity" android:label="@string/searchByMap"></activity>
     </application>
 
 </manifest>

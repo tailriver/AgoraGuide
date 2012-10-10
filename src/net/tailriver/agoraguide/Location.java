@@ -9,7 +9,7 @@ public class Location {
 	private float y;
 
 	public Location(EntrySummary es) {
-		SQLiteDatabase database = AgoraGuideActivity.getDatabase();
+		SQLiteDatabase database = AgoraInitializer.getDatabase();
 
 		String table = "location";
 		String[] columns = { "area", "x", "y" };

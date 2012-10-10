@@ -27,7 +27,7 @@ public class EntryDetail {
 		data     = new HashMap<String, String>();
 		location = new Location(summary);
 
-		SQLiteDatabase database = AgoraGuideActivity.getDatabase();
+		SQLiteDatabase database = AgoraInitializer.getDatabase();
 		String table = "entry";
 		String[] columns = (String[]) EntryDetail.columns.toArray();
 		String selection = "id=?";
@@ -41,9 +41,9 @@ public class EntryDetail {
 		c.close();
 	}
 
-	public static synchronized void init() {
+	public static void init() {
 		if (columns == null) {
-			Resources res = AgoraGuideActivity.getContext().getResources();
+			Resources res = AgoraInitializer.getApplicationContext().getResources();
 			columns = Arrays.asList(res.getStringArray(R.array.entrydetail));
 		}
 	}
@@ -53,7 +53,7 @@ public class EntryDetail {
 	}
 
 	public String getDetailName(int index) {
-		Resources res = AgoraGuideActivity.getContext().getResources();
+		Resources res = AgoraInitializer.getApplicationContext().getResources();
 		return res.getStringArray(R.array.entrydetail_locale)[index];
 	}
 

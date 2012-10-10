@@ -1,10 +1,14 @@
 package net.tailriver.agoraguide;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -14,16 +18,21 @@ import android.widget.EditText;
 public class KeywordSearchActivity extends SearchActivity
 implements OnClickListener, OnMultiChoiceClickListener, TextWatcher
 {
-	private Category[] categoryArray;
 	private EditText searchText;
+	private Category[] category;
+	private boolean[] categoryChecked;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+	public void onPreInitialize() {
 		setContentView(R.layout.searchbykeyword);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+	}
 
-		categoryArray = Category.values().toArray(new Category[Category.values().size()]);
+	@Override
+	public void onPostInitialize() {
+		category = Category.values().toArray(new Category[Category.values().size()]);
+		categoryChecked = new boolean[category.length];
+		Arrays.fill(categoryChecked, true);
 
 		searchText = (EditText) findViewById(R.id.sbk_text);
 		searchText.addTextChangedListener(this);
@@ -43,17 +52,14 @@ implements OnClickListener, OnMultiChoiceClickListener, TextWatcher
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		String[]  choices = new String[categoryArray.length];
-		boolean[] checked = new boolean[categoryArray.length];
-		for (int i = 0; i < categoryArray.length; i++) {
-			choices[i] = categoryArray[i].toString();
-			checked[i] = searchAdapter.getFilter(categoryArray[i]);
+		String[] categoryName = new String[category.length];
+		for (int i = 0; i < category.length; i++) {
+			categoryName[i] = category[i].toString();
 		}
-
 		new AlertDialog.Builder(KeywordSearchActivity.this)
 		.setTitle(R.string.filtering)
 		.setIcon(android.R.drawable.ic_search_category_default)
-		.setMultiChoiceItems(choices, checked, this)
+		.setMultiChoiceItems(categoryName, categoryChecked, this)
 		.setPositiveButton(android.R.string.ok, this)
 		.setNeutralButton(R.string.selectAll, this)
 		.create()
@@ -64,8 +70,9 @@ implements OnClickListener, OnMultiChoiceClickListener, TextWatcher
 
 	public void onClick(DialogInterface dialog, int which) {
 		if (which == AlertDialog.BUTTON_NEUTRAL) {
-			for (Category cat : Category.values())
-				searchAdapter.setFilter(cat, true);
+			for (int i = 0; i < categoryChecked.length; i++) {
+				categoryChecked[i] = true;
+			}
 		}
 
 		dialog.dismiss();
@@ -73,7 +80,7 @@ implements OnClickListener, OnMultiChoiceClickListener, TextWatcher
 	}
 
 	public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-		searchAdapter.setFilter(categoryArray[which], isChecked);
+		categoryChecked[which] = isChecked;
 	}
 
 	private void search(Editable s) {
@@ -81,7 +88,20 @@ implements OnClickListener, OnMultiChoiceClickListener, TextWatcher
 			s = searchText.getText();
 		}
 
+		Set<Category> categoryFilter = new HashSet<Category>();
+		for (int i = 0; i < category.length; i++) {
+			if (categoryChecked[i]) {
+				categoryFilter.add(category[i]);
+			}
+		}
+
+		List<EntrySummary> result = new EntryFilter()
+		.addAllEntry()
+		.applyFilter(categoryFilter)
+		.applyFilter(s)
+		.getResult();
+
 		searchAdapter.clear();
-		searchAdapter.add(EntrySummary.getEntryByKeyword(s.toString(), searchAdapter.tellFilter()));
+		searchAdapter.addAll(result);
 	}
 }

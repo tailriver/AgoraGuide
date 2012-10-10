@@ -1,13 +1,12 @@
 package net.tailriver.agoraguide;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public abstract class SearchActivity extends Activity
+public abstract class SearchActivity extends AgoraActivity
 implements OnItemClickListener
 {
 	protected SearchResultAdapter searchAdapter;
@@ -18,8 +17,7 @@ implements OnItemClickListener
 	public void setContentView(int layoutResID) {
 		super.setContentView(layoutResID);
 
-		AgoraGuideActivity.initDatabase(getApplicationContext());
-		searchAdapter = new SearchResultAdapter(this, R.id.search_result);
+		searchAdapter = new SearchResultAdapter(this);
 
 		resultView = (ListView) findViewById(R.id.search_result);
 		resultView.setAdapter(searchAdapter);

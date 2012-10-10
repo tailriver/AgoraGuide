@@ -1,7 +1,6 @@
 package net.tailriver.agoraguide;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -27,7 +26,6 @@ public class Area extends AbstractModel<Area> {
 	public static void init() {
 		factory = new ModelFactory<Area>();
 		singleton.execute();
-		updateImage();
 	}
 
 	@Override
@@ -89,23 +87,12 @@ public class Area extends AbstractModel<Area> {
 		return null;
 	}
 
-	private static void updateImage() {
-		List<Downloader.Pair> list = new ArrayList<Downloader.Pair>();
-		for (Area area : values()) {
-			File imageFile = area.getImageFile();
-			if (System.currentTimeMillis() - imageFile.lastModified() > 86400 * 1000) {
-				list.add(new Downloader.Pair(area.url, imageFile));
-			}
-		}
-
-		try {
-			Context context = AgoraGuideActivity.getContext();
-			new Downloader(context).execute(list);
-		} catch (StandAloneException e) {}
+	public String getURL() {
+		return url;
 	}
 
-	private File getImageFile() {
-		Context context = AgoraGuideActivity.getContext();
+	public File getImageFile() {
+		Context context = AgoraInitializer.getApplicationContext();
 		File imageDir = context.getDir("2012_area", Context.MODE_PRIVATE);
 		return new File(imageDir, getId() + ".png");		
 	}

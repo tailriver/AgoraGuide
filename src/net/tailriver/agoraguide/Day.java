@@ -29,7 +29,7 @@ public class Day extends AbstractModel<Day> {
 	
 	@Override
 	protected void init_factory(SQLiteDatabase database) {
-		Resources res = AgoraGuideActivity.getContext().getResources();
+		Resources res = AgoraInitializer.getApplicationContext().getResources();
 		String[] common = res.getStringArray(R.array.days);
 		String[] local  = res.getStringArray(R.array.days_locale);
 		int[]    color  = res.getIntArray(R.array.days_color);
@@ -46,11 +46,6 @@ public class Day extends AbstractModel<Day> {
 
 	public static List<Day> values() {
 		return factory.values();
-	}
-
-	@Deprecated
-	public String getLocalString() {
-		return name;
 	}
 
 	public int getColor() {

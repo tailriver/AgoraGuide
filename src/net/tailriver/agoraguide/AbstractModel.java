@@ -15,12 +15,12 @@ implements Comparable<T>
 	}
 
 	protected void execute() {
-		SQLiteDatabase database = AgoraGuideActivity.getDatabase();
+		SQLiteDatabase database = AgoraInitializer.getDatabase();
 		long start = System.currentTimeMillis();
 		init_factory(database);
 
 		long passed = System.currentTimeMillis() - start;
-		Log.d("DB fetch", getClass().getSimpleName() + "#init() took " + passed + "ms");
+		Log.d("DB SELECT", getClass().getSimpleName() + "#init() took " + passed + "ms");
 	}
 
 	abstract protected void init_factory(SQLiteDatabase database);

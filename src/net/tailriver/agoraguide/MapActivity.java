@@ -1,23 +1,21 @@
 package net.tailriver.agoraguide;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class MapActivity extends Activity {
+public class MapActivity extends AgoraActivity {
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public void onPreInitialize() {
+	}
 
-		AgoraGuideActivity.initDatabase(getApplicationContext());
-
+	@Override
+	public void onPostInitialize() {
 		EntrySummary summary = EntrySummary.get(getIntent().getStringExtra(EntryDetailActivity.INTENT_ENTRY));
 		EntryDetail detail = new EntryDetail(summary);
 		Location location = detail.getLocation();

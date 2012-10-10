@@ -4,26 +4,26 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 public class FavoritesActivity extends SearchActivity implements OnClickListener {
-	/** Called when the activity is first created. */
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public void onPreInitialize() {
 		setContentView(R.layout.favorites);
+	}
 
-		searchAdapter.add(Favorite.values());
+	@Override
+	public void onPostInitialize() {
+		searchAdapter.addAll(new EntryFilter().addFavoriteEntry().getResult());
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (searchAdapter.getCount() != Favorite.values().size()) {
 			searchAdapter.clear();
-			searchAdapter.add(Favorite.values());
+			searchAdapter.addAll(new EntryFilter().addFavoriteEntry().getResult());
 			resultView.invalidate();
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -31,9 +31,8 @@ public class FavoritesActivity extends SearchActivity implements OnClickListener
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		final MenuInflater mi = new MenuInflater(FavoritesActivity.this);
+		MenuInflater mi = new MenuInflater(this);
 		mi.inflate(R.menu.favorites, menu);
-
 		return true;
 	}
 
@@ -46,7 +45,7 @@ public class FavoritesActivity extends SearchActivity implements OnClickListener
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_favorites_clear) {
-			new AlertDialog.Builder(FavoritesActivity.this)
+			new AlertDialog.Builder(this)
 			.setTitle(R.string.clearFavorite)
 			.setIcon(android.R.drawable.ic_menu_delete)
 			.setPositiveButton(android.R.string.ok, this)

@@ -6,22 +6,20 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
-public class Downloader extends AsyncTask<Downloader.Pair, Void, Void> {
-	private static final String thisClass = Downloader.class.getSimpleName();
+public class Downloader {
 	private static final int BUFFER_SIZE = 4096;
-	private static final int MAX_WORKER = 3;
+	private static final int HTTP_TIME_OUT = 20000; // msec
 
 	private File localDirectory;
 
@@ -32,7 +30,8 @@ public class Downloader extends AsyncTask<Downloader.Pair, Void, Void> {
 		}
 	}
 
-	public Downloader(Context context) throws StandAloneException {
+	public Downloader() throws StandAloneException {
+		Context context = AgoraInitializer.getApplicationContext();
 		// connectivity check
 		Object cm = context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo ni = ((ConnectivityManager)cm).getActiveNetworkInfo();
@@ -43,37 +42,30 @@ public class Downloader extends AsyncTask<Downloader.Pair, Void, Void> {
 		localDirectory = context.getFilesDir();
 	}
 
-	private boolean download(Pair p) {
-		if (p == null) {
-			return true;
-		}
-		if (p.url == null || p.file == null) {
-			throw new IllegalArgumentException("pair is null");
+	public void download(String urlString, File file) throws IOException {
+		if (urlString == null || file == null) {
+			throw new IllegalArgumentException("argument contains null");
 		}
 
-		HttpURLConnection http;
+		URL url = new URL(urlString);
+		HttpURLConnection http = (HttpURLConnection) url.openConnection();
+		File tempFile = null;
+		InputStream  is = null;
+		OutputStream os = null;
 		try {
-			URL url = new URL(p.url);
-			http = (HttpURLConnection) url.openConnection();
 			http.setRequestProperty("Accept-Encoding", "gzip");
 			http.setRequestProperty("User-Agent", "AgoraGuide/2012 (Android)");		
-			http.setIfModifiedSince(p.file.lastModified());
+			http.setIfModifiedSince(file.lastModified());
+			http.setReadTimeout(HTTP_TIME_OUT);
 			http.setDoInput(true);
 			http.connect();
-		} catch (IOException e) {
-			Log.w("HttpURLConnection", e.getMessage(), e);
-			return false;
-		}
 
-		File tempFile = null;
-		try {
 			int code = http.getResponseCode();
 
-			Log.v(thisClass, code + " " + http.getResponseMessage());
-
+			Log.v("Downloader", code + " " + http.getResponseMessage());
 			if (code == HttpURLConnection.HTTP_NOT_MODIFIED) {
-				p.file.setLastModified(System.currentTimeMillis());
-				return true;
+				file.setLastModified(System.currentTimeMillis());
+				return;
 			}
 
 			if (code != HttpURLConnection.HTTP_OK) {
@@ -81,39 +73,33 @@ public class Downloader extends AsyncTask<Downloader.Pair, Void, Void> {
 			}
 
 			String contentEncoding = http.getContentEncoding();
-			InputStream is = http.getInputStream();
-			BufferedInputStream bis;
+			is = http.getInputStream();
 			if (contentEncoding != null && contentEncoding.equals("gzip")) {
-				bis = new BufferedInputStream(new GZIPInputStream(is), BUFFER_SIZE);
-			} else {
-				bis = new BufferedInputStream(is, BUFFER_SIZE);
+				is = new GZIPInputStream(is);
 			}
+			is = new BufferedInputStream(is, BUFFER_SIZE);
 
 			tempFile = File.createTempFile("downloading", null, localDirectory);
-			FileOutputStream fos = new FileOutputStream(tempFile);
-			BufferedOutputStream bos = new BufferedOutputStream(fos, BUFFER_SIZE);
+			os = new FileOutputStream(tempFile);
+			os = new BufferedOutputStream(os, BUFFER_SIZE);
 
 			byte[] buffer = new byte[BUFFER_SIZE];
 			int totalRead = 0;
 			while (true) {
-				int byteRead = bis.read(buffer, 0, BUFFER_SIZE);
+				int byteRead = is.read(buffer, 0, BUFFER_SIZE);
 				if (byteRead == -1)
 					break;
-				bos.write(buffer, 0, byteRead);
+				os.write(buffer, 0, byteRead);
 				totalRead += byteRead;
 			}
-			bis.close();
-			bos.flush();
-			bos.close();
+			is.close();
+			os.flush();
+			os.close();
 
-			if (!tempFile.renameTo(p.file)) {
+			if (!tempFile.renameTo(file)) {
 				throw new IOException("download successed but cannot write specific file");
 			}
-			Log.i(thisClass, "Downloaded " + String.valueOf(totalRead) + " bytes");
-			return true;
-		} catch (Exception e) {
-			Log.e(thisClass, "Exception", e);
-			return false;
+			Log.i("Downloader ", totalRead + " bytes downloaded");
 		} finally {
 			if (tempFile != null && tempFile.exists()) {
 				tempFile.delete();
@@ -121,38 +107,6 @@ public class Downloader extends AsyncTask<Downloader.Pair, Void, Void> {
 			if (http != null) {
 				http.disconnect();
 			}
-		}
-	}
-
-	@Override
-	protected Void doInBackground(Pair... params) {
-		try {
-			int worker = 0;
-			for (Pair p : params) {
-				if (worker < MAX_WORKER) {
-					worker++;
-					download(p);
-					worker--;
-				} else {
-					wait(200);
-				}
-			}
-		} catch (InterruptedException e) {
-			Log.e("Downloader", "interrupted", e);
-		}
-		return null;
-	}
-
-	public final AsyncTask<Pair, Void, Void> execute(List<Pair> list) {
-		return execute(list.toArray(new Pair[list.size()]));
-	}
-
-	static class Pair {
-		final String url;
-		final File   file;
-		Pair(String url, File file) {
-			this.url  = url;
-			this.file = file;
 		}
 	}
 }

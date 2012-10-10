@@ -18,7 +18,7 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 	private TimeFrame() {}
 
 	private TimeFrame(EntrySummary summary, Day day, int start, int end) {
-		super(summary + "-" + day + "-" + start);
+		super(summary.getId());
 		this.summary = summary;
 		this.day     = day;
 		this.start   = start;
@@ -54,6 +54,10 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 	public static int search(Day day, int time) {
 		TimeFrame pivot = new TimeFrame(null, day, time, time);
 		return - Collections.binarySearch(values(), pivot) - 1;
+	}
+
+	public static TimeFrame get(EntrySummary summary) {
+		return factory.get(summary.getId());
 	}
 
 	public static List<TimeFrame> values() {
