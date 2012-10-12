@@ -2,9 +2,6 @@
 <!DOCTYPE resources>
 <resources>
 
-    <color name="primary_text">#000000</color>
-    <color name="secondary_text">#333333</color>
-
     <integer-array name="days_color">
         <item>0xFF0000CC</item>
         <item>0xFFCC0000</item>

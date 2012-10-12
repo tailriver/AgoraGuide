@@ -10,13 +10,15 @@ public class Category extends AbstractModel<Category> {
 	private static ModelFactory<Category> factory;
 
 	private String name;
+	private String abbrev;
 	private boolean isAllday;
 
 	private Category() {}
 
-	private Category(String id, String name, boolean isAllday) {
+	private Category(String id, String name, String abbrev, boolean isAllday) {
 		super(id);
 		this.name     = name;
+		this.abbrev   = abbrev;
 		this.isAllday = isAllday;
 	}
 
@@ -28,15 +30,16 @@ public class Category extends AbstractModel<Category> {
 	@Override
 	protected void init_factory(SQLiteDatabase database) {
 		String table = "category";
-		String[] columns = { "id", "name", "is_allday" };
+		String[] columns = { "id", "name", "abbrev", "is_allday" };
 		Cursor c = database.query(table, columns, null, null, null, null, null);
 
 		c.moveToFirst();
 		for (int i = 0, rows = c.getCount(); i < rows; i++) {
-			String id = c.getString(0);
-			String name = c.getString(1);
-			boolean isAllday = c.getInt(2) == 1;
-			Category category = new Category(id, name, isAllday);
+			String id     = c.getString(0);
+			String name   = c.getString(1);
+			String abbrev = c.getString(2);
+			boolean isAllday = c.getInt(3) == 1;
+			Category category = new Category(id, name, abbrev, isAllday);
 			factory.put(id, category);
 			c.moveToNext();
 		}
@@ -49,6 +52,10 @@ public class Category extends AbstractModel<Category> {
 
 	public static List<Category> values() {
 		return factory.values();
+	}
+
+	public String getShortName() {
+		return abbrev;
 	}
 
 	public boolean isAllday() {

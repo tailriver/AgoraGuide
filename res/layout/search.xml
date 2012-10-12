@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/contentPadding"
+    tools:context=".SearchActivity" >
+
+    <EditText
+        android:id="@+id/searchKeyword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/search"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:singleLine="true" >
+    </EditText>
+
+    <LinearLayout
+        android:id="@+id/searchSchedule"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Spinner
+            android:id="@+id/searchDay"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" >
+        </Spinner>
+
+        <Spinner
+            android:id="@+id/searchTime"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" >
+        </Spinner>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/searchNotFound"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/searchNotFound" />
+
+    <ListView
+        android:id="@+id/searchResult"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/entry_summary" >
+    </ListView>
+
+</LinearLayout>

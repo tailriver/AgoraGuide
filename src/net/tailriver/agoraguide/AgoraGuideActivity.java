@@ -57,31 +57,34 @@ public class AgoraGuideActivity extends AgoraActivity implements OnClickListener
 	}
 
 	private final void jumpNextActivity(int resID) {
-		Class<?> nextActivity;
+		Intent intent = new Intent();
 		switch (resID) {
 		case R.id.button_search_keyword:
 		case R.id.menu_sbk:
-			nextActivity = KeywordSearchActivity.class;
+			intent.setClass(applicationContext, SearchActivity.class);
+			intent.putExtra(SearchActivity.INTENT_SEARCH_TYPE, SearchActivity.SearchType.Keyword);
 			break;
 		case R.id.button_search_schedule:
 		case R.id.menu_sbs:
-			nextActivity = ScheduleSearchActivity.class;
+			intent.setClass(applicationContext, SearchActivity.class);
+			intent.putExtra(SearchActivity.INTENT_SEARCH_TYPE, SearchActivity.SearchType.Schedule);
 			break;
 		case R.id.button_search_area:
 		case R.id.menu_sbm:
-			nextActivity = AreaSearchIndexActivity.class;
+			intent.setClass(applicationContext, AreaSearchIndexActivity.class);
 			break;
 		case R.id.button_search_favorite:
 		case R.id.menu_favorites:
-			nextActivity = FavoritesActivity.class;
+			intent.setClass(applicationContext, SearchActivity.class);
+			intent.putExtra(SearchActivity.INTENT_SEARCH_TYPE, SearchActivity.SearchType.Favorite);
 			break;
 		case R.id.button_information:
 		case R.id.menu_credits:
-			nextActivity = CreditsActivity.class;
+			intent.setClass(applicationContext, CreditsActivity.class);
 			break;
 		default:
 			throw new UnsupportedOperationException("invalid call");
 		}
-		startActivity(new Intent(applicationContext, nextActivity));
+		startActivity(intent);
 	}
 }

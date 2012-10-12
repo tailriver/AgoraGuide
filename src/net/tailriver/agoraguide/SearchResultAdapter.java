@@ -1,6 +1,7 @@
 package net.tailriver.agoraguide;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -15,6 +16,14 @@ public class SearchResultAdapter extends ArrayAdapter<EntrySummary> implements L
 
 	public SearchResultAdapter(Context context) {
 		super(context, textViewResourceId, new ArrayList<EntrySummary>());
+	}
+
+	@Override
+	public void addAll(Collection<? extends EntrySummary> collection) {
+		// ListAdapter.addAll() requires API Level 11
+		for (EntrySummary summary : collection) {
+			add(summary);
+		}
 	}
 
 	@Override

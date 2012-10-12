@@ -78,6 +78,10 @@ public class EntryFilter {
 		throw new UnsupportedOperationException("");
 	}
 
+	public EntryFilter applyFilter(AbstractModel<?> filter) {
+		return applyFilter(Collections.singleton(filter));
+	}
+
 	/** id, title, sponsor search */
 	public EntryFilter applyFilter(CharSequence keyword) {
 		Iterator<EntrySummary> it = collection.iterator();

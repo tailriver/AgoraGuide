@@ -18,7 +18,7 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 	private TimeFrame() {}
 
 	private TimeFrame(EntrySummary summary, Day day, int start, int end) {
-		super(summary.getId());
+		super(summary != null ? summary.getId() : null);
 		this.summary = summary;
 		this.day     = day;
 		this.start   = start;

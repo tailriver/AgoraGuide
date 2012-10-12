@@ -28,7 +28,7 @@ implements OnItemClickListener
 		ArrayAdapter<String> arrayAdapter =
 				new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
 		for (Area area : areas) {
-			arrayAdapter.add(area.toString());
+			arrayAdapter.add(area.getShortName());
 		}
 
 		view.setAdapter(arrayAdapter);
@@ -37,8 +37,8 @@ implements OnItemClickListener
 
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		Intent intent = new Intent(getApplicationContext(), AreaSearchActivity.class);
-		intent.putExtra(AreaSearchActivity.INTENT_AREA_ID, areas.get(position).getId());
+		Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+		intent.putExtra(SearchActivity.INTENT_AREA_ID, areas.get(position).getId());
 		startActivity(intent);
 	}
 }
