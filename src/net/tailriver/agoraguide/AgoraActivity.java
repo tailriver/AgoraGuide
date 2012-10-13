@@ -24,7 +24,6 @@ public abstract class AgoraActivity extends Activity {
 
 		@Override
 		protected void onPreExecute() {
-			super.onPreExecute();
 			agora.onPreInitialize();
 		}
 
@@ -36,7 +35,6 @@ public abstract class AgoraActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
 			agora.onPostInitialize();
 		}
 	}

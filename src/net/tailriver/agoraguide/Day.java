@@ -45,7 +45,7 @@ public class Day extends AbstractModel<Day> {
 	}
 
 	public static List<Day> values() {
-		return factory.values();
+		return factory.sortedValues();
 	}
 
 	public int getColor() {

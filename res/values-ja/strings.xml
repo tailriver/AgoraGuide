@@ -2,7 +2,7 @@
 <!DOCTYPE resources>
 <resources>
 
-    <string name="app_name_locale">アゴラガイド</string>
+    <string name="app_name">アゴラガイド</string>
     <string name="searchByKeyword">キーワードで探す</string>
     <string name="searchBySchedule">時間で探す</string>
     <string name="searchByMap">地図で探す</string>

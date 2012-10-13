@@ -1,8 +1,6 @@
 package net.tailriver.agoraguide;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -73,11 +71,7 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 		return factory.get(id);
 	}
 
-	public static Set<String> keySet() {
-		return factory.keySet();
-	}
-
-	public static List<EntrySummary> values() {
+	public static Collection<EntrySummary> values() {
 		return factory.values();
 	}
 
@@ -111,44 +105,17 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 
 			int p = text.toString().indexOf(seek);
 			while (p > -1) {
-				final SpannableString ss = new SpannableString(day.toString());
-				ss.setSpan(android.graphics.Typeface.BOLD, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-				ss.setSpan(new ForegroundColorSpan(day.getColor()), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				SpannableString ss = new SpannableString(day.toString());
+				ss.setSpan(android.graphics.Typeface.BOLD,
+						0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				ss.setSpan(new ForegroundColorSpan(day.getColor()),
+						0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				text.replace(p, p + seek.length(), ss);
 
 				p = text.toString().indexOf(seek, p + ss.length());
 			}
 		}
 		return text;
-	}
-
-	@Deprecated
-	public static List<EntrySummary> getEntryByKeyword(String query, Set<Category> filter) {
-		List<EntrySummary> match = new ArrayList<EntrySummary>();
-
-		// id match
-		if (keySet().contains(query))
-			match.add(EntrySummary.get(query));
-
-		// keyword match
-		for (EntrySummary es : values()) {
-			if (!filter.contains(es.getCategory())) {
-				continue;
-			}
-
-			if (query.length() == 0) {
-				match.add(es);
-				continue;
-			}
-
-			for (String word : new String[]{ es.title, es.sponsor }) {
-				if (word != null && word.contains(query)) {
-					match.add(es);
-					break;
-				}
-			}
-		}
-		return match;
 	}
 
 	@Override

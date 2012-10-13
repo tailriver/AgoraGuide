@@ -6,5 +6,6 @@
         <item>0xFF0000CC</item>
         <item>0xFFCC0000</item>
     </integer-array>
+    <color name="summaryText">#666</color>
 
 </resources>

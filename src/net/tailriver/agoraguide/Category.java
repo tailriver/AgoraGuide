@@ -51,7 +51,7 @@ public class Category extends AbstractModel<Category> {
 	}
 
 	public static List<Category> values() {
-		return factory.values();
+		return factory.sortedValues();
 	}
 
 	public String getShortName() {

@@ -20,7 +20,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:src="@drawable/main"
-            android:contentDescription="@string/app_name_locale" />
+            android:contentDescription="@string/app_name" />
 
     </LinearLayout>
 

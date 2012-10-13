@@ -3,7 +3,6 @@
 <resources>
 
     <string name="app_name">AgoraGuide</string>
-    <string name="app_name_locale">AgoraGuide</string>
     <string name="addFavorite">Add Favorite</string>
     <string name="removeFavorite">Remove Favorite</string>
     <string name="favorites">Favorites</string>

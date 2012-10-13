@@ -2,6 +2,8 @@ package net.tailriver.agoraguide;
 
 import java.util.List;
 
+import net.tailriver.agoraguide.SearchActivity.SearchType;
+
 import android.content.Intent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -38,6 +40,7 @@ implements OnItemClickListener
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 		Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+		intent.putExtra(SearchActivity.INTENT_SEARCH_TYPE, SearchType.Area);
 		intent.putExtra(SearchActivity.INTENT_AREA_ID, areas.get(position).getId());
 		startActivity(intent);
 	}

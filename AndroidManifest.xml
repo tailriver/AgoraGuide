@@ -16,7 +16,7 @@
 
     <application
         android:icon="@drawable/icon"
-        android:label="@string/app_name_locale"
+        android:label="@string/app_name"
         android:theme="@style/AgoraGuideLayout"
         android:uiOptions="splitActionBarWhenNarrow" >
         <activity

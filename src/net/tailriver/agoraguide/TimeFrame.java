@@ -1,7 +1,6 @@
 package net.tailriver.agoraguide;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -51,17 +50,16 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 		c.close();
 	}
 
-	public static int search(Day day, int time) {
-		TimeFrame pivot = new TimeFrame(null, day, time, time);
-		return - Collections.binarySearch(values(), pivot) - 1;
-	}
-
 	public static TimeFrame get(EntrySummary summary) {
 		return factory.get(summary.getId());
 	}
 
-	public static List<TimeFrame> values() {
+	public static Collection<TimeFrame> values() {
 		return factory.values();
+	}
+
+	public static final TimeFrame makePivot(Day day, int time) {
+		return new TimeFrame(null, day, time, time);
 	}
 
 	public EntrySummary getSummary() {

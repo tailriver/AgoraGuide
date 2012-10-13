@@ -2,54 +2,54 @@ package net.tailriver.agoraguide;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class SearchActivity extends AgoraActivity
-implements OnClickListener, OnItemClickListener, OnItemSelectedListener,
-OnMultiChoiceClickListener, TextWatcher
-{
+public class SearchActivity extends AgoraActivity implements OnItemClickListener {
 	public static final String INTENT_SEARCH_TYPE = "net.tailriver.agoraguide.search_type";
 	public static final String INTENT_AREA_ID     = "net.tailriver.agoraguide.area_id";
 	public enum SearchType {
 		Keyword, Schedule, Area, Favorite;
 	}
 
-	protected SearchResultAdapter searchAdapter;
-	protected ListView resultView;
-	private int firstVisiblePosition;
+	private SearchResultAdapter searchAdapter;
+	private ListView resultView;
 	private SearchType type;
+	private int lastPosition;
 
-	// for Keyword
-	private EditText searchText;
-	private Category[] category;
-	private boolean[] categoryChecked;
-
-	// for Schedule
-	private Spinner daySpinner;
-	private Spinner timeSpinner;
+	// search helper
+	private KeywordSearchHelper ksh;
+	private FavoriteSearchHelper fsh;
 
 	@Override
 	public void onPreInitialize() {
@@ -73,56 +73,32 @@ OnMultiChoiceClickListener, TextWatcher
 
 	@Override
 	public void onPostInitialize() {
-		if (type == SearchType.Keyword) {
+		switch (type) {
+		case Keyword:
 			setTitle(R.string.searchByKeyword);
-			category = Category.values().toArray(new Category[Category.values().size()]);
-			categoryChecked = new boolean[category.length];
-			Arrays.fill(categoryChecked, true);
+			ksh = new KeywordSearchHelper();
+			break;
 
-			searchText = (EditText) findViewById(R.id.searchKeyword);
-			searchText.addTextChangedListener(this);
-			searchText.setText(null);
-		}
-
-		if (type == SearchType.Schedule) {
+		case Schedule:
 			setTitle(R.string.searchBySchedule);
-			List<EntrySummary> entries = new ArrayList<EntrySummary>();
-			for (TimeFrame tf : TimeFrame.values()) {
-				entries.add(tf.getSummary());
-			}
-			String[] times = getResources().getStringArray(R.array.sbs_times);
+			new ScheduleSearchHelper();
+			break;
 
-			searchAdapter.addAll(new EntryFilter().addTimeFrameEntry().getResultTimeOrder());
-		
-			SpinnerAdapter dayAdapter =
-					new ArrayAdapter<Day>(this, android.R.layout.simple_spinner_item, Day.values());
-			SpinnerAdapter timeAdapter =
-					new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, times);
-		
-			daySpinner  = (Spinner) findViewById(R.id.searchDay);
-			timeSpinner = (Spinner) findViewById(R.id.searchTime);
-		
-			daySpinner.setAdapter(dayAdapter);
-			timeSpinner.setAdapter(timeAdapter);
-			daySpinner.setOnItemSelectedListener(this);
-			timeSpinner.setOnItemSelectedListener(this);
-		}
-
-		if (type == SearchType.Area) {
+		case Area:
 			setTitle(R.string.searchByMap);
-			Area area = Area.get(getIntent().getStringExtra(INTENT_AREA_ID));
-			searchAdapter.addAll(new EntryFilter().addAllEntry().applyFilter(area).getResult());
-		}
+			new AreaSearchHelper();
+			break;
 
-		if (type == SearchType.Favorite) {
+		case Favorite:
 			setTitle(R.string.favorites);
-			searchAdapter.addAll(new EntryFilter().addFavoriteEntry().getResult());
+			fsh = new FavoriteSearchHelper();
+			break;
 		}
 	}
 
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		firstVisiblePosition = position;
+		lastPosition = position;
 		EntrySummary summary = (EntrySummary) parent.getItemAtPosition(position);
 		Intent intent = new Intent(getApplicationContext(), EntryDetailActivity.class);
 		intent.putExtra(EntryDetailActivity.INTENT_ENTRY, summary.getId());
@@ -132,59 +108,40 @@ OnMultiChoiceClickListener, TextWatcher
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (type == SearchType.Keyword && requestCode == R.id.searchResult) {
-			resultView.setSelection(firstVisiblePosition);
+			resultView.setSelection(lastPosition);
 			resultView.requestFocusFromTouch();	// it is need when DPAD operation and back			
 		}
 
 		if (type == SearchType.Favorite && searchAdapter.getCount() != Favorite.values().size()) {
-			searchAdapter.clear();
-			searchAdapter.addAll(new EntryFilter().addFavoriteEntry().getResult());
-			resultView.invalidate();
+			fsh.search();
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {
-	}
-
-	public void onTextChanged(CharSequence s, int start, int before, int count) {
-	}
-
-	public void afterTextChanged(Editable s) {
-		if (type == SearchType.Keyword) {
-			searchByKeyword(s);
-		}
-	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		if (type == SearchType.Favorite) {
-			new MenuInflater(this).inflate(R.menu.favorites, menu);
-			return true;
+		int menuRes;
+		switch (type) {
+		case Keyword:
+			menuRes = R.menu.search;
+			break;
+		case Favorite:
+			menuRes = R.menu.favorites;
+			break;
+		default:
+			menuRes = 0;
+			break;
+		}
+
+		if (menuRes > 0) {
+			new MenuInflater(this).inflate(menuRes, menu);
 		}
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (type == SearchType.Keyword) {
-			String[] categoryName = new String[category.length];
-			for (int i = 0; i < category.length; i++) {
-				categoryName[i] = category[i].getShortName();
-			}
-			new AlertDialog.Builder(this)
-			.setTitle(R.string.filtering)
-			.setIcon(android.R.drawable.ic_search_category_default)
-			.setMultiChoiceItems(categoryName, categoryChecked, this)
-			.setPositiveButton(android.R.string.ok, this)
-			.setNeutralButton(R.string.selectAll, this)
-			.create()
-			.show();
-			return true;
-		}
-
 		if (type == SearchType.Favorite) {
 			menu.findItem(R.id.menu_favorites_clear).setEnabled( !searchAdapter.isEmpty() );
 		}
@@ -193,72 +150,199 @@ OnMultiChoiceClickListener, TextWatcher
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		if (type == SearchType.Keyword && item.getItemId() == R.id.searchFilterCategory) {
+			ksh.createCategoryFilterDialog().show();
+			return true;
+		}
 		if (type == SearchType.Favorite && item.getItemId() == R.id.menu_favorites_clear) {
-			new AlertDialog.Builder(this)
-			.setTitle(R.string.clearFavorite)
-			.setIcon(android.R.drawable.ic_menu_delete)
-			.setPositiveButton(android.R.string.ok, this)
-			.setNegativeButton(android.R.string.cancel, null)
-			.create()
-			.show();
+			fsh.createDeleteAllDialog().show();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void onClick(DialogInterface dialog, int which) {
-		if (type == SearchType.Keyword) {
-			if (which == AlertDialog.BUTTON_NEUTRAL) {
-				for (int i = 0; i < categoryChecked.length; i++) {
-					categoryChecked[i] = true;
-				}
+	private final class KeywordSearchHelper
+	implements OnKeyListener, OnClickListener, OnMultiChoiceClickListener, OnScrollListener, TextWatcher
+	{
+		private EditText searchText;
+		private Category[] category;
+		private boolean[] categoryChecked;
+
+		public KeywordSearchHelper() {
+			searchAdapter.setSource(EntrySummary.values(), ENTRY_COMPARATOR);
+			category = Category.values().toArray(new Category[Category.values().size()]);
+			categoryChecked = new boolean[category.length];
+			Arrays.fill(categoryChecked, true);
+			searchText = (EditText) findViewById(R.id.searchKeyword);
+			searchText.addTextChangedListener(this);
+			searchText.setOnKeyListener(this);	
+			searchText.setText(null);
+			resultView.setOnScrollListener(this);
+		}
+
+		public AlertDialog createCategoryFilterDialog() {
+			String[] categoryName = new String[category.length];
+			for (int i = 0; i < category.length; i++) {
+				categoryName[i] = category[i].getShortName();
 			}
-			dialog.dismiss();
-			searchByKeyword(searchText.getText());
+			return new AlertDialog.Builder(SearchActivity.this)
+			.setTitle(R.string.filtering)
+			.setIcon(android.R.drawable.ic_search_category_default)
+			.setMultiChoiceItems(categoryName, categoryChecked, this)
+			.setPositiveButton(android.R.string.ok, this)
+			.setNeutralButton(R.string.selectAll, this)
+			.create();
 		}
 
-		if (type == SearchType.Favorite) {
-			Favorite.clear();
-			searchAdapter.clear();
-			resultView.invalidate();
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
 		}
-	}
 
-	public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-		if (type == SearchType.Keyword) {
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+		}
+
+		public void afterTextChanged(Editable s) {
+			search(s);
+		}
+
+		public void onScrollStateChanged(AbsListView view, int scrollState) {
+			closeSoftKeyboard(searchText);
+		}
+
+		public void onScroll(AbsListView view, int firstVisibleItem,
+				int visibleItemCount, int totalItemCount) {
+		}
+
+		public boolean onKey(View v, int keyCode, KeyEvent event) {
+			if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+				closeSoftKeyboard(v);
+				return true;
+			}
+			return false;
+		}
+
+		public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 			categoryChecked[which] = isChecked;
 		}
-	}
 
-	public void onItemSelected(AdapterView<?> parent, View view, int position,
-			long id) {
-		if (type == SearchType.Schedule) {
-			Day day = (Day) daySpinner.getSelectedItem();
-			int time = Integer.parseInt(((String) timeSpinner.getSelectedItem()).replace(":", ""));
-
-			int viewPosition = TimeFrame.search(day, time);
-			resultView.setSelection(viewPosition);
+		public void onClick(DialogInterface dialog, int which) {
+			if (which == AlertDialog.BUTTON_NEUTRAL) {
+				Arrays.fill(categoryChecked, true);
+			}
+			dialog.dismiss();
+			search(searchText.getText());
 		}
-	}
 
-	public void onNothingSelected(AdapterView<?> parent) {
-	}
-
-	private void searchByKeyword(Editable s) {
-		Set<Category> categoryFilter = new HashSet<Category>();
-		for (int i = 0; i < category.length; i++) {
-			if (categoryChecked[i]) {
-				categoryFilter.add(category[i]);
+		private void closeSoftKeyboard(View v) {
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			if (imm != null && v != null) {
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 			}
 		}
-	
-		List<EntrySummary> result = new EntryFilter()
-		.addAllEntry()
-		.applyFilter(categoryFilter)
-		.applyFilter(s)
-		.getResult();
-	
-		searchAdapter.clear();
-		searchAdapter.addAll(result);
+
+		private void search(Editable s) {
+			Collection<Category> categoryFilter = new HashSet<Category>();
+			for (int i = 0; i < category.length; i++) {
+				if (categoryChecked[i]) {
+					categoryFilter.add(category[i]);
+				}
+			}
+			searchAdapter.filter(categoryFilter, s.toString());
+		}
 	}
+
+	private final class ScheduleSearchHelper implements OnItemSelectedListener {
+		private Spinner daySpinner;
+		private Spinner timeSpinner;
+
+		public ScheduleSearchHelper() {
+			Collection<EntrySummary> set = new HashSet<EntrySummary>();
+			for (TimeFrame tf : TimeFrame.values()) {
+				set.add(tf.getSummary());
+			}
+			searchAdapter.setSource(set, TIMEFRAME_COMPARATOR);
+			searchAdapter.filter();
+
+			String[] times = getResources().getStringArray(R.array.sbs_times);
+
+			daySpinner  = (Spinner) findViewById(R.id.searchDay);
+			timeSpinner = (Spinner) findViewById(R.id.searchTime);
+			daySpinner.setAdapter(new ArrayAdapter<Day>(
+					SearchActivity.this, android.R.layout.simple_spinner_item, Day.values()));
+			timeSpinner.setAdapter(new ArrayAdapter<String>(
+					SearchActivity.this, android.R.layout.simple_spinner_item, times));
+			daySpinner.setOnItemSelectedListener(this);
+			timeSpinner.setOnItemSelectedListener(this);
+		}
+
+		public void onItemSelected(AdapterView<?> parent, View view,
+				int position, long id) {
+			Day day = (Day) daySpinner.getSelectedItem();
+			int time = Integer.parseInt(((String) timeSpinner.getSelectedItem()).replace(":", ""));
+			int viewPosition = search(day, time);
+			resultView.setSelection(viewPosition);
+		}
+
+		public void onNothingSelected(AdapterView<?> parent) {
+		}
+
+		private int search(Day day, int time) {
+			List<TimeFrame> list = new ArrayList<TimeFrame>(TimeFrame.values());
+			Collections.sort(list);
+			return - Collections.binarySearch(list, TimeFrame.makePivot(day, time)) - 1;
+		}
+	}
+
+	private final class AreaSearchHelper {
+		public AreaSearchHelper() {
+			searchAdapter.setSource(EntrySummary.values(), ENTRY_COMPARATOR);
+			Area area = Area.get(getIntent().getStringExtra(INTENT_AREA_ID));
+			search(Collections.singleton(area));
+		}
+
+		public void search(Collection<Area> area) {
+			searchAdapter.filter(area);
+		}
+	}
+
+	private final class FavoriteSearchHelper implements OnClickListener {
+		public FavoriteSearchHelper() {
+			searchAdapter.setSource(EntrySummary.values(), ENTRY_COMPARATOR);
+			search();
+		}
+
+		public void onClick(DialogInterface dialog, int which) {
+			Favorite.clear();
+			search();
+		}
+
+		public Dialog createDeleteAllDialog() {
+			return new AlertDialog.Builder(SearchActivity.this)
+			.setTitle(R.string.clearFavorite)
+			.setIcon(android.R.drawable.ic_menu_delete)
+			.setPositiveButton(android.R.string.ok, this)
+			.setNegativeButton(android.R.string.cancel, null)
+			.create();
+		}
+
+		public void search() {
+			searchAdapter.filter(Favorite.values());
+		}
+	}
+
+	private static final Comparator<EntrySummary> ENTRY_COMPARATOR =
+			new Comparator<EntrySummary>() {
+		public int compare(EntrySummary lhs, EntrySummary rhs) {
+			return lhs.compareTo(rhs);
+		}
+	};
+
+
+	private static final Comparator<EntrySummary> TIMEFRAME_COMPARATOR =
+			new Comparator<EntrySummary>() {
+		public int compare(EntrySummary lhs, EntrySummary rhs) {
+			return TimeFrame.get(lhs).compareTo(TimeFrame.get(rhs));
+		}
+	};
 }

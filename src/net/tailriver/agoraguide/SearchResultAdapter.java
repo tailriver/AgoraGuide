@@ -1,36 +1,56 @@
 package net.tailriver.agoraguide;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-public class SearchResultAdapter extends ArrayAdapter<EntrySummary> implements ListAdapter {
-	private final static int textViewResourceId = R.layout.entry_summary;
+public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
+	private LayoutInflater inflater;
+	private Collection<? extends EntrySummary> origin;
+	private Comparator<? super EntrySummary> comparator;
+	private List<EntrySummary> list;
 
 	public SearchResultAdapter(Context context) {
-		super(context, textViewResourceId, new ArrayList<EntrySummary>());
+		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		list     = Collections.emptyList();
 	}
 
-	@Override
-	public void addAll(Collection<? extends EntrySummary> collection) {
-		// ListAdapter.addAll() requires API Level 11
-		for (EntrySummary summary : collection) {
-			add(summary);
-		}
+	public void setSource(Collection<? extends EntrySummary> collection,
+			Comparator<? super EntrySummary> comparator) {
+		this.origin     = new HashSet<EntrySummary>(collection);
+		this.comparator = comparator;
 	}
 
-	@Override
+	public void filter(Object... filter) {
+		new SearchTask().execute(filter);
+	}
+
+	public int getCount() {
+		return list.size();
+	}
+
+	public EntrySummary getItem(int position) {
+		return list.get(position);
+	}
+
+	public long getItemId(int position) {
+		return position;
+	}
+
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
-			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater.inflate(textViewResourceId, null);
+			convertView = inflater.inflate(R.layout.entry_summary, null);
 		}
 
 		EntrySummary summary = getItem(position);
@@ -48,5 +68,28 @@ public class SearchResultAdapter extends ArrayAdapter<EntrySummary> implements L
 		targetView.setVisibility(View.INVISIBLE);
 
 		return convertView;
+	}
+
+	private final class SearchTask extends AsyncTask<Object, Void, Void> {
+		@Override
+		protected Void doInBackground(Object... params) {
+			EntryFilter filter = new EntryFilter(origin);
+			for (Object p : params) {
+				if (p instanceof Collection<?>) {
+					filter.applyFilter((Collection<?>) p);
+				} else if (p instanceof String) {
+					filter.applyFilter((String) p);
+				} else {
+					throw new UnsupportedOperationException("unsupported filter");
+				}
+			}
+			list = filter.getResult(comparator);
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			notifyDataSetChanged();
+		}
 	}
 }

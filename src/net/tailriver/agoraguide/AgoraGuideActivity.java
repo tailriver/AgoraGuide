@@ -52,6 +52,7 @@ public class AgoraGuideActivity extends AgoraActivity implements OnClickListener
 			jumpNextActivity(item.getItemId());
 			return true;
 		} catch (UnsupportedOperationException e) {
+			Toast.makeText(applicationContext, e.getMessage(), Toast.LENGTH_SHORT).show();
 			return false;
 		}
 	}

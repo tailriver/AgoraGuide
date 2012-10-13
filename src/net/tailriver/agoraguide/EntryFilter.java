@@ -1,6 +1,7 @@
 package net.tailriver.agoraguide;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,167 +9,127 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 public class EntryFilter {
-	private Collection<EntrySummary> collection;
+	private Collection<? extends EntrySummary> collection;
 	private boolean removeMatched;
 
-	public EntryFilter() {
-		this.collection = new HashSet<EntrySummary>();
+	public EntryFilter(Collection<? extends EntrySummary> collection) {
+		this.collection = new HashSet<EntrySummary>(collection);
 		this.removeMatched = false;
 	}
 
-	public EntryFilter(Collection<EntrySummary> collection) {
-		this();
-		addAll(collection);
-	}
-
-	public EntryFilter add(EntrySummary summary) {
-		collection.add(summary);
-		return this;
-	}
-
-	public EntryFilter addAll(Collection<EntrySummary> collection) {
-		if (collection != null) {
-			this.collection.addAll(collection);
-		}
-		return this;
-	}
-
-	public EntryFilter addAllEntry() {
-		return addAll(getAllEntry());
-	}
-
-	public EntryFilter addFavoriteEntry() {
-		return addAll(getFavoriteEntry());
-	}
-
-	public EntryFilter addTimeFrameEntry() {
-		return addAll(getTimeFrameEntry());
-	}
-
 	/** remain matched */
-	public EntryFilter toPositiveFilter() {
+	public void toPositiveFilter() {
 		removeMatched = false;
-		return this;
 	}
 
 	/** remain NOT matched */
-	public EntryFilter toNegativeFilter() {
+	public void toNegativeFilter() {
 		removeMatched = true;
-		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public EntryFilter applyFilter(Collection<? extends AbstractModel<?>> filter) {
+	public void applyFilter(Collection<?> filter) {
 		if (filter == null || filter.size() == 0) {
-			return this;
+			applyEntryFilter(Collections.EMPTY_SET);
+			return;
 		}
-		AbstractModel<?> sample = filter.iterator().next();
+		Object sample = filter.iterator().next();
 
 		if (sample instanceof Area) {
-			return applyAreaFilter((Collection<Area>) filter);
+			applyAreaFilter((Collection<Area>) filter);
+		} else if (sample instanceof Category) {
+			applyCategoryFilter((Collection<Category>) filter);
+		} else if (sample instanceof EntrySummary) {
+			applyEntryFilter((Collection<EntrySummary>) filter);
+		} else {
+			throw new UnsupportedOperationException(sample.getClass() + " is not supported");
 		}
-		if (sample instanceof Category) {
-			return applyCategoryFilter((Collection<Category>) filter);
-		}
-		if (sample instanceof EntrySummary) {
-			return applyEntryFilter((Collection<EntrySummary>) filter);
-		}
-
-		throw new UnsupportedOperationException("");
-	}
-
-	public EntryFilter applyFilter(AbstractModel<?> filter) {
-		return applyFilter(Collections.singleton(filter));
 	}
 
 	/** id, title, sponsor search */
-	public EntryFilter applyFilter(CharSequence keyword) {
-		Iterator<EntrySummary> it = collection.iterator();
-		while (it.hasNext()) {
-			EntrySummary s = it.next();
-			Collection<String> filter = new HashSet<String>();
-			filter.add(s.getId());
-			filter.add(s.toString());
-			filter.add(s.getSponsor());
-			// TODO add detail contents
-
-			boolean matched = false;
-			for (String cs : filter) {
-				if (cs.contains(keyword)) {
-					matched = true;
-					break;
-				}
-			}
-			if (matched == removeMatched) {
-				it.remove();
-			}
+	public void applyFilter(String keyword) {
+		if (keyword == null || keyword.length() == 0) {
+			return;
 		}
-		return this;
+
+		SQLiteDatabase database = AgoraInitializer.getDatabase();
+		SQLLike like = new SQLLike("title", "sponsor", "cosponsor", "abstract", "content", "guest");
+		String table = "entry";
+		String[] columns = { "id" };
+		String selection = like.toString();
+		String[] selectionArgs = new String[like.size()];
+		Arrays.fill(selectionArgs, "%" + keyword + "%");
+		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
+
+		Collection<EntrySummary> matched = new HashSet<EntrySummary>();
+		c.moveToFirst();
+		for (int i = 0, max = c.getCount(); i < max; i++) {
+			matched.add(EntrySummary.get(c.getString(0)));
+			c.moveToNext();
+		}
+		c.close();
+
+		if (EntrySummary.get(keyword) != null) {
+			matched.add(EntrySummary.get(keyword));
+		}
+		applyEntryFilter(matched);
 	}
 
-	public List<EntrySummary> getResult() {
+	public List<EntrySummary> getResult(Comparator<? super EntrySummary> comperator) {
 		List<EntrySummary> list = new ArrayList<EntrySummary>(collection);
-		Collections.sort(list);
+		Collections.sort(list, comperator);
 		return list;
 	}
 
-	public List<EntrySummary> getResultTimeOrder() {
-		List<EntrySummary> list = new ArrayList<EntrySummary>(collection);
-		Collections.sort(list, new TimeFrameComparator());
-		return list;
-	}
-
-	private EntryFilter applyAreaFilter(Collection<Area> filter) {
-		Iterator<EntrySummary> it = collection.iterator();
+	private void applyAreaFilter(Collection<Area> filter) {
+		Iterator<? extends EntrySummary> it = collection.iterator();
 		while (it.hasNext()) {
 			EntrySummary s = it.next();
 			if (filter.contains(s.getArea()) == removeMatched) {
 				it.remove();
 			}
 		}
-		return this;
 	}
 
-	private EntryFilter applyCategoryFilter(Collection<Category> filter) {
-		Iterator<EntrySummary> it = collection.iterator();
+	private void applyCategoryFilter(Collection<Category> filter) {
+		Iterator<? extends EntrySummary> it = collection.iterator();
 		while (it.hasNext()) {
 			EntrySummary s = it.next();
 			if (filter.contains(s.getCategory()) == removeMatched) {
 				it.remove();
 			}
 		}
-		return this;
 	}
 
-	private EntryFilter applyEntryFilter(Collection<EntrySummary> filter) {
+	private void applyEntryFilter(Collection<EntrySummary> filter) {
 		if (removeMatched) {
 			collection.removeAll(filter);
 		} else {
 			collection.retainAll(filter);
 		}
-		return this;
 	}
 
-	private final Collection<EntrySummary> getAllEntry() {
-		return EntrySummary.values();
-	}
-
-	private final Collection<EntrySummary> getFavoriteEntry() {
-		return Favorite.values();
-	}
-
-	private final Collection<EntrySummary> getTimeFrameEntry() {
-		Collection<EntrySummary> set = new HashSet<EntrySummary>();
-		for (TimeFrame tf : TimeFrame.values()) {
-			set.add(tf.getSummary());
+	private class SQLLike {
+		String[] args;
+		public SQLLike(String... args) {
+			this.args = args;
 		}
-		return set;
-	}
 
-	class TimeFrameComparator implements Comparator<EntrySummary> {
-		public int compare(EntrySummary lhs, EntrySummary rhs) {
-			return TimeFrame.get(lhs).compareTo(TimeFrame.get(rhs));
+		public int size() {
+			return args.length;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < args.length; i++) {
+				sb.append(args[i]).append(" LIKE ? OR ");
+			}
+			return sb.delete(sb.length() - " OR ".length(), sb.length()).toString();
 		}
 	}
 }

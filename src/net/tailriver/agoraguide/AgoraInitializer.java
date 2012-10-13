@@ -11,12 +11,13 @@ import android.util.Log;
 public class AgoraInitializer {
 	private static final String databaseURL  = "http://tailriver.net/agoraguide/2012.sqlite3.gz";
 	private static final String databaseName = "2012.sqlite3";
+
 	private static Context applicationContext;
 	private static SQLiteDatabase database;
 	private static InitStatus status = InitStatus.NULL;
 
 	private enum InitStatus {
-		NULL, START, UPDATE, SELECT, FINISH;
+		NULL, UPDATE, SELECT, FINISH;
 	}
 
 	public static final void init(Context context) {
@@ -30,14 +31,11 @@ public class AgoraInitializer {
 				return;
 			}
 
-			// start
-			status = InitStatus.START;
+			// update files and open database
+			status = InitStatus.UPDATE;
 			applicationContext = context.getApplicationContext();
 			File databaseFile = applicationContext.getFileStreamPath(databaseName);
 			databaseFile.getParentFile().mkdirs();
-
-			// update files and open database
-			status = InitStatus.UPDATE;
 			updateDatabase(databaseFile);
 			openDatabase(databaseFile);
 
@@ -50,6 +48,7 @@ public class AgoraInitializer {
 			EntryDetail.init();
 			Location.init();
 			TimeFrame.init();
+			SQLiteDatabase.releaseMemory();
 
 			updateAreaImage();
 
@@ -80,7 +79,7 @@ public class AgoraInitializer {
 			} catch (StandAloneException e) {
 				// noop
 			} catch (IOException e) {
-				Log.e("Initializer", e.getMessage(), e);
+				Log.e("AgoraGuide", e.getMessage(), e);
 			}
 		}
 	}
@@ -88,9 +87,9 @@ public class AgoraInitializer {
 	private static final void openDatabase(File file) {
 		try {
 			database = SQLiteDatabase.openDatabase(
-					file.getPath(), null, Context.MODE_PRIVATE);			
+					file.getPath(), null, SQLiteDatabase.OPEN_READONLY);			
 		} catch (SQLiteException e) {
-			Log.e("AgoraGuide", "init", e);
+			Log.e("AgoraGuide", "openDatabase", e);
 			throw new IllegalStateException("database not found");
 		}
 	}
@@ -100,7 +99,7 @@ public class AgoraInitializer {
 			File imageFile = area.getImageFile();
 			if (System.currentTimeMillis() - imageFile.lastModified() > 86400 * 1000) {
 				try {
-					new Downloader().download(area.getURL(), imageFile);
+					new Downloader().download(area.getImageURL(), imageFile);
 				} catch (StandAloneException e) {
 					// noop
 				} catch (IOException e) {

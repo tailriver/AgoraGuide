@@ -74,7 +74,7 @@ public class Area extends AbstractModel<Area> {
 	}
 
 	public static List<Area> values() {
-		return factory.values();
+		return factory.sortedValues();
 	}
 
 	public String getShortName() {
@@ -89,14 +89,14 @@ public class Area extends AbstractModel<Area> {
 		return null;
 	}
 
-	public String getURL() {
-		return url;
-	}
-
 	public File getImageFile() {
 		Context context = AgoraInitializer.getApplicationContext();
 		File imageDir = context.getDir("2012_area", Context.MODE_PRIVATE);
 		return new File(imageDir, getId() + ".png");		
+	}
+
+	public String getImageURL() {
+		return url;
 	}
 
 	@Override
