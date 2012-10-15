@@ -14,6 +14,22 @@ public class ModelFactory<T extends AbstractModel<T>> extends HashMap<String, T>
 	public ModelFactory() {}
 
 	@Override
+	public T get(Object key) {
+		if (key == null) {
+			throw new IllegalArgumentException();
+		}
+		return super.get(key);
+	}
+
+	@Override
+	public T put(String key, T value) {
+		if (key == null || value == null) {
+			throw new IllegalArgumentException();
+		}
+		return super.put(key, value);
+	}
+
+	@Override
 	public Collection<T> values() {
 		if (values == null) {
 			values = Collections.unmodifiableCollection(super.values());

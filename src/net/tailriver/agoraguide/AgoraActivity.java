@@ -8,14 +8,14 @@ public abstract class AgoraActivity extends Activity {
 	@Override
 	protected final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		new InitializeTask(this).execute();
+		new InitializeTask(this).execute(savedInstanceState);
 	}
 
 	abstract public void onPreInitialize();
 
-	abstract public void onPostInitialize();
+	abstract public void onPostInitialize(Bundle savedInstanceState);
 
-	private final class InitializeTask extends AsyncTask<Void, Void, Void> {
+	private final class InitializeTask extends AsyncTask<Bundle, Void, Bundle> {
 		private AgoraActivity agora;
 
 		InitializeTask(AgoraActivity agora) {
@@ -28,14 +28,14 @@ public abstract class AgoraActivity extends Activity {
 		}
 
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected Bundle doInBackground(Bundle... params) {
 			AgoraInitializer.init(agora.getApplicationContext());
-			return null;
+			return params[0];
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
-			agora.onPostInitialize();
+		protected void onPostExecute(Bundle result) {
+			agora.onPostInitialize(result);
 		}
 	}
 }

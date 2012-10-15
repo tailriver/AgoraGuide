@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.LinearLayout;
@@ -15,8 +16,8 @@ public class MapActivity extends AgoraActivity {
 	}
 
 	@Override
-	public void onPostInitialize() {
-		EntrySummary summary = EntrySummary.get(getIntent().getStringExtra(EntryDetailActivity.INTENT_ENTRY));
+	public void onPostInitialize(Bundle savedInstanceState) {
+		EntrySummary summary = EntrySummary.get(getIntent().getStringExtra(IntentExtra.ENTRY_ID));
 		EntryDetail detail = new EntryDetail(summary);
 		Location location = detail.getLocation();
 		Area area = location.getArea();

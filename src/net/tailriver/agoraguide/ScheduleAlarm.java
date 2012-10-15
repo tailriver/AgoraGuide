@@ -7,85 +7,71 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 public class ScheduleAlarm extends BroadcastReceiver {
-	private static NotificationManager nm;
-
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		new InitializeTask(this, context.getApplicationContext(), intent);
-	}
-
-	public void onPreInitialize(Context context, Intent intent) {
-		nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-	}
-
-	@SuppressWarnings("deprecation")
-	public void onPostInitialize(Context context, Intent intent) {
-		String entryId = intent.getStringExtra(EntryDetailActivity.INTENT_ENTRY);
-
-		int id = (int) (Math.random() * Integer.MAX_VALUE);
-
-		Intent detailActivity = new Intent(context, EntryDetailActivity.class);
-		detailActivity.putExtra(EntryDetailActivity.INTENT_ENTRY, entryId);
-		detailActivity.putExtra(EntryDetailActivity.INTENT_NOTIFICATION_ID, id);
-
+		int id = intent.getIntExtra(IntentExtra.NOTIFICATION_ID, 0);
 		CharSequence contentTitle = context.getString(R.string.app_name);
-		CharSequence contentText  = EntrySummary.get(entryId).toString();
+		CharSequence contentText  = intent.getStringExtra(IntentExtra.NOTIFICATION_TEXT);
+		long when = intent.getLongExtra(IntentExtra.NOTIFICATION_WHEN, System.currentTimeMillis());
+
+		Log.i("aa", intent.getExtras().keySet().toString());
+		intent.setClass(context, ProgramActivity.class);
+		intent.removeExtra(IntentExtra.NOTIFICATION_TEXT);
+		intent.removeExtra(IntentExtra.NOTIFICATION_WHEN);
+		Log.i("bb", intent.getExtras().keySet().toString());
+
 		PendingIntent contentIntent = PendingIntent.getActivity(
-				context, 0, detailActivity, Intent.FLAG_ACTIVITY_NEW_TASK);
+				context, 0, intent, Intent.FLAG_ACTIVITY_NEW_TASK);
 
-		Notification n = new Notification(R.drawable.icon, contentTitle, System.currentTimeMillis());
-		n.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-		nm.notify(id, n);		
+		Notification n = new NotificationCompat.Builder(context)
+		.setSmallIcon(R.drawable.icon)
+		.setTicker(contentText)
+		.setContentTitle(contentTitle)
+		.setContentText(contentText)
+		.setContentIntent(contentIntent)
+		.setWhen(when)
+		.build();
+		getNotificationManager(context).notify(id, n);		
 	}
 
-	public static void setAlerm(EntrySummary summary, long when) {
+	/** You have to check whether the set of hash code of id is identical or not (2012 ok) */
+	public static int setAlarm(EntrySummary summary, long alarmWhen, long notificationWhen) {
 		Context context = AgoraInitializer.getApplicationContext();
-		int requestCode = (int) (Integer.MAX_VALUE * Math.random());
+		PendingIntent operation = getPendingIntent(context, summary, notificationWhen);
+		getAlarmManager(context).set(AlarmManager.RTC_WAKEUP, alarmWhen, operation);
+		return summary.getId().hashCode();
+	}
+
+	public static final void cancelAlarm(EntrySummary summary, long notificationWhen) {
+		Context context = AgoraInitializer.getApplicationContext();
+		PendingIntent operation = getPendingIntent(context, summary, notificationWhen);
+		getAlarmManager(context).cancel(operation);
+	}
+
+	public static final void cancelNotification(Context context, int id) {
+		getNotificationManager(context).cancel(id);
+	}
+
+	private static final AlarmManager getAlarmManager(Context context) {
+		return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+	}
+
+	private static final NotificationManager getNotificationManager(Context context) {
+		return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+	}
+
+	private static PendingIntent getPendingIntent(Context context,
+			EntrySummary summary, long notificationWhen) {
+		int requestCode = summary.getId().hashCode();
 		Intent intent = new Intent(context, ScheduleAlarm.class);
-		intent.putExtra(EntryDetailActivity.INTENT_ENTRY, summary.getId());
-		PendingIntent pending = PendingIntent.getBroadcast(context, requestCode, intent, 0);
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		am.set(AlarmManager.RTC_WAKEUP, when, pending);
-	}
-
-	public static final void cancelNotification(int id) {
-		nm.cancel(id);		
-	}
-
-	public static final void cancelAllNotifications(Context context) {
-		nm.cancelAll();
-	}
-
-	private static class InitializeTask extends AsyncTask<Void, Void, Void> {
-		private ScheduleAlarm alarm;
-		private Context context;
-		private Intent intent;
-
-		InitializeTask(ScheduleAlarm alarm, Context context, Intent intent) {
-			this.alarm   = alarm;
-			this.context = context;
-			this.intent  = intent;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			alarm.onPreInitialize(context, intent);
-		}
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			AgoraInitializer.init(context);
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-			alarm.onPostInitialize(context, intent);
-		}
+		intent.putExtra(IntentExtra.ENTRY_ID, summary.getId());
+		intent.putExtra(IntentExtra.NOTIFICATION_ID, requestCode);
+		intent.putExtra(IntentExtra.NOTIFICATION_TEXT, summary.toString());
+		intent.putExtra(IntentExtra.NOTIFICATION_WHEN, notificationWhen);
+		return PendingIntent.getBroadcast(context, requestCode, intent, 0);
 	}
 }

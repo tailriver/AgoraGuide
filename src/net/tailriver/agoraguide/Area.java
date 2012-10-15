@@ -10,14 +10,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 public class Area extends AbstractModel<Area> {
-	private static Area singleton = new Area();
 	private static ModelFactory<Area> factory;
 
 	private String name;
 	private String abbrev;
 	private String url;
 
-	private Area() {}
+	/*package*/ Area() {}
 
 	private Area(String id, String name, String abbrev) {
 		super(id);
@@ -25,13 +24,10 @@ public class Area extends AbstractModel<Area> {
 		this.abbrev = abbrev;
 	}
 
-	public static void init() {
-		factory = new ModelFactory<Area>();
-		singleton.execute();
-	}
-
 	@Override
-	protected void init_factory(SQLiteDatabase database) {
+	protected void init(SQLiteDatabase database) {
+		factory = new ModelFactory<Area>();
+
 		String table1 = "area";
 		String[] columns1 = { "id", "name", "abbrev" };
 		Cursor c1 = database.query(table1, columns1, null, null, null, null, null);

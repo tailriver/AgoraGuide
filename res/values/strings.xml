@@ -3,21 +3,20 @@
 <resources>
 
     <string name="app_name">AgoraGuide</string>
-    <string name="addFavorite">Add Favorite</string>
-    <string name="removeFavorite">Remove Favorite</string>
-    <string name="favorites">Favorites</string>
-    <string name="entryDetail">Program</string>
-    <string name="searchByKeyword">Search by keyword</string>
-    <string name="searchBySchedule">Search by schedule</string>
-    <string name="searchByMap">Search by map</string>
+    <string name="credits">Credits</string>
+    <string name="favorite">Favorites</string>
+    <string name="favoriteAdd">Add Favorite</string>
+    <string name="favoriteClear">Clear all favorites</string>
+    <string name="favoriteRemove">Remove Favorite</string>
+    <string name="program">Program</string>
+    <string name="programLocation">Check the Location!</string>
+    <string name="searchArea">Area Search</string>
+    <string name="searchCategoryFiltering">Filtering by Category</string>
+    <string name="searchKeyword">Keyword Search</string>
+    <string name="searchKeywordHint">search&#8230;</string>
+    <string name="searchLoading">Loading&#8230;</string>
     <string name="searchNotFound">Not Found</string>
-    <string name="search">Search</string>
-    <string name="clearFavorite">Clear Favorites</string>
-    <string name="credits">Information</string>
-    <string name="website">Go to web site</string>
-    <string name="reservation">Appointment</string>
-    <string name="reserve">Reserve</string>
-    <string name="filtering">Filtering</string>
+    <string name="searchSchedule">Schedule Search</string>
     <string name="selectAll">Select all</string>
 
     <string-array name="days">
@@ -28,31 +27,13 @@
         <item>Sat</item>
         <item>Sun</item>
     </string-array>
-    <string-array name="sbs_times">
+    <string-array name="searchScheduleTimes">
         <item>10:00</item>
         <item>11:00</item>
         <item>12:00</item>
         <item>13:00</item>
         <item>14:00</item>
         <item>15:00</item>
-    </string-array>
-    <string-array name="entrydetail">
-        <item>cosponsor</item>
-        <item>guest</item>
-        <item>abstract</item>
-        <item>content</item>
-        <item>reservation</item>
-        <item>note</item>
-        <item>original</item>
-    </string-array>
-    <string-array name="entrydetail_locale">
-        <item>CoSponsor</item>
-        <item>Guest</item>
-        <item>Abstract</item>
-        <item>Content</item>
-        <item>Reseration</item>
-        <item>Note</item>
-        <item>Original</item>
     </string-array>
 
 </resources>

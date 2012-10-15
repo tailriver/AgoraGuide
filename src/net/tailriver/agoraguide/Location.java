@@ -23,10 +23,6 @@ public class Location {
 		y = c.getFloat(2);
 	}
 
-	public static void init() {
-		// for symmetry
-	}
-
 	public Area getArea() {
 		return area;
 	}

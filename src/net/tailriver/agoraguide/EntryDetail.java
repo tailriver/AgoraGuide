@@ -1,71 +1,50 @@
 package net.tailriver.agoraguide;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class EntryDetail {
-	public static final String CLASS_NAME = EntryDetail.class.getSimpleName();
-	private static List<String> columns;
+	private static final String[] columns = {
+		"cosponsor", "abstract", "content", "guest", "website", "reservation", "note" };
 
-	private EntrySummary summary;
 	private Map<String, String> data;
 	private Location location;
 
-	public EntryDetail(String id) {
-		this(EntrySummary.get(id));
-	}
-
 	public EntryDetail(EntrySummary summary) {
-		this.summary = summary;
 		data     = new HashMap<String, String>();
 		location = new Location(summary);
 
 		SQLiteDatabase database = AgoraInitializer.getDatabase();
 		String table = "entry";
-		String[] columns = (String[]) EntryDetail.columns.toArray();
 		String selection = "id=?";
 		String[] selectionArgs = { summary.getId() };
 		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
 
 		c.moveToFirst();
-		for (int i = 0; i < columns.length; i++) {
-			data.put(columns[i], c.getString(i));
+		for (int i = 0, max = c.getColumnCount(); i < max; i++) {
+			String key = c.getColumnName(i);
+			try {
+				data.put(key, c.isNull(i) ? null : c.getString(i));
+			} catch (RuntimeException e) {
+				Log.w("EntryDetail", "getString", e);
+				data.put(key, "");
+			}
 		}
 		c.close();
 	}
 
-	public static void init() {
-		if (columns == null) {
-			Resources res = AgoraInitializer.getApplicationContext().getResources();
-			columns = Arrays.asList(res.getStringArray(R.array.entrydetail));
+	public String getName(String key) {
+		return Hint.get("entry", key);
+	}
+
+	public String getValue(String key) {
+		if (!data.containsKey(key)) {
+			throw new IllegalArgumentException();
 		}
-	}
-
-	public EntrySummary getSummary() {
-		return summary;
-	}
-
-	public String getDetailName(int index) {
-		Resources res = AgoraInitializer.getApplicationContext().getResources();
-		return res.getStringArray(R.array.entrydetail_locale)[index];
-	}
-
-	public String getDetailName(String key) {
-		return getDetailName(Collections.binarySearch(columns, key));
-	}
-
-	public String getDetailValue(int index) {
-		return getDetailValue(columns.get(index));
-	}
-
-	public String getDetailValue(String key) {
 		return data.get(key);
 	}
 

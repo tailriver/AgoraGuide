@@ -1,36 +1,38 @@
 package net.tailriver.agoraguide;
 
-import java.util.Collection;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class TimeFrame extends AbstractModel<TimeFrame> {
-	private static TimeFrame singleton = new TimeFrame();
 	private static ModelFactory<TimeFrame> factory;
 
-	private EntrySummary summary;
-	private Day day;
-	private int start;
-	private int end;
+	private Date start;
+	private Date end;
 
-	private TimeFrame() {}
+	/*package*/ TimeFrame() {}
 
-	private TimeFrame(EntrySummary summary, Day day, int start, int end) {
+	private TimeFrame(EntrySummary summary, Date start, Date end) {
 		super(summary != null ? summary.getId() : null);
-		this.summary = summary;
-		this.day     = day;
-		this.start   = start;
-		this.end     = end;
-	}
-
-	public static void init() {
-		factory = new ModelFactory<TimeFrame>();
-		singleton.execute();
+		this.start = start;
+		this.end   = end;
 	}
 
 	@Override
-	protected void init_factory(SQLiteDatabase database) {
+	protected void init(SQLiteDatabase database) {
+		factory = new ModelFactory<TimeFrame>();
+
+		Calendar cal = Calendar.getInstance(Locale.JAPAN);
+		cal.set(Calendar.YEAR, 2012);
+		cal.set(Calendar.MONTH, Calendar.NOVEMBER);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+
 		String table = "timeframe";
 		String[] columns = { "entry", "day", "start", "end" };
 		Cursor c = database.query(table, columns, null, null, null, null, null);
@@ -38,11 +40,18 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 		c.moveToFirst();
 		for (int i = 0, rows = c.getCount(); i < rows; i++) {
 			EntrySummary summary = EntrySummary.get(c.getString(0));
-			Day day   = Day.get(c.getString(1));
-			int start = c.getInt(2);
-			int end   = c.getInt(3);
 			if (!summary.getCategory().isAllday()) {
-				TimeFrame tf = new TimeFrame(summary, day, start, end);
+				Day d = Day.get(c.getString(1));
+				int s = c.getInt(2);
+				int e = c.getInt(3);
+				cal.set(Calendar.DAY_OF_MONTH, d.getDay());
+				cal.set(Calendar.HOUR_OF_DAY, s / 100);
+				cal.set(Calendar.MINUTE,      s % 100);
+				Date start = cal.getTime();
+				cal.set(Calendar.HOUR_OF_DAY, e / 100);
+				cal.set(Calendar.MINUTE,      e % 100);
+				Date end   = cal.getTime();
+				TimeFrame tf = new TimeFrame(summary, start, end);
 				factory.put(tf.toString(), tf);
 			}
 			c.moveToNext();
@@ -54,27 +63,51 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 		return factory.get(summary.getId());
 	}
 
-	public static Collection<TimeFrame> values() {
-		return factory.values();
+	public static List<TimeFrame> values() {
+		return factory.sortedValues();
 	}
 
 	public static final TimeFrame makePivot(Day day, int time) {
-		return new TimeFrame(null, day, time, time);
+		Calendar c = Calendar.getInstance(Locale.JAPAN);
+		c.set(2012, Calendar.NOVEMBER, day.getDay(), time / 100, time % 100, 0);
+		c.set(Calendar.MILLISECOND, 0);
+
+		return new TimeFrame(null, c.getTime(), c.getTime());
 	}
 
 	public EntrySummary getSummary() {
-		return summary;
+		return EntrySummary.get(getId());
+	}
+
+	public Calendar getStart() {
+		Calendar c = Calendar.getInstance(Locale.JAPAN);
+		c.setTime(start);
+
+		// XXX hack for debug (start everyday)
+		if (true) {
+			Log.w("TimeFrame", "debug hack worked");
+			Calendar cur = Calendar.getInstance();
+			c = cur;
+			c.add(Calendar.MINUTE, 15);
+			c.add(Calendar.SECOND, 30);
+			/*
+			c.set(cur.get(Calendar.YEAR), cur.get(Calendar.MONTH), cur.get(Calendar.DAY_OF_MONTH));
+			if (c.before(cur)) {
+				c.add(Calendar.DAY_OF_MONTH, 1);
+			}
+			*/
+			Log.w("TimeFrame", "getStart() returns " + c.getTime().toString());
+		}
+		return c;
 	}
 
 	@Override
 	public int compareTo(TimeFrame another) {
-		if (!day.equals(another.day))
-			return day.compareTo(another.day);
-		if (start != another.start)
-			return start - another.start;
-		if (end != another.end)
-			return end - another.end;
-		return summary.compareTo(another.summary);
+		if (!start.equals(another.start))
+			return start.compareTo(another.start);
+		if (!end.equals(another.end))
+			return end.compareTo(another.end);
+		return super.compareTo(another);
 	}
 
 	@Override

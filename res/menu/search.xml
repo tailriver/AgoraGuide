@@ -3,8 +3,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/searchFilterCategory"
-        android:title="@string/filtering">
+        android:id="@+id/searchCategoryFiltering"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:showAsAction="ifRoom"
+        android:title="@string/searchCategoryFiltering"
+        android:visible="false">
     </item>
+    <item
+        android:id="@+id/favoriteClear"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:showAsAction="ifRoom"
+        android:title="@string/favoriteClear"
+        android:visible="false"/>
 
 </menu>

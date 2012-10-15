@@ -1,25 +1,24 @@
 package net.tailriver.agoraguide;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
@@ -36,8 +35,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 public class SearchActivity extends AgoraActivity implements OnItemClickListener {
-	public static final String INTENT_SEARCH_TYPE = "net.tailriver.agoraguide.search_type";
-	public static final String INTENT_AREA_ID     = "net.tailriver.agoraguide.area_id";
 	public enum SearchType {
 		Keyword, Schedule, Area, Favorite;
 	}
@@ -48,8 +45,7 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 	private int lastPosition;
 
 	// search helper
-	private KeywordSearchHelper ksh;
-	private FavoriteSearchHelper fsh;
+	private SearchHelper helper;
 
 	@Override
 	public void onPreInitialize() {
@@ -62,7 +58,7 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 		resultView.setOnItemClickListener(this);
 		resultView.setEmptyView(findViewById(R.id.searchNotFound));
 
-		type = (SearchType) getIntent().getSerializableExtra(INTENT_SEARCH_TYPE);
+		type = (SearchType) getIntent().getSerializableExtra(IntentExtra.SEARCH_TYPE);
 		if (type != SearchType.Keyword) {
 			findViewById(R.id.searchKeyword).setVisibility(View.GONE);
 		}
@@ -72,36 +68,46 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 	}
 
 	@Override
-	public void onPostInitialize() {
+	public void onPostInitialize(Bundle savedInstanceState) {
 		switch (type) {
 		case Keyword:
-			setTitle(R.string.searchByKeyword);
-			ksh = new KeywordSearchHelper();
+			setTitle(R.string.searchKeyword);
+			helper = new KeywordSearchHelper();
 			break;
 
 		case Schedule:
-			setTitle(R.string.searchBySchedule);
-			new ScheduleSearchHelper();
+			setTitle(R.string.searchSchedule);
+			helper = new ScheduleSearchHelper();
 			break;
 
 		case Area:
-			setTitle(R.string.searchByMap);
-			new AreaSearchHelper();
+			setTitle(R.string.searchArea);
+			helper = new AreaSearchHelper();
 			break;
 
 		case Favorite:
-			setTitle(R.string.favorites);
-			fsh = new FavoriteSearchHelper();
+			setTitle(R.string.favorite);
+			helper = new FavoriteSearchHelper();
 			break;
 		}
+		if (savedInstanceState != null) {
+			helper.onRestoreInstanceState(savedInstanceState);
+		}
+		helper.search();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		helper.onSaveInstanceState(outState);
 	}
 
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 		lastPosition = position;
 		EntrySummary summary = (EntrySummary) parent.getItemAtPosition(position);
-		Intent intent = new Intent(getApplicationContext(), EntryDetailActivity.class);
-		intent.putExtra(EntryDetailActivity.INTENT_ENTRY, summary.getId());
+		Intent intent = new Intent(getApplicationContext(), ProgramActivity.class);
+		intent.putExtra(IntentExtra.ENTRY_ID, summary.getId());
 		startActivityForResult(intent, R.id.searchResult);
 	}
 
@@ -113,7 +119,7 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 		}
 
 		if (type == SearchType.Favorite && searchAdapter.getCount() != Favorite.values().size()) {
-			fsh.search();
+			helper.search();
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
@@ -121,48 +127,42 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		int menuRes;
+		getMenuInflater().inflate(R.menu.search, menu);
 		switch (type) {
 		case Keyword:
-			menuRes = R.menu.search;
-			break;
+			menu.findItem(R.id.searchCategoryFiltering).setVisible(true);
+			return true;
 		case Favorite:
-			menuRes = R.menu.favorites;
-			break;
+			menu.findItem(R.id.favoriteClear).setVisible(true);
+			menu.findItem(R.id.favoriteClear).setEnabled( !searchAdapter.isEmpty() );
+			return true;
 		default:
-			menuRes = 0;
-			break;
+			return false;
 		}
-
-		if (menuRes > 0) {
-			new MenuInflater(this).inflate(menuRes, menu);
-		}
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (type == SearchType.Favorite) {
-			menu.findItem(R.id.menu_favorites_clear).setEnabled( !searchAdapter.isEmpty() );
-		}
-		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (type == SearchType.Keyword && item.getItemId() == R.id.searchFilterCategory) {
-			ksh.createCategoryFilterDialog().show();
+		switch (item.getItemId()) {
+		case R.id.searchCategoryFiltering:
+		case R.id.favoriteClear:
+			helper.createDialog().show();
 			return true;
+		default:
+			return super.onOptionsItemSelected(item);			
 		}
-		if (type == SearchType.Favorite && item.getItemId() == R.id.menu_favorites_clear) {
-			fsh.createDeleteAllDialog().show();
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
+	}
+
+	private interface SearchHelper {
+		public void onRestoreInstanceState(Bundle savedInstance);
+		public void onSaveInstanceState(Bundle outState);
+		public AlertDialog createDialog();
+		public void search();
 	}
 
 	private final class KeywordSearchHelper
-	implements OnKeyListener, OnClickListener, OnMultiChoiceClickListener, OnScrollListener, TextWatcher
+	implements SearchHelper,
+	OnKeyListener, OnClickListener, OnMultiChoiceClickListener, OnScrollListener, TextWatcher
 	{
 		private EditText searchText;
 		private Category[] category;
@@ -176,22 +176,46 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 			searchText = (EditText) findViewById(R.id.searchKeyword);
 			searchText.addTextChangedListener(this);
 			searchText.setOnKeyListener(this);	
-			searchText.setText(null);
 			resultView.setOnScrollListener(this);
 		}
 
-		public AlertDialog createCategoryFilterDialog() {
+		public void onRestoreInstanceState(Bundle savedInstanceState) {
+			searchText.setText(savedInstanceState.getString("keyword"));
+			categoryChecked = savedInstanceState.getBooleanArray("categoryChecked");
+		}
+
+		public void onSaveInstanceState(Bundle outState) {
+			outState.putString("keyword", searchText.getText().toString());
+			outState.putBooleanArray("categoryChecked", categoryChecked);
+		}
+
+		public AlertDialog createDialog() {
+			Configuration config = getResources().getConfiguration();
+			boolean isLandscape = config.orientation == Configuration.ORIENTATION_LANDSCAPE;
 			String[] categoryName = new String[category.length];
 			for (int i = 0; i < category.length; i++) {
-				categoryName[i] = category[i].getShortName();
+				String allday = Hint.get("$", category[i].isAllday() ? "allday" : "not_allday");
+				String name = isLandscape ? category[i].toString() : category[i].getShortName();
+				categoryName[i] = allday + " " + name;
 			}
 			return new AlertDialog.Builder(SearchActivity.this)
-			.setTitle(R.string.filtering)
+			.setTitle(R.string.searchCategoryFiltering)
 			.setIcon(android.R.drawable.ic_search_category_default)
 			.setMultiChoiceItems(categoryName, categoryChecked, this)
 			.setPositiveButton(android.R.string.ok, this)
 			.setNeutralButton(R.string.selectAll, this)
 			.create();
+		}
+
+		public void search() {
+			String s = searchText.getText().toString();
+			Collection<Category> categoryFilter = new HashSet<Category>();
+			for (int i = 0; i < category.length; i++) {
+				if (categoryChecked[i]) {
+					categoryFilter.add(category[i]);
+				}
+			}
+			searchAdapter.filter(categoryFilter, s.toString());
 		}
 
 		public void beforeTextChanged(CharSequence s, int start, int count,
@@ -203,7 +227,7 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 		}
 
 		public void afterTextChanged(Editable s) {
-			search(s);
+			search();
 		}
 
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -231,7 +255,7 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 				Arrays.fill(categoryChecked, true);
 			}
 			dialog.dismiss();
-			search(searchText.getText());
+			search();
 		}
 
 		private void closeSoftKeyboard(View v) {
@@ -240,19 +264,9 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 			}
 		}
-
-		private void search(Editable s) {
-			Collection<Category> categoryFilter = new HashSet<Category>();
-			for (int i = 0; i < category.length; i++) {
-				if (categoryChecked[i]) {
-					categoryFilter.add(category[i]);
-				}
-			}
-			searchAdapter.filter(categoryFilter, s.toString());
-		}
 	}
 
-	private final class ScheduleSearchHelper implements OnItemSelectedListener {
+	private final class ScheduleSearchHelper implements SearchHelper, OnItemSelectedListener {
 		private Spinner daySpinner;
 		private Spinner timeSpinner;
 
@@ -264,62 +278,89 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 			searchAdapter.setSource(set, TIMEFRAME_COMPARATOR);
 			searchAdapter.filter();
 
-			String[] times = getResources().getStringArray(R.array.sbs_times);
+			ArrayAdapter<Day> dayAdapter = new ArrayAdapter<Day>(SearchActivity.this,
+					android.R.layout.simple_spinner_item, Day.values());
+			ArrayAdapter<CharSequence> timeAdapter = ArrayAdapter.createFromResource(
+					SearchActivity.this,
+					R.array.searchScheduleTimes, android.R.layout.simple_spinner_item);
+
+			dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 			daySpinner  = (Spinner) findViewById(R.id.searchDay);
 			timeSpinner = (Spinner) findViewById(R.id.searchTime);
-			daySpinner.setAdapter(new ArrayAdapter<Day>(
-					SearchActivity.this, android.R.layout.simple_spinner_item, Day.values()));
-			timeSpinner.setAdapter(new ArrayAdapter<String>(
-					SearchActivity.this, android.R.layout.simple_spinner_item, times));
+			daySpinner.setAdapter(dayAdapter);
+			timeSpinner.setAdapter(timeAdapter);
 			daySpinner.setOnItemSelectedListener(this);
 			timeSpinner.setOnItemSelectedListener(this);
 		}
 
-		public void onItemSelected(AdapterView<?> parent, View view,
-				int position, long id) {
+		public void onRestoreInstanceState(Bundle savedInstanceState) {
+			daySpinner.setSelection(savedInstanceState.getInt("day"));
+			timeSpinner.setSelection(savedInstanceState.getInt("time"));
+		}
+
+		public void onSaveInstanceState(Bundle outState) {
+			outState.putInt("day",  daySpinner.getSelectedItemPosition());
+			outState.putInt("time", timeSpinner.getSelectedItemPosition());
+		}
+
+		public AlertDialog createDialog() {
+			return null;
+		}
+
+		public void search() {
 			Day day = (Day) daySpinner.getSelectedItem();
 			int time = Integer.parseInt(((String) timeSpinner.getSelectedItem()).replace(":", ""));
-			int viewPosition = search(day, time);
+			int viewPosition = - Collections.binarySearch(
+					TimeFrame.values(), TimeFrame.makePivot(day, time)) - 1;
 			resultView.setSelection(viewPosition);
+		}
+
+		public void onItemSelected(AdapterView<?> parent, View view,
+				int position, long id) {
+			search();
 		}
 
 		public void onNothingSelected(AdapterView<?> parent) {
 		}
-
-		private int search(Day day, int time) {
-			List<TimeFrame> list = new ArrayList<TimeFrame>(TimeFrame.values());
-			Collections.sort(list);
-			return - Collections.binarySearch(list, TimeFrame.makePivot(day, time)) - 1;
-		}
 	}
 
-	private final class AreaSearchHelper {
+	private final class AreaSearchHelper implements SearchHelper {
 		public AreaSearchHelper() {
 			searchAdapter.setSource(EntrySummary.values(), ENTRY_COMPARATOR);
-			Area area = Area.get(getIntent().getStringExtra(INTENT_AREA_ID));
-			search(Collections.singleton(area));
 		}
 
-		public void search(Collection<Area> area) {
-			searchAdapter.filter(area);
+		public void onRestoreInstanceState(Bundle savedInstance) {
+		}
+
+		public void onSaveInstanceState(Bundle outState) {
+		}
+
+		public AlertDialog createDialog() {
+			return null;
+		}
+
+		public void search() {
+			Area area = Area.get(getIntent().getStringExtra(IntentExtra.AREA_ID));
+			searchAdapter.filter(Collections.singleton(area));
 		}
 	}
 
-	private final class FavoriteSearchHelper implements OnClickListener {
+	private final class FavoriteSearchHelper implements SearchHelper, OnClickListener {
 		public FavoriteSearchHelper() {
 			searchAdapter.setSource(EntrySummary.values(), ENTRY_COMPARATOR);
-			search();
 		}
 
-		public void onClick(DialogInterface dialog, int which) {
-			Favorite.clear();
-			search();
+		public void onRestoreInstanceState(Bundle savedInstance) {
 		}
 
-		public Dialog createDeleteAllDialog() {
+		public void onSaveInstanceState(Bundle outState) {
+		}
+
+		public AlertDialog createDialog() {
 			return new AlertDialog.Builder(SearchActivity.this)
-			.setTitle(R.string.clearFavorite)
+			.setTitle(R.string.favoriteClear)
 			.setIcon(android.R.drawable.ic_menu_delete)
 			.setPositiveButton(android.R.string.ok, this)
 			.setNegativeButton(android.R.string.cancel, null)
@@ -329,6 +370,12 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 		public void search() {
 			searchAdapter.filter(Favorite.values());
 		}
+
+		public void onClick(DialogInterface dialog, int which) {
+			Favorite.clear();
+			search();
+			ActivityCompat.invalidateOptionsMenu(SearchActivity.this);	// for < HONEYCOMB
+		}
 	}
 
 	private static final Comparator<EntrySummary> ENTRY_COMPARATOR =
@@ -337,7 +384,6 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 			return lhs.compareTo(rhs);
 		}
 	};
-
 
 	private static final Comparator<EntrySummary> TIMEFRAME_COMPARATOR =
 			new Comparator<EntrySummary>() {

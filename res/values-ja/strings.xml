@@ -3,34 +3,25 @@
 <resources>
 
     <string name="app_name">アゴラガイド</string>
-    <string name="searchByKeyword">キーワードで探す</string>
-    <string name="searchBySchedule">時間で探す</string>
-    <string name="searchByMap">地図で探す</string>
-    <string name="entryDetail">企画詳細</string>
-    <string name="favorites">お気に入り</string>
-    <string name="search">検索キーワード</string>
-    <string name="addFavorite">お気に入りに追加</string>
-    <string name="removeFavorite">お気に入りから削除</string>
-    <string name="clearFavorite">すべてのお気に入りを削除する</string>
-    <string name="credits">情報</string>
-    <string name="website">ウェブサイトに移動</string>
-    <string name="reservation">事前申込可</string>
-    <string name="reserve">申込詳細へ</string>
-    <string name="filtering">絞り込み検索</string>
+    <string name="credits">クレジット</string>
+    <string name="favorite">お気に入り</string>
+    <string name="favoriteAdd">お気に入りに追加</string>
+    <string name="favoriteRemove">お気に入りから削除</string>
+    <string name="favoriteClear">すべてのお気に入りを削除</string>
+    <string name="program">企画詳細</string>
+    <string name="programLocation">場所を確認する</string>
+    <string name="searchArea">会場で探す</string>
+    <string name="searchCategoryFiltering">出展形式で絞り込む</string>
+    <string name="searchKeyword">キーワードで探す</string>
+    <string name="searchKeywordHint">検索キーワード&#8230;</string>
+    <string name="searchLoading">読み込み中&#8230;</string>
+    <string name="searchNotFound">見つかりません</string>
+    <string name="searchSchedule">開始時刻で探す</string>
     <string name="selectAll">すべて選択</string>
 
     <string-array name="days_locale">
         <item>土</item>
         <item>日</item>
-    </string-array>
-    <string-array name="entrydetail_locale">
-        <item>主催・共催等</item>
-        <item>主な登壇者など</item>
-        <item>概要</item>
-        <item>内容</item>
-        <item>事前申込</item>
-        <item>備考</item>
-        <item>詳細ページ</item>
     </string-array>
 
 </resources>

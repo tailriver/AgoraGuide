@@ -38,7 +38,11 @@ public class Downloader {
 		if (ni == null || !ni.isAvailable() || !ni.isConnected()) {
 			throw new StandAloneException();
 		}
-
+		Log.i("NI", "Available: " + ni.isAvailable());
+		Log.i("NI", "Connected: " + ni.isConnected());
+		Log.i("NI", "ConnectedOr...: " + ni.isConnectedOrConnecting());
+		Log.i("NI", "State: " + ni.getState());
+		Log.i("NI", "DetailedState: " + ni.getDetailedState().toString());
 		localDirectory = context.getFilesDir();
 	}
 

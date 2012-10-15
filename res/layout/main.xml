@@ -39,7 +39,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@android:drawable/ic_menu_search"
-            android:contentDescription="@string/searchByKeyword" />
+            android:contentDescription="@string/searchKeyword" />
 
         <ImageButton
             android:id="@+id/button_search_schedule"
@@ -47,7 +47,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@android:drawable/ic_menu_recent_history"
-            android:contentDescription="@string/searchBySchedule" />
+            android:contentDescription="@string/searchSchedule" />
 
         <ImageButton
             android:id="@+id/button_search_area"
@@ -55,7 +55,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@android:drawable/ic_menu_mapmode"
-            android:contentDescription="@string/searchByMap" />
+            android:contentDescription="@string/searchArea" />
 
         <ImageButton
             android:id="@+id/button_search_favorite"
@@ -63,7 +63,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@android:drawable/btn_star_big_off"
-            android:contentDescription="@string/favorites" />
+            android:contentDescription="@string/favorite" />
 
         <ImageButton
             android:id="@+id/button_information"

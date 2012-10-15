@@ -1,29 +1,21 @@
 package net.tailriver.agoraguide;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 abstract public class AbstractModel<T extends AbstractModel<T>>
 implements Comparable<T>
 {
 	private String id;
 
-	protected AbstractModel() {}
+	protected AbstractModel() {
+		init(AgoraInitializer.getDatabase());
+	}
 
 	protected AbstractModel(String id) {
 		this.id = id;
 	}
 
-	protected void execute() {
-		SQLiteDatabase database = AgoraInitializer.getDatabase();
-		long start = System.currentTimeMillis();
-		init_factory(database);
-
-		long passed = System.currentTimeMillis() - start;
-		Log.d("DB SELECT", getClass().getSimpleName() + "#init() took " + passed + "ms");
-	}
-
-	abstract protected void init_factory(SQLiteDatabase database);
+	abstract protected void init(SQLiteDatabase database);
 
 	public final String getId() {
 		return id;

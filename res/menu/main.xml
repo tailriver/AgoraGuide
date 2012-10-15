@@ -3,25 +3,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/menu_sbk"
-        android:icon="@drawable/menu_sbk"
-        android:title="@string/searchByKeyword"/>
-
+        android:id="@+id/menuSearchKeyword"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/searchKeyword"/>
     <item
-        android:id="@+id/menu_sbs"
-        android:icon="@drawable/menu_sbs"
-        android:title="@string/searchBySchedule"/>
-
+        android:id="@+id/menuSearchSchedule"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="@string/searchSchedule"/>
     <item
-        android:id="@+id/menu_sbm"
-        android:title="@string/searchByMap"
-        android:visible="false"/>
-
+        android:id="@+id/menuSearchArea"
+        android:icon="@android:drawable/ic_menu_mapmode"
+        android:title="@string/searchArea"/>
     <item
-        android:id="@+id/menu_favorites"
-        android:icon="@android:drawable/star_big_on"
-        android:title="@string/favorites"/>
-
+        android:id="@+id/menuFavorites"
+        android:icon="@android:drawable/btn_star_big_off"
+        android:title="@string/favorite"/>
     <item
         android:id="@+id/menu_credits"
         android:icon="@android:drawable/ic_menu_info_details"

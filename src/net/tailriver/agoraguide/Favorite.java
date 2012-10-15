@@ -1,5 +1,6 @@
 package net.tailriver.agoraguide;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -7,19 +8,32 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Favorite {
-	private static final String PREFERENCE_NAME = "agora2012";
+	private static final String PREFERENCE_NAME = "2012_favorite";
 
 	public static final boolean isFavorite(EntrySummary summary) {
-		SharedPreferences pref = getSharedPreferences();
-		return pref.contains(summary.getId());
+		return getSharedPreferences().contains(summary.getId());
 	}
 
 	public static void setFavorite(EntrySummary summary, boolean newState) {
 		SharedPreferences pref = getSharedPreferences();
+		int requestCode = pref.getInt(summary.getId(), -1);
+		if (!summary.getCategory().isAllday()) {
+			Calendar cal = TimeFrame.get(summary).getStart();
+			long notificationWhen = cal.getTimeInMillis();
+			if (newState) {
+				cal.add(Calendar.MINUTE, -15);
+				long alarmWhen = cal.getTimeInMillis();
+				requestCode = ScheduleAlarm.setAlarm(summary, alarmWhen, notificationWhen);
+			} else {
+				if (requestCode > -1) {
+					ScheduleAlarm.cancelAlarm(summary, notificationWhen);
+				}
+			}
+		}
 		if (newState) {
-			pref.edit().putBoolean(summary.getId(), true).commit();
+			pref.edit().putInt(summary.getId(), requestCode).commit();				
 		} else {
-			pref.edit().remove(summary.getId()).commit();
+			pref.edit().remove(summary.getId()).commit();			
 		}
 	}
 
@@ -32,12 +46,10 @@ public class Favorite {
 	}
 
 	public static void clear() {
-		SharedPreferences pref = getSharedPreferences();
-		SharedPreferences.Editor editor = pref.edit();
-		for (String key : pref.getAll().keySet()) {
-			editor.remove(key);
+		for (EntrySummary summary : values()) {
+			Favorite.setFavorite(summary, false);
 		}
-		editor.commit();
+		getSharedPreferences().edit().clear().commit();
 	}
 
 	private static final SharedPreferences getSharedPreferences() {

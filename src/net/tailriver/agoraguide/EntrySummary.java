@@ -10,7 +10,6 @@ import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 
 public class EntrySummary extends AbstractModel<EntrySummary> {
-	private static EntrySummary singleton = new EntrySummary();
 	private static ModelFactory<EntrySummary> factory;
 
 	private String title;
@@ -19,7 +18,7 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 	private CharSequence schedule;
 	private Area area;
 
-	private EntrySummary() {}
+	/*package*/ EntrySummary() {}
 
 	private EntrySummary(String id, String title, Category category, String sponsor, String schedule) {
 		super(id);
@@ -29,13 +28,10 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 		this.schedule = schedule;
 	}
 
-	public static void init() {
-		factory = new ModelFactory<EntrySummary>();
-		singleton.execute();
-	}
-
 	@Override
-	protected void init_factory(SQLiteDatabase database) {
+	protected void init(SQLiteDatabase database) {
+		factory = new ModelFactory<EntrySummary>();
+
 		String table1 = "entry";
 		String[] columns1 = { "id", "title", "category", "sponsor", "schedule" };
 		Cursor c1 = database.query(table1, columns1, null, null, null, null, null);

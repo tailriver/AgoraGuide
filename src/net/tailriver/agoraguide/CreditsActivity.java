@@ -1,5 +1,7 @@
 package net.tailriver.agoraguide;
 
+import android.os.Bundle;
+
 public class CreditsActivity extends AgoraActivity {
 	@Override
 	public void onPreInitialize() {
@@ -7,6 +9,6 @@ public class CreditsActivity extends AgoraActivity {
 	}
 
 	@Override
-	public void onPostInitialize() {
+	public void onPostInitialize(Bundle savedInstanceState) {
 	}
 }

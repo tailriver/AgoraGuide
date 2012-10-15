@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
@@ -20,10 +21,12 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 	private Collection<? extends EntrySummary> origin;
 	private Comparator<? super EntrySummary> comparator;
 	private List<EntrySummary> list;
+	private TextView textView;
 
-	public SearchResultAdapter(Context context) {
-		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	public SearchResultAdapter(Activity activity) {
+		inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		list     = Collections.emptyList();
+		textView = (TextView) activity.findViewById(R.id.searchNotFound);
 	}
 
 	public void setSource(Collection<? extends EntrySummary> collection,
@@ -72,6 +75,11 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 
 	private final class SearchTask extends AsyncTask<Object, Void, Void> {
 		@Override
+		protected void onPreExecute() {
+			textView.setText(R.string.searchLoading);
+		}
+
+		@Override
 		protected Void doInBackground(Object... params) {
 			EntryFilter filter = new EntryFilter(origin);
 			for (Object p : params) {
@@ -80,7 +88,7 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 				} else if (p instanceof String) {
 					filter.applyFilter((String) p);
 				} else {
-					throw new UnsupportedOperationException("unsupported filter");
+					throw new UnsupportedOperationException();
 				}
 			}
 			list = filter.getResult(comparator);
@@ -90,6 +98,9 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 		@Override
 		protected void onPostExecute(Void result) {
 			notifyDataSetChanged();
+			if (list.size() == 0) {
+				textView.setText(R.string.searchNotFound);
+			}
 		}
 	}
 }

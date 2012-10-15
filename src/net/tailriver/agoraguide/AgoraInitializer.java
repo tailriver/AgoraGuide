@@ -14,52 +14,46 @@ public class AgoraInitializer {
 
 	private static Context applicationContext;
 	private static SQLiteDatabase database;
-	private static InitStatus status = InitStatus.NULL;
-
-	private enum InitStatus {
-		NULL, UPDATE, SELECT, FINISH;
-	}
+	private static Boolean initFinished = Boolean.FALSE;
 
 	public static final void init(Context context) {
-		Log.i("AgoraGuide", "init called; status:" + status);
-		if (status != InitStatus.NULL) {
+		if (initFinished) {
 			return;
 		}
 
-		synchronized (status) {
-			if (status != InitStatus.NULL) {
+		synchronized (initFinished) {
+			if (initFinished) {
 				return;
 			}
+			Log.i("AgoraGuide", "initialization start");
+			applicationContext = context.getApplicationContext();
 
 			// update files and open database
-			status = InitStatus.UPDATE;
-			applicationContext = context.getApplicationContext();
 			File databaseFile = applicationContext.getFileStreamPath(databaseName);
 			databaseFile.getParentFile().mkdirs();
 			updateDatabase(databaseFile);
 			openDatabase(databaseFile);
 
 			// SELECT * FROM ...
-			status = InitStatus.SELECT;
-			Area.init();
-			Category.init();
-			Day.init();
-			EntrySummary.init();
-			EntryDetail.init();
-			Location.init();
-			TimeFrame.init();
+			new Area();
+			new Category();
+			new Day();
+			new EntrySummary();
+			new Hint();
+			new TimeFrame();
 			SQLiteDatabase.releaseMemory();
 
 			updateAreaImage();
 
 			// finish
-			status = InitStatus.FINISH;
+			initFinished = Boolean.TRUE;
+			Log.i("AgoraGuide", "initialization end");
 		}
 	}
 
 	/** returns application context. */
 	public static final Context getApplicationContext() {
-		if (status == InitStatus.NULL) {
+		if (applicationContext == null) {
 			throw new IllegalStateException("init not called");
 		}
 		return applicationContext;

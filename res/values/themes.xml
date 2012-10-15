@@ -2,18 +2,25 @@
 <!DOCTYPE resources>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--  level -->
-    <style name="AgoraGuideLayout" parent="@android:style/Theme.Light">
+    <style name="AgoraGuideThemeBase" parent="@android:style/Theme.Light"></style>
+
+    <style name="TitleTextAppearanceBase" parent="@android:style/TextAppearance.Large"></style>
+
+    <style name="SummaryTextAppearanceBase" parent="@android:style/TextAppearance.Small"></style>
+
+    <!-- level -->
+    <style name="AgoraGuideLayout" parent="@style/AgoraGuideThemeBase">
         <item name="android:textSize">15sp</item>
     </style>
 
     <!-- View level -->
-    <style name="TitleTextAppearance" parent="@android:style/TextAppearance.Large">
+    <style name="TitleTextAppearance" parent="@style/TitleTextAppearanceBase">
         <item name="android:text">Title Text Appearance</item>
         <item name="android:textColor">@android:color/primary_text_light</item>
         <item name="android:textSize">20sp</item>
     </style>
-    <style name="SummaryTextAppearance" parent="@android:style/TextAppearance.Small">
+
+    <style name="SummaryTextAppearance" parent="@style/SummaryTextAppearanceBase">
         <item name="android:textColor">@color/summaryText</item>
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>

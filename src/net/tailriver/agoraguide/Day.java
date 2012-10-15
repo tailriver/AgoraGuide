@@ -6,14 +6,13 @@ import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 
 public class Day extends AbstractModel<Day> {
-	private static Day singleton = new Day();
 	private static ModelFactory<Day> factory;
 
 	private String name;
 	private int color;
 	private int order;
 
-	private Day() {}
+	/*package*/ Day() {}
 
 	private Day(String common, String name, int color, int order) {
 		super(common);
@@ -22,13 +21,10 @@ public class Day extends AbstractModel<Day> {
 		this.order = order;
 	}
 
-	public static void init() {
-		factory = new ModelFactory<Day>();
-		singleton.execute();
-	}
-	
 	@Override
-	protected void init_factory(SQLiteDatabase database) {
+	protected void init(SQLiteDatabase database) {
+		factory = new ModelFactory<Day>();
+
 		Resources res = AgoraInitializer.getApplicationContext().getResources();
 		String[] common = res.getStringArray(R.array.days);
 		String[] local  = res.getStringArray(R.array.days_locale);
@@ -46,6 +42,10 @@ public class Day extends AbstractModel<Day> {
 
 	public static List<Day> values() {
 		return factory.sortedValues();
+	}
+
+	public int getDay() {
+		return getId().equals("Sat") ? 10 : 11;
 	}
 
 	public int getColor() {

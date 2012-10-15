@@ -6,14 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class Category extends AbstractModel<Category> {
-	private static Category singleton = new Category();
 	private static ModelFactory<Category> factory;
 
 	private String name;
 	private String abbrev;
 	private boolean isAllday;
 
-	private Category() {}
+	/*package*/ Category() {}
 
 	private Category(String id, String name, String abbrev, boolean isAllday) {
 		super(id);
@@ -22,13 +21,10 @@ public class Category extends AbstractModel<Category> {
 		this.isAllday = isAllday;
 	}
 
-	public static void init() {
-		factory = new ModelFactory<Category>();
-		singleton.execute();
-	}
-
 	@Override
-	protected void init_factory(SQLiteDatabase database) {
+	protected void init(SQLiteDatabase database) {
+		factory = new ModelFactory<Category>();
+
 		String table = "category";
 		String[] columns = { "id", "name", "abbrev", "is_allday" };
 		Cursor c = database.query(table, columns, null, null, null, null, null);

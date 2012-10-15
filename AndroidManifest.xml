@@ -7,7 +7,7 @@
 
     <uses-sdk
         android:minSdkVersion="7"
-        android:targetSdkVersion="16" />
+        android:targetSdkVersion="16"/>
 
     <uses-permission android:name="android.permission.INTERNET" >
     </uses-permission>
@@ -17,31 +17,32 @@
     <application
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/AgoraGuideLayout"
-        android:uiOptions="splitActionBarWhenNarrow" >
+        android:theme="@style/AgoraGuideLayout" >
         <activity
             android:name="AgoraGuideActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTask" >
+            android:uiOptions="splitActionBarWhenNarrow" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <activity android:name="SearchActivity">
-        </activity><activity android:name="AreaSearchIndexActivity" android:label="@string/searchByMap">
-        </activity><activity android:name="EntryDetailActivity" >
+        <activity android:name="SearchActivity" >
+        </activity>
+        <activity android:name="AreaSearchIndexActivity" >
+        </activity>
+        <activity android:name="ProgramActivity" >
         </activity>
         <activity android:name="MapActivity" >
         </activity>
+        <activity
+            android:name="CreditsActivity"
+            android:label="@string/credits" >
+        </activity>
 
-        
-
-        
-        <activity android:name="CreditsActivity" android:label="@string/credits">
-        </activity><receiver android:name="ScheduleAlarm" android:process=":remote">
+        <receiver
+            android:name="ScheduleAlarm"
+            android:process=":remote" >
         </receiver>
     </application>
 
