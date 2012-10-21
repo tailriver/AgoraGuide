@@ -18,11 +18,10 @@ public class ScheduleAlarm extends BroadcastReceiver {
 		CharSequence contentText  = intent.getStringExtra(IntentExtra.NOTIFICATION_TEXT);
 		long when = intent.getLongExtra(IntentExtra.NOTIFICATION_WHEN, System.currentTimeMillis());
 
-		Log.i("aa", intent.getExtras().keySet().toString());
 		intent.setClass(context, ProgramActivity.class);
 		intent.removeExtra(IntentExtra.NOTIFICATION_TEXT);
 		intent.removeExtra(IntentExtra.NOTIFICATION_WHEN);
-		Log.i("bb", intent.getExtras().keySet().toString());
+		Log.i("SA", intent.getExtras().keySet().toString());
 
 		PendingIntent contentIntent = PendingIntent.getActivity(
 				context, 0, intent, Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -72,6 +71,9 @@ public class ScheduleAlarm extends BroadcastReceiver {
 		intent.putExtra(IntentExtra.NOTIFICATION_ID, requestCode);
 		intent.putExtra(IntentExtra.NOTIFICATION_TEXT, summary.toString());
 		intent.putExtra(IntentExtra.NOTIFICATION_WHEN, notificationWhen);
+		for (String s : intent.getExtras().keySet()) {
+			Log.i("SA", "Intent " + s + ": " + intent.getExtras().get(s));
+		}
 		return PendingIntent.getBroadcast(context, requestCode, intent, 0);
 	}
 }

@@ -18,6 +18,7 @@ import android.os.Build;
 import android.util.Log;
 
 public class Downloader {
+	private static final String CLASS_NAME = Downloader.class.getSimpleName();
 	private static final int BUFFER_SIZE = 4096;
 	private static final int HTTP_TIME_OUT = 20000; // msec
 
@@ -36,13 +37,11 @@ public class Downloader {
 		Object cm = context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo ni = ((ConnectivityManager)cm).getActiveNetworkInfo();
 		if (ni == null || !ni.isAvailable() || !ni.isConnected()) {
+			if (ni != null) {
+				Log.i(CLASS_NAME, "State: " + ni.getState());
+			}
 			throw new StandAloneException();
 		}
-		Log.i("NI", "Available: " + ni.isAvailable());
-		Log.i("NI", "Connected: " + ni.isConnected());
-		Log.i("NI", "ConnectedOr...: " + ni.isConnectedOrConnecting());
-		Log.i("NI", "State: " + ni.getState());
-		Log.i("NI", "DetailedState: " + ni.getDetailedState().toString());
 		localDirectory = context.getFilesDir();
 	}
 
@@ -66,7 +65,8 @@ public class Downloader {
 
 			int code = http.getResponseCode();
 
-			Log.v("Downloader", code + " " + http.getResponseMessage());
+			Log.d(CLASS_NAME, urlString);
+			Log.d(CLASS_NAME, code + " " + http.getResponseMessage());
 			if (code == HttpURLConnection.HTTP_NOT_MODIFIED) {
 				file.setLastModified(System.currentTimeMillis());
 				return;
@@ -103,7 +103,7 @@ public class Downloader {
 			if (!tempFile.renameTo(file)) {
 				throw new IOException("download successed but cannot write specific file");
 			}
-			Log.i("Downloader ", totalRead + " bytes downloaded");
+			Log.i(CLASS_NAME, totalRead + " bytes downloaded");
 		} finally {
 			if (tempFile != null && tempFile.exists()) {
 				tempFile.delete();

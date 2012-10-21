@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 public class AgoraInitializer {
+	private static final String CLASS_NAME = AgoraInitializer.class.getSimpleName();
 	private static final String databaseURL  = "http://tailriver.net/agoraguide/2012.sqlite3.gz";
 	private static final String databaseName = "2012.sqlite3";
 
@@ -25,7 +26,7 @@ public class AgoraInitializer {
 			if (initFinished) {
 				return;
 			}
-			Log.i("AgoraGuide", "initialization start");
+			Log.i(CLASS_NAME, "initialization start");
 			applicationContext = context.getApplicationContext();
 
 			// update files and open database
@@ -47,7 +48,7 @@ public class AgoraInitializer {
 
 			// finish
 			initFinished = Boolean.TRUE;
-			Log.i("AgoraGuide", "initialization end");
+			Log.i(CLASS_NAME, "initialization end");
 		}
 	}
 
@@ -73,7 +74,7 @@ public class AgoraInitializer {
 			} catch (StandAloneException e) {
 				// noop
 			} catch (IOException e) {
-				Log.e("AgoraGuide", e.getMessage(), e);
+				Log.e(CLASS_NAME, e.getMessage(), e);
 			}
 		}
 	}
@@ -83,7 +84,7 @@ public class AgoraInitializer {
 			database = SQLiteDatabase.openDatabase(
 					file.getPath(), null, SQLiteDatabase.OPEN_READONLY);			
 		} catch (SQLiteException e) {
-			Log.e("AgoraGuide", "openDatabase", e);
+			Log.e(CLASS_NAME, "openDatabase", e);
 			throw new IllegalStateException("database not found");
 		}
 	}
@@ -97,7 +98,7 @@ public class AgoraInitializer {
 				} catch (StandAloneException e) {
 					// noop
 				} catch (IOException e) {
-					Log.e("updateImage", e.getMessage(), e);
+					Log.e(CLASS_NAME, "updateAreaImage()", e);
 				}
 			}
 		}

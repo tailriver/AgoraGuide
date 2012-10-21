@@ -93,6 +93,7 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.program, menu);
+		// FIXME summary is null when orientation changes
 		if (Favorite.isFavorite(summary)) {
 			menu.findItem(R.id.programFavorite).setIcon(android.R.drawable.btn_star_big_on);
 			menu.findItem(R.id.programFavorite).setTitle(R.string.favoriteRemove);
