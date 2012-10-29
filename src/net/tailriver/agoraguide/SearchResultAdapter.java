@@ -2,12 +2,10 @@ package net.tailriver.agoraguide;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,22 +15,16 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
-	private LayoutInflater inflater;
 	private Collection<? extends EntrySummary> origin;
-	private Comparator<? super EntrySummary> comparator;
+	private LayoutInflater inflater;
 	private List<EntrySummary> list;
 	private TextView textView;
 
 	public SearchResultAdapter(Activity activity) {
-		inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		origin   = new HashSet<EntrySummary>(EntrySummary.values());
+		inflater = activity.getLayoutInflater();
 		list     = Collections.emptyList();
 		textView = (TextView) activity.findViewById(R.id.searchNotFound);
-	}
-
-	public void setSource(Collection<? extends EntrySummary> collection,
-			Comparator<? super EntrySummary> comparator) {
-		this.origin     = new HashSet<EntrySummary>(collection);
-		this.comparator = comparator;
 	}
 
 	public void filter(Object... filter) {
@@ -91,7 +83,7 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 					throw new UnsupportedOperationException();
 				}
 			}
-			list = filter.getResult(comparator);
+			list = filter.getResult();
 			return null;
 		}
 
@@ -102,5 +94,6 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 				textView.setText(R.string.searchNotFound);
 			}
 		}
+
 	}
 }

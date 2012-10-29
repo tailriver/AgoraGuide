@@ -10,7 +10,7 @@ import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 
 public class EntrySummary extends AbstractModel<EntrySummary> {
-	private static ModelFactory<EntrySummary> factory;
+	private static ModelFactory<EntrySummary> factory = new ModelFactory<EntrySummary>();
 
 	private String title;
 	private Category category;
@@ -30,8 +30,7 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 
 	@Override
 	protected void init(SQLiteDatabase database) {
-		factory = new ModelFactory<EntrySummary>();
-
+		factory.clear();
 		String table1 = "entry";
 		String[] columns1 = { "id", "title", "category", "sponsor", "schedule" };
 		Cursor c1 = database.query(table1, columns1, null, null, null, null, null);

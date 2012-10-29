@@ -14,6 +14,13 @@ public class ModelFactory<T extends AbstractModel<T>> extends HashMap<String, T>
 	public ModelFactory() {}
 
 	@Override
+	public void clear() {
+		values = null;
+		sortedValues = null;
+		super.clear();
+	}
+
+	@Override
 	public T get(Object key) {
 		if (key == null) {
 			throw new IllegalArgumentException();

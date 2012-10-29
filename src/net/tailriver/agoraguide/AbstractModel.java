@@ -1,6 +1,7 @@
 package net.tailriver.agoraguide;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 abstract public class AbstractModel<T extends AbstractModel<T>>
 implements Comparable<T>
@@ -8,7 +9,11 @@ implements Comparable<T>
 	private String id;
 
 	protected AbstractModel() {
-		init(AgoraInitializer.getDatabase());
+		Log.i(getClass().getSimpleName(), "factory constructor called");
+		SQLiteDatabase db = AgoraActivity.getDatabase();
+		if (db != null) {
+			init(db);
+		}
 	}
 
 	protected AbstractModel(String id) {
@@ -39,5 +44,13 @@ implements Comparable<T>
 	}
 
 	@Override
-	abstract public String toString();
+	protected void finalize() throws Throwable {
+		Log.w(getClass().getSimpleName(), "finalize " + toString());
+		super.finalize();
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
+	}
 }

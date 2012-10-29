@@ -18,15 +18,17 @@ public class Favorite {
 		SharedPreferences pref = getSharedPreferences();
 		int requestCode = pref.getInt(summary.getId(), -1);
 		if (!summary.getCategory().isAllday()) {
-			Calendar cal = TimeFrame.get(summary).getStart();
-			long notificationWhen = cal.getTimeInMillis();
-			if (newState) {
-				cal.add(Calendar.MINUTE, -15);
-				long alarmWhen = cal.getTimeInMillis();
-				requestCode = ScheduleAlarm.setAlarm(summary, alarmWhen, notificationWhen);
-			} else {
-				if (requestCode > -1) {
-					ScheduleAlarm.cancelAlarm(summary, notificationWhen);
+			for (TimeFrame t : TimeFrame.getAll(summary)) {
+				Calendar cal = t.getStart();
+				long notificationWhen = cal.getTimeInMillis();
+				if (newState) {
+					cal.add(Calendar.MINUTE, -15);
+					long alarmWhen = cal.getTimeInMillis();
+					requestCode = ScheduleAlarm.setAlarm(summary, alarmWhen, notificationWhen);
+				} else {
+					if (requestCode > -1) {
+						ScheduleAlarm.cancelAlarm(summary, notificationWhen);
+					}
 				}
 			}
 		}
@@ -53,7 +55,7 @@ public class Favorite {
 	}
 
 	private static final SharedPreferences getSharedPreferences() {
-		Context context = AgoraInitializer.getApplicationContext();
+		Context context = AgoraActivity.getStaticApplicationContext();
 		return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
 	}
 }

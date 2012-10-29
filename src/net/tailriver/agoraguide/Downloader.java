@@ -8,21 +8,36 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.util.Pair;
 
-public class Downloader {
+public class Downloader extends AsyncTask<Void, Integer, Void> {
 	private static final String CLASS_NAME = Downloader.class.getSimpleName();
-	private static final int BUFFER_SIZE = 4096;
 	private static final int HTTP_TIME_OUT = 20000; // msec
+	private static final int PROGRESS_MAX = 100;
 
-	private File localDirectory;
+	private FragmentActivity activity;
+	private ProgressDialogFrag dialog;
+	private List<Pair<URL, File>> task;
 
 	static {
 		// patch
@@ -31,10 +46,9 @@ public class Downloader {
 		}
 	}
 
-	public Downloader() throws StandAloneException {
-		Context context = AgoraInitializer.getApplicationContext();
+	public Downloader(FragmentActivity activity) throws StandAloneException {
 		// connectivity check
-		Object cm = context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		Object cm = activity.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo ni = ((ConnectivityManager)cm).getActiveNetworkInfo();
 		if (ni == null || !ni.isAvailable() || !ni.isConnected()) {
 			if (ni != null) {
@@ -42,19 +56,71 @@ public class Downloader {
 			}
 			throw new StandAloneException();
 		}
-		localDirectory = context.getFilesDir();
+		this.activity = activity;
+		task = new ArrayList<Pair<URL, File>>();
 	}
 
-	public void download(String urlString, File file) throws IOException {
-		if (urlString == null || file == null) {
+	public void addTask(String url, File dist, long expire) {
+		if (url == null || dist == null) {
 			throw new IllegalArgumentException("argument contains null");
 		}
+		if (System.currentTimeMillis() - dist.lastModified() > expire) {
+			try {
+				task.add(Pair.create(new URL(url), dist));
+			} catch (MalformedURLException e) {
+				Log.w(CLASS_NAME, "invalid url", e);
+			}
+		}
+	}
 
-		URL url = new URL(urlString);
+	@Override
+	protected void onProgressUpdate(Integer... values) {
+		if (values[0] == null) {
+			values[0] = dialog.getProgress() / PROGRESS_MAX;
+		}
+		dialog.setProgress(values[0] * PROGRESS_MAX + values[1]);
+	}
+
+	@Override
+	protected void onPreExecute() {
+		FragmentManager manager = activity.getSupportFragmentManager();
+		dialog = new ProgressDialogFrag(activity);
+		dialog.show(manager, "dialog");
+	}
+
+	@Override
+	protected Void doInBackground(Void... params) {
+		dialog.setMax(task.size());
+		publishProgress(0, 0);
+		for (int i = 0, max = task.size(); i < max; i++) {
+			Pair<URL, File> p = task.get(i);
+			try {
+				boolean isUpdated = download(p.first, p.second);
+				if (p.second.equals(AgoraActivity.getDatabaseFile()) && isUpdated) {
+					AgoraActivity.invalidateInit();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			publishProgress(i+1, 0);
+		}
+		return null;
+	}
+
+	@Override
+	protected void onPostExecute(Void result) {
+		dialog.onDismiss(dialog.getDialog());
+	}
+
+	@Override
+	protected void onCancelled(Void result) {
+		Log.w(CLASS_NAME, "cancelled");
+		dialog.onDismiss(dialog.getDialog());
+	}
+
+	private boolean download(URL url, File file) throws IOException {
 		HttpURLConnection http = (HttpURLConnection) url.openConnection();
 		File tempFile = null;
-		InputStream  is = null;
-		OutputStream os = null;
 		try {
 			http.setRequestProperty("Accept-Encoding", "gzip");
 			http.setRequestProperty("User-Agent", "AgoraGuide/2012 (Android)");		
@@ -64,37 +130,40 @@ public class Downloader {
 			http.connect();
 
 			int code = http.getResponseCode();
-
-			Log.d(CLASS_NAME, urlString);
+			Log.d(CLASS_NAME, http.getURL().toString());
 			Log.d(CLASS_NAME, code + " " + http.getResponseMessage());
+
 			if (code == HttpURLConnection.HTTP_NOT_MODIFIED) {
 				file.setLastModified(System.currentTimeMillis());
-				return;
+				return false;
 			}
-
 			if (code != HttpURLConnection.HTTP_OK) {
 				throw new IOException("fail to download");
 			}
 
 			String contentEncoding = http.getContentEncoding();
-			is = http.getInputStream();
-			if (contentEncoding != null && contentEncoding.equals("gzip")) {
+			String contentType     = http.getContentType();
+			InputStream is = http.getInputStream();
+			if ((contentEncoding != null && contentEncoding.equals("gzip")) ||
+					(contentType != null && contentType.contains("gzip"))) {
 				is = new GZIPInputStream(is);
 			}
-			is = new BufferedInputStream(is, BUFFER_SIZE);
+			is = new BufferedInputStream(is);
 
-			tempFile = File.createTempFile("downloading", null, localDirectory);
-			os = new FileOutputStream(tempFile);
-			os = new BufferedOutputStream(os, BUFFER_SIZE);
+			tempFile = File.createTempFile("downloading", null, activity.getFilesDir());
+			OutputStream os = new FileOutputStream(tempFile);
+			os = new BufferedOutputStream(os);
 
-			byte[] buffer = new byte[BUFFER_SIZE];
+			int contentLength = http.getContentLength();
+			byte[] buffer = new byte[8192];
 			int totalRead = 0;
 			while (true) {
-				int byteRead = is.read(buffer, 0, BUFFER_SIZE);
+				int byteRead = is.read(buffer);
 				if (byteRead == -1)
 					break;
 				os.write(buffer, 0, byteRead);
 				totalRead += byteRead;
+				publishProgress(null, (int)(100d * totalRead / contentLength));
 			}
 			is.close();
 			os.flush();
@@ -104,12 +173,53 @@ public class Downloader {
 				throw new IOException("download successed but cannot write specific file");
 			}
 			Log.i(CLASS_NAME, totalRead + " bytes downloaded");
+			return true;
+		} catch (UnknownHostException e) {
+			Log.w(CLASS_NAME, e.getMessage());
+			cancel(true);
+			return false;
 		} finally {
 			if (tempFile != null && tempFile.exists()) {
 				tempFile.delete();
 			}
 			if (http != null) {
 				http.disconnect();
+			}
+		}
+	}
+
+	private final class ProgressDialogFrag extends DialogFragment {
+		private ProgressDialog pd;
+
+		public ProgressDialogFrag(Context context) {
+			pd = new ProgressDialog(context);
+		}
+
+		@SuppressLint("NewApi")
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			pd.setTitle("Updating");
+			pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			pd.setIndeterminate(false);
+			if (AgoraActivity.isHoneycomb()) {
+				pd.setProgressNumberFormat(null);
+			}
+			pd.show();
+			return pd;
+		}
+
+		public void setMax(int max) {
+			pd.setMax(max * PROGRESS_MAX);
+		}
+
+		public int getProgress() {
+			return pd.getProgress();
+		}
+
+		public void setProgress(int value) {
+			pd.setProgress(value);
+			if (value > pd.getMax()) {
+				pd.setIndeterminate(true);
 			}
 		}
 	}

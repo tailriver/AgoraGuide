@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class Category extends AbstractModel<Category> {
-	private static ModelFactory<Category> factory;
+	private static ModelFactory<Category> factory = new ModelFactory<Category>();
 
 	private String name;
 	private String abbrev;
@@ -23,8 +23,7 @@ public class Category extends AbstractModel<Category> {
 
 	@Override
 	protected void init(SQLiteDatabase database) {
-		factory = new ModelFactory<Category>();
-
+		factory.clear();
 		String table = "category";
 		String[] columns = { "id", "name", "abbrev", "is_allday" };
 		Cursor c = database.query(table, columns, null, null, null, null, null);

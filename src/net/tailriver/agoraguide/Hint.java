@@ -1,21 +1,22 @@
 package net.tailriver.agoraguide;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class Hint extends AbstractModel<Hint> {
-	private static HashMap<String, String> factory;
+	private static Map<String, String> factory = new HashMap<String, String>();
 
 	/*package*/ Hint() {}
 
 	@Override
 	protected void init(SQLiteDatabase database) {
-		factory = new HashMap<String, String>();
 	}
 
 	public static final String get(String table, String column) {
+		factory.clear();
 		String key = new StringBuilder(table).append('.').append(column).toString();
 		if (!factory.containsKey(key)) {
 			String value = select(table, column);
@@ -38,7 +39,7 @@ public class Hint extends AbstractModel<Hint> {
 	}
 
 	private static String select(String selection, String[] selectionArgs) {
-		SQLiteDatabase database = AgoraInitializer.getDatabase();
+		SQLiteDatabase database = AgoraActivity.getDatabase();
 		String table = "hint";
 		String[] columns = { "ja", "warning", "ref" };
 		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
@@ -59,10 +60,5 @@ public class Hint extends AbstractModel<Hint> {
 		} finally {
 			c.close();
 		}
-	}
-
-	@Override
-	public String toString() {
-		throw new UnsupportedOperationException();
 	}
 }

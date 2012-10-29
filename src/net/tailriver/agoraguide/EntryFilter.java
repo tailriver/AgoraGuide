@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -56,7 +55,7 @@ public class EntryFilter {
 			return;
 		}
 
-		SQLiteDatabase database = AgoraInitializer.getDatabase();
+		SQLiteDatabase database = AgoraActivity.getDatabase();
 		SQLLike like = new SQLLike("title", "sponsor", "cosponsor", "abstract", "content", "guest");
 		String table = "entry";
 		String[] columns = { "id" };
@@ -79,9 +78,9 @@ public class EntryFilter {
 		applyEntryFilter(matched);
 	}
 
-	public List<EntrySummary> getResult(Comparator<? super EntrySummary> comperator) {
+	public List<EntrySummary> getResult() {
 		List<EntrySummary> list = new ArrayList<EntrySummary>(collection);
-		Collections.sort(list, comperator);
+		Collections.sort(list);
 		return list;
 	}
 

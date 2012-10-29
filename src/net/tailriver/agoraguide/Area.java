@@ -8,9 +8,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 public class Area extends AbstractModel<Area> {
-	private static ModelFactory<Area> factory;
+	private static ModelFactory<Area> factory = new ModelFactory<Area>();
 
 	private String name;
 	private String abbrev;
@@ -26,8 +27,7 @@ public class Area extends AbstractModel<Area> {
 
 	@Override
 	protected void init(SQLiteDatabase database) {
-		factory = new ModelFactory<Area>();
-
+		factory.clear();
 		String table1 = "area";
 		String[] columns1 = { "id", "name", "abbrev" };
 		Cursor c1 = database.query(table1, columns1, null, null, null, null, null);
@@ -61,7 +61,8 @@ public class Area extends AbstractModel<Area> {
 	}
 
 	private String selectDevice() {
-		// TODO
+		// FIXME implements selectDevice()
+		Log.w("Area", "selectDevice() Not implemented");
 		return "Android@ldpi";
 	}
 
@@ -86,13 +87,14 @@ public class Area extends AbstractModel<Area> {
 	}
 
 	public File getImageFile() {
-		Context context = AgoraInitializer.getApplicationContext();
+		// FIXME provides dummy images
+		Context context = AgoraActivity.getStaticApplicationContext();
 		File imageDir = context.getDir("2012_area", Context.MODE_PRIVATE);
 		return new File(imageDir, getId() + ".png");		
 	}
 
 	public String getImageURL() {
-		return url;
+			return url;
 	}
 
 	@Override

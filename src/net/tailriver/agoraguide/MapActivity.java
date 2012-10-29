@@ -26,16 +26,20 @@ public class MapActivity extends AgoraActivity {
 		if (areaBitmap == null) {
 			Log.w(getClass().getSimpleName(), "No image");
 			finish();
+			return;
 		}
 		int w = areaBitmap.getWidth();
 		int h = areaBitmap.getHeight();
 		float cx = location.getX() * w;
 		float cy = location.getY() * h;
-		float radius = 0.03f * h;
-		Paint paint = new Paint();
-		paint.setARGB(32, 255, 0, 0);
-		Canvas mapCanvas = new Canvas(areaBitmap);
-		mapCanvas.drawCircle(cx, cy, radius, paint);
+		if (!Float.isNaN(cx) && !Float.isNaN(cy)) {
+			// FIXME draws hiyoko instead of circle
+			float radius = 0.03f * h;
+			Paint paint = new Paint();
+			paint.setARGB(32, 255, 0, 0);
+			Canvas mapCanvas = new Canvas(areaBitmap);
+			mapCanvas.drawCircle(cx, cy, radius, paint);
+		}
 
 		BitmapDrawable mapDrawable = new BitmapDrawable(getResources(), areaBitmap);
 		mapDrawable.setBounds(0, 0, w, h);

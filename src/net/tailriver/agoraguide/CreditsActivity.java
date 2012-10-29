@@ -8,6 +8,7 @@ public class CreditsActivity extends AgoraActivity {
 		setContentView(R.layout.credits);		
 	}
 
+	// FIXME updates credits
 	@Override
 	public void onPostInitialize(Bundle savedInstanceState) {
 	}

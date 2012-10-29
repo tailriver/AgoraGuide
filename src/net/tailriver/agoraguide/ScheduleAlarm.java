@@ -39,14 +39,14 @@ public class ScheduleAlarm extends BroadcastReceiver {
 
 	/** You have to check whether the set of hash code of id is identical or not (2012 ok) */
 	public static int setAlarm(EntrySummary summary, long alarmWhen, long notificationWhen) {
-		Context context = AgoraInitializer.getApplicationContext();
+		Context context = AgoraActivity.getStaticApplicationContext();
 		PendingIntent operation = getPendingIntent(context, summary, notificationWhen);
 		getAlarmManager(context).set(AlarmManager.RTC_WAKEUP, alarmWhen, operation);
 		return summary.getId().hashCode();
 	}
 
 	public static final void cancelAlarm(EntrySummary summary, long notificationWhen) {
-		Context context = AgoraInitializer.getApplicationContext();
+		Context context = AgoraActivity.getStaticApplicationContext();
 		PendingIntent operation = getPendingIntent(context, summary, notificationWhen);
 		getAlarmManager(context).cancel(operation);
 	}

@@ -15,10 +15,14 @@ public class EntryDetail {
 	private Location location;
 
 	public EntryDetail(EntrySummary summary) {
+		SQLiteDatabase database = AgoraActivity.getDatabase();
+		if (database == null) {
+			throw new IllegalStateException("database is not opened");
+		}
+
 		data     = new HashMap<String, String>();
 		location = new Location(summary);
 
-		SQLiteDatabase database = AgoraInitializer.getDatabase();
 		String table = "entry";
 		String selection = "id=?";
 		String[] selectionArgs = { summary.getId() };

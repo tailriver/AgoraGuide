@@ -1,5 +1,6 @@
 package net.tailriver.agoraguide;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -10,23 +11,31 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 public class TimeFrame extends AbstractModel<TimeFrame> {
-	private static ModelFactory<TimeFrame> factory;
+	private static ModelFactory<TimeFrame> factory = new ModelFactory<TimeFrame>();
 
+	private EntrySummary summary;
 	private Date start;
 	private Date end;
 
 	/*package*/ TimeFrame() {}
 
+	private TimeFrame(Date pivot) {
+		super(null);
+		summary = null;
+		start   = pivot;
+		end     = pivot;
+	}
+
 	private TimeFrame(EntrySummary summary, Date start, Date end) {
-		super(summary != null ? summary.getId() : null);
-		this.start = start;
-		this.end   = end;
+		super(start.getTime() + " " + summary.getId());
+		this.summary = summary;
+		this.start   = start;
+		this.end     = end;
 	}
 
 	@Override
 	protected void init(SQLiteDatabase database) {
-		factory = new ModelFactory<TimeFrame>();
-
+		factory.clear();
 		Calendar cal = Calendar.getInstance(Locale.JAPAN);
 		cal.set(Calendar.YEAR, 2012);
 		cal.set(Calendar.MONTH, Calendar.NOVEMBER);
@@ -59,8 +68,18 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 		c.close();
 	}
 
-	public static TimeFrame get(EntrySummary summary) {
-		return factory.get(summary.getId());
+	public static TimeFrame get(EntrySummary summary, Date start) {
+		return factory.get(start.getTime() + " " + summary.getId());
+	}
+
+	public static List<TimeFrame> getAll(EntrySummary summary) {
+		List<TimeFrame> list = new ArrayList<TimeFrame>();
+		for (TimeFrame t : values()) {
+			if (t.getId().endsWith(" " + summary.getId())) {
+				list.add(t);
+			}
+		}
+		return list;
 	}
 
 	public static List<TimeFrame> values() {
@@ -72,30 +91,25 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 		c.set(2012, Calendar.NOVEMBER, day.getDay(), time / 100, time % 100, 0);
 		c.set(Calendar.MILLISECOND, 0);
 
-		return new TimeFrame(null, c.getTime(), c.getTime());
+		return new TimeFrame(c.getTime());
 	}
 
 	public EntrySummary getSummary() {
-		return EntrySummary.get(getId());
+		return summary;
 	}
 
 	public Calendar getStart() {
 		Calendar c = Calendar.getInstance(Locale.JAPAN);
 		c.setTime(start);
 
-		// XXX hack for debug (start everyday)
+		// FIXME hack for debug (start everyday)
 		if (true) {
 			Log.w("TimeFrame", "debug hack worked");
 			Calendar cur = Calendar.getInstance();
-			c = cur;
-			c.add(Calendar.MINUTE, 15);
-			c.add(Calendar.SECOND, 30);
-			/*
 			c.set(cur.get(Calendar.YEAR), cur.get(Calendar.MONTH), cur.get(Calendar.DAY_OF_MONTH));
 			if (c.before(cur)) {
 				c.add(Calendar.DAY_OF_MONTH, 1);
 			}
-			*/
 			Log.w("TimeFrame", "getStart() returns " + c.getTime().toString());
 		}
 		return c;

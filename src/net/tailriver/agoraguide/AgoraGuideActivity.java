@@ -14,21 +14,15 @@ public class AgoraGuideActivity extends AgoraActivity implements OnClickListener
 	@Override
 	public void onPreInitialize() {
 		setContentView(R.layout.main);
-
-		ViewGroup vg = ((ViewGroup) findViewById(R.id.main_buttons));
-		for (int i = 0, max = vg.getChildCount(); i < max; i++) {
-			View v = vg.getChildAt(i);
-			v.setOnClickListener(this);
-			v.setEnabled(false);
-		}		
 	}
 
 	@Override
 	public void onPostInitialize(Bundle savedInstanceState) {
+		// FIXME provides appropriate icons
 		ViewGroup vg = ((ViewGroup) findViewById(R.id.main_buttons));
 		for (int i = 0, max = vg.getChildCount(); i < max; i++) {
 			View v = vg.getChildAt(i);
-			v.setEnabled(true);
+			v.setOnClickListener(this);
 		}
 
 		// update alarm

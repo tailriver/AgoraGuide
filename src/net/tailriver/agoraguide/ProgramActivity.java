@@ -2,9 +2,7 @@ package net.tailriver.agoraguide;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
@@ -17,7 +15,6 @@ import android.widget.TextView;
 
 public class ProgramActivity extends AgoraActivity implements OnClickListener {
 	private EntrySummary summary;
-	boolean enableActionBar;
 
 	@Override
 	public void onPreInitialize() {
@@ -28,7 +25,6 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 		if (notificationId > -1) {
 			ScheduleAlarm.cancelNotification(getApplicationContext(), notificationId);
 		}
-		enableActionBar = Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1;
 	}
 
 	@Override
@@ -41,7 +37,7 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 		iconView.append(" ");
 		iconView.append(summary.getCategory().toString());
 
-		if (enableActionBar) {
+		if (AgoraActivity.isHoneycomb()) {
 			findViewById(R.id.programIconLayout).setVisibility(View.GONE);
 		} else {
 			View favoriteView = findViewById(R.id.favoriteButton);
@@ -55,6 +51,7 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 			findViewById(R.id.mapButton).setOnClickListener(this);
 		}
 
+		// FIXME long title truncated (xml issue) < Honeycomb
 		TextView titleView = (TextView) findViewById(R.id.programTitle);
 		titleView.setText(summary.toString());
 
@@ -93,7 +90,6 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.program, menu);
-		// FIXME summary is null when orientation changes
 		if (Favorite.isFavorite(summary)) {
 			menu.findItem(R.id.programFavorite).setIcon(android.R.drawable.btn_star_big_on);
 			menu.findItem(R.id.programFavorite).setTitle(R.string.favoriteRemove);
@@ -107,7 +103,7 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 		case R.id.programFavorite:
 			Favorite.setFavorite(summary, !Favorite.isFavorite(summary));
 			updateFavoriteView(findViewById(R.id.favoriteButton));
-			ActivityCompat.invalidateOptionsMenu(this);		// for < HONEYCOMB
+			supportInvalidateOptionsMenu();
 			return true;
 		case R.id.programLocation:
 			Intent intent = new Intent(getApplicationContext(), MapActivity.class);

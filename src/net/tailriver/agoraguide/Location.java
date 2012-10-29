@@ -9,7 +9,10 @@ public class Location {
 	private float y;
 
 	public Location(EntrySummary es) {
-		SQLiteDatabase database = AgoraInitializer.getDatabase();
+		SQLiteDatabase database = AgoraActivity.getDatabase();
+		if (database == null) {
+			throw new IllegalStateException("database is not opened");
+		}
 
 		String table = "location";
 		String[] columns = { "area", "x", "y" };
@@ -19,8 +22,8 @@ public class Location {
 
 		c.moveToFirst();
 		area = Area.get(c.getString(0));
-		x = c.getFloat(1);
-		y = c.getFloat(2);
+		x = c.isNull(1) ? Float.NaN : c.getFloat(1);
+		y = c.isNull(2) ? Float.NaN : c.getFloat(2);
 	}
 
 	public Area getArea() {
