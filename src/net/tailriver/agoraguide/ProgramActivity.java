@@ -51,7 +51,6 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 			findViewById(R.id.mapButton).setOnClickListener(this);
 		}
 
-		// FIXME long title truncated (xml issue) < Honeycomb
 		TextView titleView = (TextView) findViewById(R.id.programTitle);
 		titleView.setText(summary.toString());
 
