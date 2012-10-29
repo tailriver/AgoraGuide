@@ -68,7 +68,7 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 
 		CharSequence delimiter = "\n\n";
 		SpannableStringBuilder text = new SpannableStringBuilder();
-		for (String tag : new String[]{ "abstract", "content", "guest", "reservation", "note" }) {
+		for (String tag : new String[]{ "abstract", "content", "guest", "website", "reservation", "note" }) {
 			String tagValue = detail.getValue(tag);
 			if (tagValue != null && tagValue.length() != 0) {
 				SpannableStringBuilder section =
@@ -127,7 +127,7 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 		ImageView favoriteView = (ImageView) v;
 		if (Favorite.isFavorite(summary)) {
 			favoriteView.setImageResource(android.R.drawable.btn_star_big_on);
-			favoriteView.setContentDescription(getString(R.string.favoriteRemove));			
+			favoriteView.setContentDescription(getString(R.string.favoriteRemove));
 		} else {
 			favoriteView.setImageResource(android.R.drawable.btn_star_big_off);
 			favoriteView.setContentDescription(getString(R.string.favoriteAdd));

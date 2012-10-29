@@ -3,7 +3,6 @@ package net.tailriver.agoraguide;
 import net.tailriver.agoraguide.SearchActivity.SearchType;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,8 +21,7 @@ implements OnItemClickListener
 
 	@Override
 	public void onPostInitialize(Bundle savedInstanceState) {
-		Configuration config = getResources().getConfiguration();
-		boolean isLandscape = config.orientation == Configuration.ORIENTATION_LANDSCAPE;
+		boolean isLandscape = isLandscape();
 		ArrayAdapter<String> arrayAdapter =
 				new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
 		for (Area area : Area.values()) {

@@ -3,6 +3,7 @@ package net.tailriver.agoraguide;
 import java.io.File;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.os.Build;
@@ -113,5 +114,10 @@ public abstract class AgoraActivity extends FragmentActivity {
 
 	public static final boolean isHoneycomb() {
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+	}
+
+	public final boolean isLandscape() {
+		Configuration config = getResources().getConfiguration();
+		return config.orientation == Configuration.ORIENTATION_LANDSCAPE;
 	}
 }
