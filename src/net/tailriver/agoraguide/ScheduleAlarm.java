@@ -26,6 +26,8 @@ public class ScheduleAlarm extends BroadcastReceiver {
 		PendingIntent contentIntent = PendingIntent.getActivity(
 				context, 0, intent, Intent.FLAG_ACTIVITY_NEW_TASK);
 
+		// TODO multiple notifications does not work appropriately.
+		// it works last one only
 		Notification n = new NotificationCompat.Builder(context)
 		.setSmallIcon(R.drawable.icon)
 		.setTicker(contentText)

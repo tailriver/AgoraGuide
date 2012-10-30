@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 public class Area extends AbstractModel<Area> {
 	private static ModelFactory<Area> factory = new ModelFactory<Area>();
@@ -61,9 +60,9 @@ public class Area extends AbstractModel<Area> {
 	}
 
 	private String selectDevice() {
-		// FIXME implements selectDevice()
-		Log.w("Area", "selectDevice() Not implemented");
-		return "Android@ldpi";
+		// TODO implements selectDevice()
+		//return "Android@ldpi";
+		return "iOS@2x";
 	}
 
 	public static Area get(String id) {
