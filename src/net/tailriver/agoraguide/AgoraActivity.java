@@ -24,7 +24,6 @@ public abstract class AgoraActivity extends FragmentActivity {
 	@Override
 	protected final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//Debug.startMethodTracing();
 		if (!initFinished) {
 			synchronized (initFinished) {
 				onPreInitialize();
@@ -46,7 +45,6 @@ public abstract class AgoraActivity extends FragmentActivity {
 			onPreInitialize();
 			onPostInitialize(savedInstanceState);
 		}
-		//Debug.stopMethodTracing();
 	}
 
 	abstract public void onPreInitialize();
@@ -57,11 +55,13 @@ public abstract class AgoraActivity extends FragmentActivity {
 		SQLiteDatabase.releaseMemory();
 		try {
 			Downloader d = new Downloader(this);
-			int hour = 3600 * 100;
+			//int hour = 3600 * 100;
 			for (Area area : Area.values()) {
-				d.addTask(area.getImageURL(), area.getImageFile(), 24 * hour);
+				//d.addTask(area.getImageURL(), area.getImageFile(), 24 * hour);
+				d.addTask(area.getImageURL(), area.getImageFile(), 0);
 			}
-			d.addTask(databaseURL, getDatabaseFile(), 6 * hour);
+			//d.addTask(databaseURL, getDatabaseFile(), 6 * hour);
+			d.addTask(databaseURL, getDatabaseFile(), 0);
 			d.execute();
 		} catch (StandAloneException e) {
 			Log.i(CLASS_NAME, e.getMessage());

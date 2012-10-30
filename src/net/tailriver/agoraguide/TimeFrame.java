@@ -98,12 +98,13 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 		return summary;
 	}
 
+	@SuppressWarnings("unused")
 	public Calendar getStart() {
 		Calendar c = Calendar.getInstance(Locale.JAPAN);
 		c.setTime(start);
 
-		// FIXME hack for debug (start everyday)
-		if (true) {
+		// TODO hack for debug (start everyday)
+		if (false) {
 			Log.w("TimeFrame", "debug hack worked");
 			Calendar cur = Calendar.getInstance();
 			c.set(cur.get(Calendar.YEAR), cur.get(Calendar.MONTH), cur.get(Calendar.DAY_OF_MONTH));

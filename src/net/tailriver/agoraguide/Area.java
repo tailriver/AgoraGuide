@@ -61,8 +61,7 @@ public class Area extends AbstractModel<Area> {
 
 	private String selectDevice() {
 		// TODO implements selectDevice()
-		//return "Android@ldpi";
-		return "iOS@2x";
+		return "Android";
 	}
 
 	public static Area get(String id) {
@@ -86,7 +85,6 @@ public class Area extends AbstractModel<Area> {
 	}
 
 	public File getImageFile() {
-		// FIXME provides dummy images
 		Context context = AgoraActivity.getStaticApplicationContext();
 		File imageDir = context.getDir("2012_area", Context.MODE_PRIVATE);
 		return new File(imageDir, getId() + ".png");		
