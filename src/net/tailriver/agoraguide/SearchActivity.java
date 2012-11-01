@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -53,6 +54,7 @@ public class SearchActivity extends AgoraActivity implements OnItemClickListener
 		resultView = (ListView) findViewById(R.id.searchResult);
 		resultView.setOnItemClickListener(this);
 		resultView.setEmptyView(findViewById(R.id.searchNotFound));
+		resultView.setBackgroundColor(Color.argb(180, 255, 255, 255));
 
 		type = (SearchType) getIntent().getSerializableExtra(IntentExtra.SEARCH_TYPE);
 		if (type != SearchType.Keyword) {

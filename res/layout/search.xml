@@ -53,13 +53,13 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:adjustViewBounds="true"
-            android:alpha="0.33"
             android:src="@drawable/odaiba" />
 
         <ListView
             android:id="@+id/searchResult"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:scrollingCache="false"
             tools:listitem="@layout/entry_summary" >
         </ListView>
     </FrameLayout>
