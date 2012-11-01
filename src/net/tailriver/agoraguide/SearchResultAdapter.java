@@ -1,5 +1,6 @@
 package net.tailriver.agoraguide;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 	private LayoutInflater inflater;
 	private List<EntrySummary> list;
 	private TextView textView;
+	private Object[] filterCache;
 
 	public SearchResultAdapter(Activity activity) {
 		origin   = new HashSet<EntrySummary>(EntrySummary.values());
@@ -28,7 +30,10 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 	}
 
 	public void filter(Object... filter) {
-		new SearchTask().execute(filter);
+		if (!Arrays.deepEquals(filter, filterCache)) {
+			new SearchTask().execute(filter);
+			filterCache = filter;
+		}
 	}
 
 	public int getCount() {
@@ -74,6 +79,8 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 	}
 
 	private final class SearchTask extends AsyncTask<Object, Void, Void> {
+		private List<EntrySummary> tempList;
+
 		@Override
 		protected void onPreExecute() {
 			textView.setText(R.string.searchLoading);
@@ -91,15 +98,18 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 					throw new UnsupportedOperationException();
 				}
 			}
-			list = filter.getResult();
+			tempList = filter.getResult();
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			notifyDataSetChanged();
-			if (list.size() == 0) {
-				textView.setText(R.string.searchNotFound);
+			synchronized (list) {
+				list = tempList;
+				notifyDataSetInvalidated();
+				if (list.size() == 0) {
+					textView.setText(R.string.searchNotFound);
+				}
 			}
 		}
 
