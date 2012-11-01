@@ -44,25 +44,33 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
+		ViewHolder holder;
+
 		if (convertView == null) {
 			convertView = inflater.inflate(R.layout.entry_summary, null);
+			holder = new ViewHolder();
+			holder.title    = (TextView) convertView.findViewById(R.id.entrylist_item_title);
+			holder.sponsor  = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
+			holder.schedule = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
+			holder.target   = (TextView) convertView.findViewById(R.id.entrylist_item_target);
+			convertView.setTag(holder);
+		} else {
+			holder = (ViewHolder) convertView.getTag();
 		}
 
 		EntrySummary summary = getItem(position);
-
-		TextView titleView = (TextView) convertView.findViewById(R.id.entrylist_item_title);
-		titleView.setText(summary.toString());
-
-		TextView sponsorView = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
-		sponsorView.setText(summary.getSponsor());
-
-		TextView scheduleView = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
-		scheduleView.setText(summary.getSchedule());
-
-		TextView targetView = (TextView) convertView.findViewById(R.id.entrylist_item_target);
-		targetView.setVisibility(View.INVISIBLE);
-
+		holder.title.setText(summary.toString());
+		holder.sponsor.setText(summary.getSponsor());
+		holder.schedule.setText(summary.getSchedule());
+		holder.target.setVisibility(View.GONE);
 		return convertView;
+	}
+
+	private class ViewHolder {
+		TextView title;
+		TextView sponsor;
+		TextView schedule;
+		TextView target;
 	}
 
 	private final class SearchTask extends AsyncTask<Object, Void, Void> {
