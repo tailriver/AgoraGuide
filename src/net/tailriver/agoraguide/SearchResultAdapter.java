@@ -93,7 +93,10 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 				if (p instanceof Collection<?>) {
 					filter.applyFilter((Collection<?>) p);
 				} else if (p instanceof String) {
+					EntryFilter tempFilter = filter.clone();
 					filter.applyFilter((String) p);
+					tempFilter.applyFilter(h2k((String) p));
+					filter.add(tempFilter);
 				} else {
 					throw new UnsupportedOperationException();
 				}
@@ -113,5 +116,15 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 			}
 		}
 
+		private String h2k(String p) {
+			StringBuilder sb = new StringBuilder(p);
+			for (int i = 0; i < sb.length(); i++) {
+				char c = sb.charAt(i);
+				if (c >= 'ぁ' && c <= 'ん') {
+					sb.setCharAt(i, (char)(c - 'ぁ' + 'ァ'));
+				}
+			}
+			return sb.toString();
+		}
 	}
 }

@@ -11,8 +11,8 @@ import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-public class EntryFilter {
-	private Collection<? extends EntrySummary> collection;
+public class EntryFilter implements Cloneable {
+	private Collection<EntrySummary> collection;
 	private boolean removeMatched;
 
 	public EntryFilter(Collection<? extends EntrySummary> collection) {
@@ -28,6 +28,10 @@ public class EntryFilter {
 	/** remain NOT matched */
 	public void toNegativeFilter() {
 		removeMatched = true;
+	}
+
+	public void add(EntryFilter anotherFilter) {
+		collection.addAll(anotherFilter.collection);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,6 +86,17 @@ public class EntryFilter {
 		List<EntrySummary> list = new ArrayList<EntrySummary>(collection);
 		Collections.sort(list);
 		return list;
+	}
+
+	@Override
+	public EntryFilter clone() {
+		try {
+			EntryFilter c = (EntryFilter) super.clone();
+			c.collection = new HashSet<EntrySummary>(collection);
+			return c;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
 	}
 
 	private void applyAreaFilter(Collection<Area> filter) {
