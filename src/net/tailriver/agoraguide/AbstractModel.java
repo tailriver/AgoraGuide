@@ -44,12 +44,6 @@ implements Comparable<T>
 	}
 
 	@Override
-	protected void finalize() throws Throwable {
-		Log.w(getClass().getSimpleName(), "finalize " + toString());
-		super.finalize();
-	}
-
-	@Override
 	public String toString() {
 		return getClass().getSimpleName();
 	}
