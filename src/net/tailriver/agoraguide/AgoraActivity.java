@@ -111,7 +111,11 @@ public abstract class AgoraActivity extends FragmentActivity {
 		Log.i(CLASS_NAME, "database updated; need to re-init");
 	}
 
-	public static final boolean isHoneycomb() {
+	public static final boolean hasFroyo() {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
+	}
+
+	public static final boolean hasHoneycomb() {
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 	}
 

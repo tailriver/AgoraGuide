@@ -22,7 +22,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -41,7 +40,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 
 	static {
 		// patch
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
+		if (!AgoraActivity.hasFroyo()) {
 			System.setProperty("http.keepAlive", "false");
 		}
 	}
@@ -201,7 +200,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			pd.setTitle("Updating");
 			pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			pd.setIndeterminate(false);
-			if (AgoraActivity.isHoneycomb()) {
+			if (AgoraActivity.hasHoneycomb()) {
 				pd.setProgressNumberFormat(null);
 			}
 			pd.show();

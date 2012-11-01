@@ -37,7 +37,7 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 		iconView.append(" ");
 		iconView.append(summary.getCategory().toString());
 
-		if (AgoraActivity.isHoneycomb()) {
+		if (AgoraActivity.hasHoneycomb()) {
 			findViewById(R.id.programIconLayout).setVisibility(View.GONE);
 		} else {
 			View favoriteView = findViewById(R.id.favoriteButton);
