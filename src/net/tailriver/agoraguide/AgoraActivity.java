@@ -54,15 +54,16 @@ public abstract class AgoraActivity extends FragmentActivity {
 	private final void initMore() {
 		SQLiteDatabase.releaseMemory();
 		try {
-			Downloader d = new Downloader(this);
-			//int hour = 3600 * 100;
+			long hour = 3600 * 1000;
+			Downloader d1 = new Downloader(this);
+			Downloader d2 = new Downloader(this);
+			d1.setShowProgressDialog(true);
+			d1.addTask(databaseURL, getDatabaseFile(), 1 * hour);
 			for (Area area : Area.values()) {
-				//d.addTask(area.getImageURL(), area.getImageFile(), 24 * hour);
-				d.addTask(area.getImageURL(), area.getImageFile(), 0);
+				d2.addTask(area.getImageURL(), area.getImageFile(), 1 * hour);
 			}
-			//d.addTask(databaseURL, getDatabaseFile(), 6 * hour);
-			d.addTask(databaseURL, getDatabaseFile(), 0);
-			d.execute();
+			d1.execute();
+			d2.execute();
 		} catch (StandAloneException e) {
 			Log.i(CLASS_NAME, e.getMessage());
 		}

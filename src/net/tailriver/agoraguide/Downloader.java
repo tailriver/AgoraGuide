@@ -37,6 +37,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	private FragmentActivity activity;
 	private ProgressDialogFrag dialog;
 	private List<Pair<URL, File>> task;
+	private boolean showProgressDialog;
 
 	static {
 		// patch
@@ -72,24 +73,32 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		}
 	}
 
+	public void setShowProgressDialog(boolean showProgressDialog) {
+		this.showProgressDialog = showProgressDialog;
+	}
+
 	@Override
 	protected void onProgressUpdate(Integer... values) {
-		if (values[0] == null) {
-			values[0] = dialog.getProgress() / PROGRESS_MAX;
+		if (dialog != null) {
+			if (values[0] == null) {
+				values[0] = dialog.getProgress() / PROGRESS_MAX;
+			}
+			dialog.setProgress(values[0] * PROGRESS_MAX + values[1]);
 		}
-		dialog.setProgress(values[0] * PROGRESS_MAX + values[1]);
 	}
 
 	@Override
 	protected void onPreExecute() {
-		FragmentManager manager = activity.getSupportFragmentManager();
-		dialog = new ProgressDialogFrag(activity);
-		dialog.show(manager, "dialog");
+		if (showProgressDialog) {
+			FragmentManager manager = activity.getSupportFragmentManager();
+			dialog = new ProgressDialogFrag(activity);
+			dialog.show(manager, "dialog");
+			dialog.setMax(task.size());
+		}
 	}
 
 	@Override
 	protected Void doInBackground(Void... params) {
-		dialog.setMax(task.size());
 		publishProgress(0, 0);
 		for (int i = 0, max = task.size(); i < max; i++) {
 			Pair<URL, File> p = task.get(i);
@@ -108,13 +117,17 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 
 	@Override
 	protected void onPostExecute(Void result) {
-		dialog.onDismiss(dialog.getDialog());
+		if (dialog != null) {
+			dialog.onDismiss(dialog.getDialog());
+		}
 	}
 
 	@Override
 	protected void onCancelled(Void result) {
 		Log.w(CLASS_NAME, "cancelled");
-		dialog.onDismiss(dialog.getDialog());
+		if (dialog != null) {
+			dialog.onDismiss(dialog.getDialog());
+		}
 	}
 
 	private boolean download(URL url, File file) throws IOException {
