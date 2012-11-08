@@ -40,6 +40,9 @@ public class EntryFilter implements Cloneable {
 			applyEntryFilter(Collections.EMPTY_SET);
 			return;
 		}
+		if (filter.contains(null)) {
+			throw new IllegalArgumentException("filter contains null");
+		}
 		Object sample = filter.iterator().next();
 
 		if (sample instanceof Area) {

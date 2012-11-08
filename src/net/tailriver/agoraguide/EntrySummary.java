@@ -63,6 +63,9 @@ public class EntrySummary extends AbstractModel<EntrySummary> {
 	}
 
 	public static EntrySummary get(String id) {
+		if (!factory.containsKey(id)) {
+			throw new IllegalArgumentException("invalid id");
+		}
 		return factory.get(id);
 	}
 

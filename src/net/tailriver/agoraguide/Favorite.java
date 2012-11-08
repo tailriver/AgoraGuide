@@ -42,7 +42,11 @@ public class Favorite {
 	public static Collection<EntrySummary> values() {
 		Collection<EntrySummary> collection = new HashSet<EntrySummary>();
 		for (String key : getSharedPreferences().getAll().keySet()) {
-			collection.add(EntrySummary.get(key));
+			try {
+				collection.add(EntrySummary.get(key));
+			} catch (IllegalArgumentException e) {
+				// just ignore
+			}
 		}
 		return collection;
 	}
