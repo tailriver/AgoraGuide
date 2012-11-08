@@ -14,7 +14,7 @@ import android.util.Log;
 public abstract class AgoraActivity extends FragmentActivity {
 	private static final String CLASS_NAME = AgoraActivity.class.getSimpleName();
 	private static final String databaseHost = "http://tailriver.net";
-	private static final String databaseURL  = databaseHost + "/agoraguide/2012test.sqlite3.gz";
+	private static final String databaseURL  = databaseHost + "/agoraguide/2012.sqlite3.gz";
 	private static final String databaseName = "2012.sqlite3";
 
 	private static Context applicationContext;
