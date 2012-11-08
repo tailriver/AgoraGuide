@@ -14,7 +14,7 @@ import android.util.Log;
 public abstract class AgoraActivity extends FragmentActivity {
 	private static final String CLASS_NAME = AgoraActivity.class.getSimpleName();
 	private static final String databaseHost = "http://tailriver.net";
-	private static final String databaseURL  = databaseHost + "/agoraguide/2012.sqlite3.gz";
+	private static final String databaseURL  = databaseHost + "/agoraguide/2012test.sqlite3.gz";
 	private static final String databaseName = "2012.sqlite3";
 
 	private static Context applicationContext;
@@ -24,11 +24,24 @@ public abstract class AgoraActivity extends FragmentActivity {
 	@Override
 	protected final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// When cache files have been deleted during launch app
+		if (getCacheDir().listFiles().length == 0) {
+			invalidateInit();
+		}
+
+		onPreInitialize();
 		if (!initFinished) {
 			synchronized (initFinished) {
-				onPreInitialize();
 				if (!initFinished) {
 					applicationContext = getApplicationContext();
+
+					// TODO compatibility (since v1.11)
+					File oldFile = getFileStreamPath(databaseName);
+					if (oldFile.exists()) {
+						oldFile.renameTo(getDatabaseFile());
+					}
+
 					openDatabase();
 					new Area();
 					new Category();
@@ -39,12 +52,9 @@ public abstract class AgoraActivity extends FragmentActivity {
 					initFinished = Boolean.TRUE;
 					initMore();
 				}
-				onPostInitialize(savedInstanceState);
 			}
-		} else {
-			onPreInitialize();
-			onPostInitialize(savedInstanceState);
 		}
+		onPostInitialize(savedInstanceState);
 	}
 
 	abstract public void onPreInitialize();
@@ -76,6 +86,10 @@ public abstract class AgoraActivity extends FragmentActivity {
 		return applicationContext;
 	}
 
+	public static final File getStaticCacheDir() {
+		return applicationContext.getCacheDir();
+	}
+
 	public static final SQLiteDatabase getDatabase() {
 		if (database == null || !database.isOpen()) {
 			return null;
@@ -84,23 +98,22 @@ public abstract class AgoraActivity extends FragmentActivity {
 	}
 
 	public static final File getDatabaseFile() {
-		File databaseFile = applicationContext.getFileStreamPath(databaseName);
-		databaseFile.getParentFile().mkdirs();
-		return databaseFile;
+		return new File(getStaticCacheDir(), databaseName);
 	}
 
 	private static final void openDatabase() {
-		if (!getDatabaseFile().exists()) {
+		File databaseFile = getDatabaseFile();
+		if (!databaseFile.exists()) {
 			return;
 		}
 		try {
+			invalidateDatabase();
 			database = SQLiteDatabase.openDatabase(
-					getDatabaseFile().getPath(), null, SQLiteDatabase.OPEN_READONLY);
+					databaseFile.getPath(), null, SQLiteDatabase.OPEN_READONLY);
 			database.rawQuery("SELECT count(*) FROM area", null);	// dummy query
 		} catch(SQLiteDatabaseCorruptException e) {
-			database.close();
-			getDatabaseFile().delete();
-			database = null;
+			invalidateDatabase();
+			databaseFile.delete();
 		} catch (Exception e) {
 			Log.w(CLASS_NAME, "openDatabase", e);
 		}
@@ -108,7 +121,14 @@ public abstract class AgoraActivity extends FragmentActivity {
 
 	public static void invalidateInit() {
 		initFinished = Boolean.FALSE;
-		Log.i(CLASS_NAME, "database updated; need to re-init");
+		Log.i(CLASS_NAME, "invalidateInit called");
+	}
+
+	private static void invalidateDatabase() {
+		if (database != null) {
+			database.close();
+			database = null;
+		}
 	}
 
 	public static final boolean hasFroyo() {

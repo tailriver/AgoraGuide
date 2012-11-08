@@ -3,7 +3,6 @@ package net.tailriver.agoraguide;
 import java.io.File;
 import java.util.List;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -57,6 +56,15 @@ public class Area extends AbstractModel<Area> {
 			c2.moveToNext();
 		}
 		c2.close();
+
+		// TODO compatibility (since v1.11)
+		File oldDir = new File(AgoraActivity.getStaticCacheDir().getParent(), "app_2012_area");
+		if (oldDir.exists()) {
+			for (File image : oldDir.listFiles()) {
+				image.delete();
+			}
+			oldDir.delete();
+		}
 	}
 
 	private String selectDevice() {
@@ -85,9 +93,8 @@ public class Area extends AbstractModel<Area> {
 	}
 
 	public File getImageFile() {
-		Context context = AgoraActivity.getStaticApplicationContext();
-		File imageDir = context.getDir("2012_area", Context.MODE_PRIVATE);
-		return new File(imageDir, getId() + ".png");		
+		String filename = url.substring(url.lastIndexOf("/"));
+		return new File(AgoraActivity.getStaticCacheDir(), filename);
 	}
 
 	public String getImageURL() {
