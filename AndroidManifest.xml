@@ -2,8 +2,8 @@
 <!DOCTYPE manifest>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.tailriver.agoraguide"
-    android:versionCode="4"
-    android:versionName="1.1" >
+    android:versionCode="5"
+    android:versionName="1.11" >
 
     <uses-sdk
         android:minSdkVersion="7"
