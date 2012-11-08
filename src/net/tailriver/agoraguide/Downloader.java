@@ -60,16 +60,14 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		task = new ArrayList<Pair<URL, File>>();
 	}
 
-	public void addTask(String url, File dist, long expire) {
+	public void addTask(String url, File dist) {
 		if (url == null || dist == null) {
 			throw new IllegalArgumentException("argument contains null");
 		}
-		if (System.currentTimeMillis() - dist.lastModified() > expire) {
-			try {
-				task.add(Pair.create(new URL(url), dist));
-			} catch (MalformedURLException e) {
-				Log.w(CLASS_NAME, "invalid url", e);
-			}
+		try {
+			task.add(Pair.create(new URL(url), dist));
+		} catch (MalformedURLException e) {
+			Log.w(CLASS_NAME, "invalid url", e);
 		}
 	}
 
@@ -146,7 +144,6 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			Log.d(CLASS_NAME, code + " " + http.getResponseMessage());
 
 			if (code == HttpURLConnection.HTTP_NOT_MODIFIED) {
-				file.setLastModified(System.currentTimeMillis());
 				return false;
 			}
 			if (code != HttpURLConnection.HTTP_OK) {
