@@ -65,7 +65,10 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			throw new IllegalArgumentException("argument contains null");
 		}
 		try {
-			task.add(Pair.create(new URL(url), dist));
+			Pair<URL, File> p = Pair.create(new URL(url), dist);
+			if (!task.contains(p)) {
+				task.add(p);
+			}
 		} catch (MalformedURLException e) {
 			Log.w(CLASS_NAME, "invalid url", e);
 		}
