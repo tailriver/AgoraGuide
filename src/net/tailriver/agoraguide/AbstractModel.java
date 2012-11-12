@@ -3,9 +3,8 @@ package net.tailriver.agoraguide;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-abstract public class AbstractModel<T extends AbstractModel<T>>
-implements Comparable<T>
-{
+abstract public class AbstractModel<T extends AbstractModel<T>> implements
+		Comparable<T> {
 	private String id;
 
 	protected AbstractModel() {

@@ -12,12 +12,13 @@ public class Category extends AbstractModel<Category> {
 	private String abbrev;
 	private boolean isAllday;
 
-	/*package*/ Category() {}
+	/* package */Category() {
+	}
 
 	private Category(String id, String name, String abbrev, boolean isAllday) {
 		super(id);
-		this.name     = name;
-		this.abbrev   = abbrev;
+		this.name = name;
+		this.abbrev = abbrev;
 		this.isAllday = isAllday;
 	}
 
@@ -30,8 +31,8 @@ public class Category extends AbstractModel<Category> {
 
 		c.moveToFirst();
 		for (int i = 0, rows = c.getCount(); i < rows; i++) {
-			String id     = c.getString(0);
-			String name   = c.getString(1);
+			String id = c.getString(0);
+			String name = c.getString(1);
 			String abbrev = c.getString(2);
 			boolean isAllday = c.getInt(3) == 1;
 			Category category = new Category(id, name, abbrev, isAllday);

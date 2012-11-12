@@ -10,7 +10,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-public class AgoraGuideActivity extends AgoraActivity implements OnClickListener {
+public class AgoraGuideActivity extends AgoraActivity implements
+		OnClickListener {
 	@Override
 	public void onPreInitialize() {
 		setContentView(R.layout.main);
@@ -35,7 +36,8 @@ public class AgoraGuideActivity extends AgoraActivity implements OnClickListener
 		try {
 			jumpNextActivity(v.getId());
 		} catch (UnsupportedOperationException e) {
-			Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), e.getMessage(),
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -51,7 +53,8 @@ public class AgoraGuideActivity extends AgoraActivity implements OnClickListener
 			jumpNextActivity(item.getItemId());
 			return true;
 		} catch (UnsupportedOperationException e) {
-			Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), e.getMessage(),
+					Toast.LENGTH_SHORT).show();
 			return false;
 		}
 	}
@@ -63,12 +66,14 @@ public class AgoraGuideActivity extends AgoraActivity implements OnClickListener
 		case R.id.button_search_keyword:
 		case R.id.menuSearchKeyword:
 			intent.setClass(applicationContext, SearchActivity.class);
-			intent.putExtra(IntentExtra.SEARCH_TYPE, SearchActivity.SearchType.Keyword);
+			intent.putExtra(IntentExtra.SEARCH_TYPE,
+					SearchActivity.SearchType.Keyword);
 			break;
 		case R.id.button_search_schedule:
 		case R.id.menuSearchSchedule:
 			intent.setClass(applicationContext, SearchActivity.class);
-			intent.putExtra(IntentExtra.SEARCH_TYPE, SearchActivity.SearchType.Schedule);
+			intent.putExtra(IntentExtra.SEARCH_TYPE,
+					SearchActivity.SearchType.Schedule);
 			break;
 		case R.id.button_search_area:
 		case R.id.menuSearchArea:
@@ -77,7 +82,8 @@ public class AgoraGuideActivity extends AgoraActivity implements OnClickListener
 		case R.id.button_search_favorite:
 		case R.id.menuFavorites:
 			intent.setClass(applicationContext, SearchActivity.class);
-			intent.putExtra(IntentExtra.SEARCH_TYPE, SearchActivity.SearchType.Favorite);
+			intent.putExtra(IntentExtra.SEARCH_TYPE,
+					SearchActivity.SearchType.Favorite);
 			break;
 		case R.id.button_information:
 		case R.id.menu_credits:

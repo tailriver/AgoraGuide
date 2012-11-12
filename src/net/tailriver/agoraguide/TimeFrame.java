@@ -17,20 +17,21 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 	private Date start;
 	private Date end;
 
-	/*package*/ TimeFrame() {}
+	/* package */TimeFrame() {
+	}
 
 	private TimeFrame(Date pivot) {
 		super(null);
 		summary = null;
-		start   = pivot;
-		end     = pivot;
+		start = pivot;
+		end = pivot;
 	}
 
 	private TimeFrame(EntrySummary summary, Date start, Date end) {
 		super(start.getTime() + " " + summary.getId());
 		this.summary = summary;
-		this.start   = start;
-		this.end     = end;
+		this.start = start;
+		this.end = end;
 	}
 
 	@Override
@@ -55,11 +56,11 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 				int e = c.getInt(3);
 				cal.set(Calendar.DAY_OF_MONTH, d.getDay());
 				cal.set(Calendar.HOUR_OF_DAY, s / 100);
-				cal.set(Calendar.MINUTE,      s % 100);
+				cal.set(Calendar.MINUTE, s % 100);
 				Date start = cal.getTime();
 				cal.set(Calendar.HOUR_OF_DAY, e / 100);
-				cal.set(Calendar.MINUTE,      e % 100);
-				Date end   = cal.getTime();
+				cal.set(Calendar.MINUTE, e % 100);
+				Date end = cal.getTime();
 				TimeFrame tf = new TimeFrame(summary, start, end);
 				factory.put(tf.toString(), tf);
 			}
@@ -107,7 +108,8 @@ public class TimeFrame extends AbstractModel<TimeFrame> {
 		if (false) {
 			Log.w("TimeFrame", "debug hack worked");
 			Calendar cur = Calendar.getInstance();
-			c.set(cur.get(Calendar.YEAR), cur.get(Calendar.MONTH), cur.get(Calendar.DAY_OF_MONTH));
+			c.set(cur.get(Calendar.YEAR), cur.get(Calendar.MONTH),
+					cur.get(Calendar.DAY_OF_MONTH));
 			if (c.before(cur)) {
 				c.add(Calendar.DAY_OF_MONTH, 1);
 			}

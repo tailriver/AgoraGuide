@@ -23,9 +23,9 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 	private Object[] filterCache;
 
 	public SearchResultAdapter(Activity activity) {
-		origin   = new HashSet<EntrySummary>(EntrySummary.values());
+		origin = new HashSet<EntrySummary>(EntrySummary.values());
 		inflater = activity.getLayoutInflater();
-		list     = Collections.emptyList();
+		list = Collections.emptyList();
 		textView = (TextView) activity.findViewById(R.id.searchNotFound);
 	}
 
@@ -54,10 +54,14 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 		if (convertView == null) {
 			convertView = inflater.inflate(R.layout.entry_summary, null);
 			holder = new ViewHolder();
-			holder.title    = (TextView) convertView.findViewById(R.id.entrylist_item_title);
-			holder.sponsor  = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
-			holder.schedule = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
-			holder.target   = (TextView) convertView.findViewById(R.id.entrylist_item_target);
+			holder.title = (TextView) convertView
+					.findViewById(R.id.entrylist_item_title);
+			holder.sponsor = (TextView) convertView
+					.findViewById(R.id.entrylist_item_sponsor);
+			holder.schedule = (TextView) convertView
+					.findViewById(R.id.entrylist_item_schedule);
+			holder.target = (TextView) convertView
+					.findViewById(R.id.entrylist_item_target);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -121,7 +125,7 @@ public class SearchResultAdapter extends BaseAdapter implements ListAdapter {
 			for (int i = 0; i < sb.length(); i++) {
 				char c = sb.charAt(i);
 				if (c >= 'ぁ' && c <= 'ん') {
-					sb.setCharAt(i, (char)(c - 'ぁ' + 'ァ'));
+					sb.setCharAt(i, (char) (c - 'ぁ' + 'ァ'));
 				}
 			}
 			return sb.toString();

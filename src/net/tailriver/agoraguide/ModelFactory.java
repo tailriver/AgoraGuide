@@ -6,12 +6,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class ModelFactory<T extends AbstractModel<T>> extends HashMap<String, T> {
+public class ModelFactory<T extends AbstractModel<T>> extends
+		HashMap<String, T> {
 	private static final long serialVersionUID = 1L;
 	private Collection<T> values;
 	private List<T> sortedValues;
 
-	public ModelFactory() {}
+	public ModelFactory() {
+	}
 
 	@Override
 	public void clear() {

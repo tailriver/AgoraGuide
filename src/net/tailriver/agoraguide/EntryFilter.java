@@ -52,7 +52,8 @@ public class EntryFilter implements Cloneable {
 		} else if (sample instanceof EntrySummary) {
 			applyEntryFilter((Collection<EntrySummary>) filter);
 		} else {
-			throw new UnsupportedOperationException(sample.getClass() + " is not supported");
+			throw new UnsupportedOperationException(sample.getClass()
+					+ " is not supported");
 		}
 	}
 
@@ -63,13 +64,15 @@ public class EntryFilter implements Cloneable {
 		}
 
 		SQLiteDatabase database = AgoraActivity.getDatabase();
-		SQLLike like = new SQLLike("title", "sponsor", "cosponsor", "abstract", "content", "guest");
+		SQLLike like = new SQLLike("title", "sponsor", "cosponsor", "abstract",
+				"content", "guest");
 		String table = "entry";
 		String[] columns = { "id" };
 		String selection = like.toString();
 		String[] selectionArgs = new String[like.size()];
 		Arrays.fill(selectionArgs, "%" + keyword + "%");
-		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
+		Cursor c = database.query(table, columns, selection, selectionArgs,
+				null, null, null);
 
 		Collection<EntrySummary> matched = new HashSet<EntrySummary>();
 		c.moveToFirst();
@@ -132,6 +135,7 @@ public class EntryFilter implements Cloneable {
 
 	private class SQLLike {
 		String[] args;
+
 		public SQLLike(String... args) {
 			this.args = args;
 		}
@@ -146,7 +150,8 @@ public class EntryFilter implements Cloneable {
 			for (int i = 0; i < args.length; i++) {
 				sb.append(args[i]).append(" LIKE ? OR ");
 			}
-			return sb.delete(sb.length() - " OR ".length(), sb.length()).toString();
+			return sb.delete(sb.length() - " OR ".length(), sb.length())
+					.toString();
 		}
 	}
 }

@@ -18,7 +18,8 @@ public class Location {
 		String[] columns = { "area", "x", "y" };
 		String selection = "entry=?";
 		String[] selectionArgs = { es.getId() };
-		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
+		Cursor c = database.query(table, columns, selection, selectionArgs,
+				null, null, null);
 
 		c.moveToFirst();
 		area = Area.get(c.getString(0));

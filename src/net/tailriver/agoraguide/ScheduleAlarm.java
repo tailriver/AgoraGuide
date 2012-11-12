@@ -15,41 +15,47 @@ public class ScheduleAlarm extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		int id = intent.getIntExtra(IntentExtra.NOTIFICATION_ID, 0);
 		CharSequence contentTitle = context.getString(R.string.app_name);
-		CharSequence contentText  = intent.getStringExtra(IntentExtra.NOTIFICATION_TEXT);
-		long when = intent.getLongExtra(IntentExtra.NOTIFICATION_WHEN, System.currentTimeMillis());
+		CharSequence contentText = intent
+				.getStringExtra(IntentExtra.NOTIFICATION_TEXT);
+		long when = intent.getLongExtra(IntentExtra.NOTIFICATION_WHEN,
+				System.currentTimeMillis());
 
 		intent.setClass(context, ProgramActivity.class);
 		intent.removeExtra(IntentExtra.NOTIFICATION_TEXT);
 		intent.removeExtra(IntentExtra.NOTIFICATION_WHEN);
 		Log.i("SA", intent.getExtras().keySet().toString());
 
-		PendingIntent contentIntent = PendingIntent.getActivity(
-				context, 0, intent, Intent.FLAG_ACTIVITY_NEW_TASK);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
+				intent, Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		// TODO multiple notifications does not work appropriately.
 		// it works last one only
 		Notification n = new NotificationCompat.Builder(context)
-		.setSmallIcon(R.drawable.icon)
-		.setTicker(contentText)
-		.setContentTitle(contentTitle)
-		.setContentText(contentText)
-		.setContentIntent(contentIntent)
-		.setWhen(when)
-		.build();
-		getNotificationManager(context).notify(id, n);		
+				.setSmallIcon(R.drawable.icon).setTicker(contentText)
+				.setContentTitle(contentTitle).setContentText(contentText)
+				.setContentIntent(contentIntent).setWhen(when).build();
+		getNotificationManager(context).notify(id, n);
 	}
 
-	/** You have to check whether the set of hash code of id is identical or not (2012 ok) */
-	public static int setAlarm(EntrySummary summary, long alarmWhen, long notificationWhen) {
+	/**
+	 * You have to check whether the set of hash code of id is identical or not
+	 * (2012 ok)
+	 */
+	public static int setAlarm(EntrySummary summary, long alarmWhen,
+			long notificationWhen) {
 		Context context = AgoraActivity.getStaticApplicationContext();
-		PendingIntent operation = getPendingIntent(context, summary, notificationWhen);
-		getAlarmManager(context).set(AlarmManager.RTC_WAKEUP, alarmWhen, operation);
+		PendingIntent operation = getPendingIntent(context, summary,
+				notificationWhen);
+		getAlarmManager(context).set(AlarmManager.RTC_WAKEUP, alarmWhen,
+				operation);
 		return summary.getId().hashCode();
 	}
 
-	public static final void cancelAlarm(EntrySummary summary, long notificationWhen) {
+	public static final void cancelAlarm(EntrySummary summary,
+			long notificationWhen) {
 		Context context = AgoraActivity.getStaticApplicationContext();
-		PendingIntent operation = getPendingIntent(context, summary, notificationWhen);
+		PendingIntent operation = getPendingIntent(context, summary,
+				notificationWhen);
 		getAlarmManager(context).cancel(operation);
 	}
 
@@ -61,8 +67,10 @@ public class ScheduleAlarm extends BroadcastReceiver {
 		return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 	}
 
-	private static final NotificationManager getNotificationManager(Context context) {
-		return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+	private static final NotificationManager getNotificationManager(
+			Context context) {
+		return (NotificationManager) context
+				.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
 	private static PendingIntent getPendingIntent(Context context,

@@ -49,7 +49,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	public Downloader(FragmentActivity activity) throws StandAloneException {
 		// connectivity check
 		Object cm = activity.getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo ni = ((ConnectivityManager)cm).getActiveNetworkInfo();
+		NetworkInfo ni = ((ConnectivityManager) cm).getActiveNetworkInfo();
 		if (ni == null || !ni.isAvailable() || !ni.isConnected()) {
 			if (ni != null) {
 				Log.i(CLASS_NAME, "State: " + ni.getState());
@@ -105,13 +105,14 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			Pair<URL, File> p = task.get(i);
 			try {
 				boolean isUpdated = download(p.first, p.second);
-				if (p.second.equals(AgoraActivity.getDatabaseFile()) && isUpdated) {
+				if (p.second.equals(AgoraActivity.getDatabaseFile())
+						&& isUpdated) {
 					AgoraActivity.invalidateInit();
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			publishProgress(i+1, 0);
+			publishProgress(i + 1, 0);
 		}
 		return null;
 	}
@@ -136,7 +137,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		File tempFile = null;
 		try {
 			http.setRequestProperty("Accept-Encoding", "gzip");
-			http.setRequestProperty("User-Agent", "AgoraGuide/2012 (Android)");		
+			http.setRequestProperty("User-Agent", "AgoraGuide/2012 (Android)");
 			http.setIfModifiedSince(file.lastModified());
 			http.setReadTimeout(HTTP_TIME_OUT);
 			http.setDoInput(true);
@@ -154,15 +155,16 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			}
 
 			String contentEncoding = http.getContentEncoding();
-			String contentType     = http.getContentType();
+			String contentType = http.getContentType();
 			InputStream is = http.getInputStream();
-			if ((contentEncoding != null && contentEncoding.equals("gzip")) ||
-					(contentType != null && contentType.contains("gzip"))) {
+			if ((contentEncoding != null && contentEncoding.equals("gzip"))
+					|| (contentType != null && contentType.contains("gzip"))) {
 				is = new GZIPInputStream(is);
 			}
 			is = new BufferedInputStream(is);
 
-			tempFile = File.createTempFile("downloading", null, activity.getFilesDir());
+			tempFile = File.createTempFile("downloading", null,
+					activity.getFilesDir());
 			OutputStream os = new FileOutputStream(tempFile);
 			os = new BufferedOutputStream(os);
 
@@ -175,14 +177,15 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 					break;
 				os.write(buffer, 0, byteRead);
 				totalRead += byteRead;
-				publishProgress(null, (int)(100d * totalRead / contentLength));
+				publishProgress(null, (int) (100d * totalRead / contentLength));
 			}
 			is.close();
 			os.flush();
 			os.close();
 
 			if (!tempFile.renameTo(file)) {
-				throw new IOException("download successed but cannot write specific file");
+				throw new IOException(
+						"download successed but cannot write specific file");
 			}
 			Log.i(CLASS_NAME, totalRead + " bytes downloaded");
 			return true;

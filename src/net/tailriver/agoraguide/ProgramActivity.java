@@ -21,15 +21,18 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 		setContentView(R.layout.program);
 		setTitle(R.string.program);
 
-		int notificationId = getIntent().getIntExtra(IntentExtra.NOTIFICATION_ID, -1);
+		int notificationId = getIntent().getIntExtra(
+				IntentExtra.NOTIFICATION_ID, -1);
 		if (notificationId > -1) {
-			ScheduleAlarm.cancelNotification(getApplicationContext(), notificationId);
+			ScheduleAlarm.cancelNotification(getApplicationContext(),
+					notificationId);
 		}
 	}
 
 	@Override
 	public void onPostInitialize(Bundle savedInstanceState) {
-		summary = EntrySummary.get(getIntent().getStringExtra(IntentExtra.ENTRY_ID));
+		summary = EntrySummary.get(getIntent().getStringExtra(
+				IntentExtra.ENTRY_ID));
 		EntryDetail detail = new EntryDetail(summary);
 
 		TextView iconView = (TextView) findViewById(R.id.programHeader);
@@ -67,13 +70,14 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 
 		CharSequence delimiter = "\n\n";
 		SpannableStringBuilder text = new SpannableStringBuilder();
-		for (String tag : new String[]{ "abstract", "content", "guest", "website", "reservation", "note" }) {
+		for (String tag : new String[] { "abstract", "content", "guest",
+				"website", "reservation", "note" }) {
 			String tagValue = detail.getValue(tag);
 			if (tagValue != null && tagValue.length() != 0) {
-				SpannableStringBuilder section =
-						new SpannableStringBuilder(detail.getName(tag)).append("\n");
-				section.setSpan(new BackgroundColorSpan(Color.LTGRAY),
-						0, section.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				SpannableStringBuilder section = new SpannableStringBuilder(
+						detail.getName(tag)).append("\n");
+				section.setSpan(new BackgroundColorSpan(Color.LTGRAY), 0,
+						section.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				text.append(section).append(tagValue).append(delimiter);
 			}
 		}
@@ -90,8 +94,10 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.program, menu);
 		if (Favorite.isFavorite(summary)) {
-			menu.findItem(R.id.programFavorite).setIcon(android.R.drawable.btn_star_big_on);
-			menu.findItem(R.id.programFavorite).setTitle(R.string.favoriteRemove);
+			menu.findItem(R.id.programFavorite).setIcon(
+					android.R.drawable.btn_star_big_on);
+			menu.findItem(R.id.programFavorite).setTitle(
+					R.string.favoriteRemove);
 		}
 		return true;
 	}
@@ -105,7 +111,8 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 			supportInvalidateOptionsMenu();
 			return true;
 		case R.id.programLocation:
-			Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+			Intent intent = new Intent(getApplicationContext(),
+					MapActivity.class);
 			intent.putExtra(IntentExtra.ENTRY_ID, summary.getId());
 			startActivity(intent);
 			return true;
@@ -116,7 +123,8 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 
 	public void onClick(View v) {
 		if (v.getId() == R.id.mapButton) {
-			Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+			Intent intent = new Intent(getApplicationContext(),
+					MapActivity.class);
 			intent.putExtra(IntentExtra.ENTRY_ID, summary.getId());
 			startActivity(intent);
 		}
@@ -126,7 +134,8 @@ public class ProgramActivity extends AgoraActivity implements OnClickListener {
 		ImageView favoriteView = (ImageView) v;
 		if (Favorite.isFavorite(summary)) {
 			favoriteView.setImageResource(android.R.drawable.btn_star_big_on);
-			favoriteView.setContentDescription(getString(R.string.favoriteRemove));
+			favoriteView
+					.setContentDescription(getString(R.string.favoriteRemove));
 		} else {
 			favoriteView.setImageResource(android.R.drawable.btn_star_big_off);
 			favoriteView.setContentDescription(getString(R.string.favoriteAdd));

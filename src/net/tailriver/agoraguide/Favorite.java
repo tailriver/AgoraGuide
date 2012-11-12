@@ -24,7 +24,8 @@ public class Favorite {
 				if (newState) {
 					cal.add(Calendar.MINUTE, -15);
 					long alarmWhen = cal.getTimeInMillis();
-					requestCode = ScheduleAlarm.setAlarm(summary, alarmWhen, notificationWhen);
+					requestCode = ScheduleAlarm.setAlarm(summary, alarmWhen,
+							notificationWhen);
 				} else {
 					if (requestCode > -1) {
 						ScheduleAlarm.cancelAlarm(summary, notificationWhen);
@@ -33,9 +34,9 @@ public class Favorite {
 			}
 		}
 		if (newState) {
-			pref.edit().putInt(summary.getId(), requestCode).commit();				
+			pref.edit().putInt(summary.getId(), requestCode).commit();
 		} else {
-			pref.edit().remove(summary.getId()).commit();			
+			pref.edit().remove(summary.getId()).commit();
 		}
 	}
 
@@ -60,6 +61,7 @@ public class Favorite {
 
 	private static final SharedPreferences getSharedPreferences() {
 		Context context = AgoraActivity.getStaticApplicationContext();
-		return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
+		return context.getSharedPreferences(PREFERENCE_NAME,
+				Context.MODE_PRIVATE);
 	}
 }

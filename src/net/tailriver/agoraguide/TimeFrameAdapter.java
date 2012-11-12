@@ -17,7 +17,7 @@ public class TimeFrameAdapter extends BaseAdapter implements ListAdapter {
 	// TODO marges to SearchResultAdapter
 	public TimeFrameAdapter(Activity activity) {
 		inflater = activity.getLayoutInflater();
-		list     = TimeFrame.values();
+		list = TimeFrame.values();
 	}
 
 	public int getCount() {
@@ -38,10 +38,14 @@ public class TimeFrameAdapter extends BaseAdapter implements ListAdapter {
 		if (convertView == null) {
 			convertView = inflater.inflate(R.layout.entry_summary, null);
 			holder = new ViewHolder();
-			holder.title    = (TextView) convertView.findViewById(R.id.entrylist_item_title);
-			holder.sponsor  = (TextView) convertView.findViewById(R.id.entrylist_item_sponsor);
-			holder.schedule = (TextView) convertView.findViewById(R.id.entrylist_item_schedule);
-			holder.target   = (TextView) convertView.findViewById(R.id.entrylist_item_target);
+			holder.title = (TextView) convertView
+					.findViewById(R.id.entrylist_item_title);
+			holder.sponsor = (TextView) convertView
+					.findViewById(R.id.entrylist_item_sponsor);
+			holder.schedule = (TextView) convertView
+					.findViewById(R.id.entrylist_item_schedule);
+			holder.target = (TextView) convertView
+					.findViewById(R.id.entrylist_item_target);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();

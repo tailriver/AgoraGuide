@@ -12,11 +12,12 @@ public class Day extends AbstractModel<Day> {
 	private int color;
 	private int order;
 
-	/*package*/ Day() {}
+	/* package */Day() {
+	}
 
 	private Day(String common, String name, int color, int order) {
 		super(common);
-		this.name  = name;
+		this.name = name;
 		this.color = color;
 		this.order = order;
 	}
@@ -24,10 +25,11 @@ public class Day extends AbstractModel<Day> {
 	@Override
 	protected void init(SQLiteDatabase database) {
 		factory.clear();
-		Resources res = AgoraActivity.getStaticApplicationContext().getResources();
+		Resources res = AgoraActivity.getStaticApplicationContext()
+				.getResources();
 		String[] common = res.getStringArray(R.array.days);
-		String[] local  = res.getStringArray(R.array.days_locale);
-		int[]    color  = res.getIntArray(R.array.days_color);
+		String[] local = res.getStringArray(R.array.days_locale);
+		int[] color = res.getIntArray(R.array.days_color);
 
 		for (int i = 0; i < common.length; i++) {
 			Day day = new Day(common[i], local[i], color[i], i);

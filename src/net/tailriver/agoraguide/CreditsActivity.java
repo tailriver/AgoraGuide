@@ -13,8 +13,8 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Pair;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -50,7 +50,8 @@ public class CreditsActivity extends AgoraActivity {
 		root.addView(acknowledgementLabel);
 
 		List<Pair<String, String>> acknowledgements = new ArrayList<Pair<String, String>>();
-		acknowledgements.add(Pair.create("独立行政法人 科学技術振興機構", "http://www.jst.go.jp/"));
+		acknowledgements.add(Pair.create("独立行政法人 科学技術振興機構",
+				"http://www.jst.go.jp/"));
 		addLinkCredits(root, acknowledgements);
 
 		TextView copyrightLabel = new TextView(this);
@@ -62,14 +63,11 @@ public class CreditsActivity extends AgoraActivity {
 		copyrightTable.setPadding(2 * padding, 0, 0, 0);
 		copyrightTable.setColumnShrinkable(1, true);
 		List<Pair<String[], String>> copyrights = new ArrayList<Pair<String[], String>>();
-		copyrights.add(Pair.create(
-				new String[]{"企画情報", "会場マップ"},
+		copyrights.add(Pair.create(new String[] { "企画情報", "会場マップ" },
 				"© 2012 JST"));
-		copyrights.add(Pair.create(
-				new String[]{"ロゴ", "イラスト"},
+		copyrights.add(Pair.create(new String[] { "ロゴ", "イラスト" },
 				"© 2011-2012 青木風人、長田絵理香、堀内瑶恵、田中佐代子（筑波大学）"));
-		copyrights.add(Pair.create(
-				new String[]{"アプリ"},
+		copyrights.add(Pair.create(new String[] { "アプリ" },
 				"© 2011-2012 Shinsuke Ogawa"));
 		addCopyrightCredits(copyrightTable, copyrights);
 		root.addView(copyrightTable);
@@ -84,14 +82,16 @@ public class CreditsActivity extends AgoraActivity {
 	public void onPostInitialize(Bundle savedInstanceState) {
 	}
 
-	private void addLinkCredits(ViewGroup parent, List<Pair<String, String>> list) {
+	private void addLinkCredits(ViewGroup parent,
+			List<Pair<String, String>> list) {
 		for (final Pair<String, String> p : list) {
 			TextView link = new TextView(this);
 			link.setText(getLinkSpannable(p.first));
 			link.setPadding(2 * padding, 0, 0, 0);
 			link.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(p.second));
+					Intent intent = new Intent(Intent.ACTION_VIEW, Uri
+							.parse(p.second));
 					startActivity(intent);
 				}
 			});
@@ -99,10 +99,11 @@ public class CreditsActivity extends AgoraActivity {
 		}
 	}
 
-	private void addCopyrightCredits(ViewGroup parent, List<Pair<String[], String>> list) {
+	private void addCopyrightCredits(ViewGroup parent,
+			List<Pair<String[], String>> list) {
 		for (final Pair<String[], String> p : list) {
 			TableRow row = new TableRow(this);
-			TextView left  = new TextView(this);
+			TextView left = new TextView(this);
 			TextView right = new TextView(this);
 
 			StringBuilder leftText = new StringBuilder();
@@ -110,7 +111,8 @@ public class CreditsActivity extends AgoraActivity {
 			for (String s : p.first) {
 				leftText.append(s).append(delimiter);
 			}
-			left.setText(leftText.substring(0, leftText.length() - delimiter.length()));
+			left.setText(leftText.substring(0,
+					leftText.length() - delimiter.length()));
 			left.setTextColor(Color.DKGRAY);
 			left.setPadding(0, 0, padding, 0);
 			right.setText(p.second);
@@ -123,10 +125,10 @@ public class CreditsActivity extends AgoraActivity {
 
 	private CharSequence getLinkSpannable(String string) {
 		SpannableString ss = new SpannableString(string);
-		ss.setSpan(new ForegroundColorSpan(Color.BLUE),
-				0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-		ss.setSpan(new UnderlineSpan(),
-				0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ss.setSpan(new ForegroundColorSpan(Color.BLUE), 0, ss.length(),
+				Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ss.setSpan(new UnderlineSpan(), 0, ss.length(),
+				Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ss;
 	}
 }

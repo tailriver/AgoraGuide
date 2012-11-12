@@ -13,11 +13,8 @@ import android.widget.Toast;
 
 public class MapActivity extends AgoraActivity {
 	private static final String BUNDLE_HIYOKO = "hiyokoResource";
-	private static final int[] HIYOKO_ICONS = {
-		R.drawable.here_blue,
-		R.drawable.here_green,
-		R.drawable.here_yellow
-	};
+	private static final int[] HIYOKO_ICONS = { R.drawable.here_blue,
+			R.drawable.here_green, R.drawable.here_yellow };
 
 	private int hiyokoResource;
 
@@ -27,7 +24,8 @@ public class MapActivity extends AgoraActivity {
 
 	@Override
 	public void onPostInitialize(Bundle savedInstanceState) {
-		EntrySummary summary = EntrySummary.get(getIntent().getStringExtra(IntentExtra.ENTRY_ID));
+		EntrySummary summary = EntrySummary.get(getIntent().getStringExtra(
+				IntentExtra.ENTRY_ID));
 		EntryDetail detail = new EntryDetail(summary);
 		Location location = detail.getLocation();
 		Area area = location.getArea();
@@ -42,22 +40,26 @@ public class MapActivity extends AgoraActivity {
 		int h = areaBitmap.getHeight();
 		PointF p = new PointF(location.getX() * w, location.getY() * h);
 
-		if (savedInstanceState != null && savedInstanceState.containsKey(BUNDLE_HIYOKO)) {
+		if (savedInstanceState != null
+				&& savedInstanceState.containsKey(BUNDLE_HIYOKO)) {
 			hiyokoResource = savedInstanceState.getInt(BUNDLE_HIYOKO);
 		} else {
-			hiyokoResource = HIYOKO_ICONS[(int)(Math.random() * HIYOKO_ICONS.length)];
+			hiyokoResource = HIYOKO_ICONS[(int) (Math.random() * HIYOKO_ICONS.length)];
 		}
 
 		if (!Float.isNaN(p.x) && !Float.isNaN(p.y)) {
-			Bitmap hiyoko = BitmapFactory.decodeResource(getResources(), hiyokoResource);
-			p.offset(- hiyoko.getWidth(), - 0.5f * hiyoko.getHeight());
+			Bitmap hiyoko = BitmapFactory.decodeResource(getResources(),
+					hiyokoResource);
+			p.offset(-hiyoko.getWidth(), -0.5f * hiyoko.getHeight());
 			Canvas mapCanvas = new Canvas(areaBitmap);
 			mapCanvas.drawBitmap(hiyoko, p.x, p.y, null);
 		}
 
-		BitmapDrawable mapDrawable = new BitmapDrawable(getResources(), areaBitmap);
+		BitmapDrawable mapDrawable = new BitmapDrawable(getResources(),
+				areaBitmap);
 
-		int padding = getResources().getDimensionPixelSize(R.dimen.contentPadding);
+		int padding = getResources().getDimensionPixelSize(
+				R.dimen.contentPadding);
 		ImageView map = new ImageView(this);
 		map.setPadding(padding, padding, padding, padding);
 		map.setScaleType(ScaleType.CENTER_INSIDE);

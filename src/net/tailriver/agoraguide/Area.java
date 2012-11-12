@@ -15,11 +15,12 @@ public class Area extends AbstractModel<Area> {
 	private String abbrev;
 	private String url;
 
-	/*package*/ Area() {}
+	/* package */Area() {
+	}
 
 	private Area(String id, String name, String abbrev) {
 		super(id);
-		this.name   = name;
+		this.name = name;
 		this.abbrev = abbrev;
 	}
 
@@ -28,12 +29,13 @@ public class Area extends AbstractModel<Area> {
 		factory.clear();
 		String table1 = "area";
 		String[] columns1 = { "id", "name", "abbrev" };
-		Cursor c1 = database.query(table1, columns1, null, null, null, null, null);
+		Cursor c1 = database.query(table1, columns1, null, null, null, null,
+				null);
 
 		c1.moveToFirst();
 		for (int i = 0, rows = c1.getCount(); i < rows; i++) {
-			String id     = c1.getString(0);
-			String name   = c1.getString(1);
+			String id = c1.getString(0);
+			String name = c1.getString(1);
 			String abbrev = c1.getString(2);
 			factory.put(id, new Area(id, name, abbrev));
 			c1.moveToNext();
@@ -46,7 +48,8 @@ public class Area extends AbstractModel<Area> {
 		String[] columns2 = { "area", "src" };
 		String selection2 = "device=?";
 		String[] selectionArgs2 = { device };
-		Cursor c2 = database.query(table2, columns2, selection2, selectionArgs2, null, null, null);
+		Cursor c2 = database.query(table2, columns2, selection2,
+				selectionArgs2, null, null, null);
 
 		c2.moveToFirst();
 		for (int i = 0, rows = c2.getCount(); i < rows; i++) {
@@ -58,7 +61,8 @@ public class Area extends AbstractModel<Area> {
 		c2.close();
 
 		// TODO compatibility (since v1.11)
-		File oldDir = new File(AgoraActivity.getStaticCacheDir().getParent(), "app_2012_area");
+		File oldDir = new File(AgoraActivity.getStaticCacheDir().getParent(),
+				"app_2012_area");
 		if (oldDir.exists()) {
 			for (File image : oldDir.listFiles()) {
 				image.delete();
@@ -87,7 +91,8 @@ public class Area extends AbstractModel<Area> {
 	public Bitmap getBitmap() {
 		File imageFile = getImageFile();
 		if (imageFile.exists()) {
-			return BitmapFactory.decodeFile(imageFile.getPath()).copy(Bitmap.Config.ARGB_8888, true);
+			return BitmapFactory.decodeFile(imageFile.getPath()).copy(
+					Bitmap.Config.ARGB_8888, true);
 		}
 		return null;
 	}
@@ -98,7 +103,7 @@ public class Area extends AbstractModel<Area> {
 	}
 
 	public String getImageURL() {
-			return url;
+		return url;
 	}
 
 	@Override

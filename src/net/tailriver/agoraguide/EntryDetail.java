@@ -8,8 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 public class EntryDetail {
-	private static final String[] columns = {
-		"cosponsor", "abstract", "content", "guest", "website", "reservation", "note" };
+	private static final String[] columns = { "cosponsor", "abstract",
+			"content", "guest", "website", "reservation", "note" };
 
 	private Map<String, String> data;
 	private Location location;
@@ -20,13 +20,14 @@ public class EntryDetail {
 			throw new IllegalStateException("database is not opened");
 		}
 
-		data     = new HashMap<String, String>();
+		data = new HashMap<String, String>();
 		location = new Location(summary);
 
 		String table = "entry";
 		String selection = "id=?";
 		String[] selectionArgs = { summary.getId() };
-		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
+		Cursor c = database.query(table, columns, selection, selectionArgs,
+				null, null, null);
 
 		c.moveToFirst();
 		for (int i = 0, max = c.getColumnCount(); i < max; i++) {

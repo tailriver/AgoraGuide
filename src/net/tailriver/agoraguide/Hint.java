@@ -9,7 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 public class Hint extends AbstractModel<Hint> {
 	private static Map<String, String> factory = new HashMap<String, String>();
 
-	/*package*/ Hint() {}
+	/* package */Hint() {
+	}
 
 	@Override
 	protected void init(SQLiteDatabase database) {
@@ -17,7 +18,8 @@ public class Hint extends AbstractModel<Hint> {
 
 	public static final String get(String table, String column) {
 		factory.clear();
-		String key = new StringBuilder(table).append('.').append(column).toString();
+		String key = new StringBuilder(table).append('.').append(column)
+				.toString();
 		if (!factory.containsKey(key)) {
 			String value = select(table, column);
 			factory.put(key, value);
@@ -42,7 +44,8 @@ public class Hint extends AbstractModel<Hint> {
 		SQLiteDatabase database = AgoraActivity.getDatabase();
 		String table = "hint";
 		String[] columns = { "ja", "warning", "ref" };
-		Cursor c = database.query(table, columns, selection, selectionArgs, null, null, null);
+		Cursor c = database.query(table, columns, selection, selectionArgs,
+				null, null, null);
 		try {
 			if (!c.moveToFirst() || c.getCount() != 1) {
 				throw new IllegalArgumentException("not found");

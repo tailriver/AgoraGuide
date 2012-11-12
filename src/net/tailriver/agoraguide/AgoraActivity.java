@@ -12,9 +12,11 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 public abstract class AgoraActivity extends FragmentActivity {
-	private static final String CLASS_NAME = AgoraActivity.class.getSimpleName();
+	private static final String CLASS_NAME = AgoraActivity.class
+			.getSimpleName();
 	private static final String databaseHost = "http://tailriver.net";
-	private static final String databaseURL  = databaseHost + "/agoraguide/2012.sqlite3.gz";
+	private static final String databaseURL = databaseHost
+			+ "/agoraguide/2012.sqlite3.gz";
 	private static final String databaseName = "2012.sqlite3";
 
 	private static Context applicationContext;
@@ -108,10 +110,10 @@ public abstract class AgoraActivity extends FragmentActivity {
 		}
 		try {
 			invalidateDatabase();
-			database = SQLiteDatabase.openDatabase(
-					databaseFile.getPath(), null, SQLiteDatabase.OPEN_READONLY);
-			database.rawQuery("SELECT count(*) FROM area", null);	// dummy query
-		} catch(SQLiteDatabaseCorruptException e) {
+			database = SQLiteDatabase.openDatabase(databaseFile.getPath(),
+					null, SQLiteDatabase.OPEN_READONLY);
+			database.rawQuery("SELECT count(*) FROM area", null); // dummy query
+		} catch (SQLiteDatabaseCorruptException e) {
 			invalidateDatabase();
 			databaseFile.delete();
 		} catch (Exception e) {
